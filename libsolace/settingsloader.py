@@ -7,8 +7,8 @@ __yamlfiles__ = [
 __doc__ = """
 
 >>> import libsolace.settingsloader as settings
->>> settings.RAT_URL
-"http://rat.unibet.com/path"
+>>> settings.CMDB_URL
+"http://mydomain.com/path"
 """
 
 import yaml
