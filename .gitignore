@@ -3,3 +3,4 @@
 /build
 /dist
 /libsolace.egg-info
+*.pyc

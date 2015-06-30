@@ -36,24 +36,6 @@ try:
 except pkg_resources.DistributionNotFound:
   version = 'unknown'
 
-def dictate(dictionary):
-	newdict = {}
-	for key in dictionary.keys():
-		logger.debug('key %s' % key)
-		if not isinstance(dictionary[key], dict):
-			if not isinstance(dictionary[key], OrderedDict):
-				logger.debug('not any dict or list')
-				logger.debug(dictionary[key])
-				logger.debug(type(dictionary[key]))
-				newdict[key] = dictionary[key]
-		else:
-			logger.debug('some kind of dict')
-			logger.debug(dictionary[key])
-			newdict[key] = dictate(dictionary[key])
-	return newdict
-
-def pj(string):
-	return pprint.pformat(string, width=80)
 
 def xml2obj(src):
 	"""A simple function to converts XML data into native Python object.
@@ -141,6 +123,7 @@ def xml2obj(src):
 		xml.sax.parse(src, builder)
 	return builder.root._attrs.values()[0]
 
+
 class d2x:
     """ Converts Dictionary to XML """
     def __init__(self, structure):
@@ -226,6 +209,7 @@ def httpRequest(url, fields=None, headers=None, method='GET', timeout=3, **kwarg
     logger.debug('Got response. Data: %s, Headers: %s, Status code: %s' % (str(data),str(headers),str(code)))
     return (data, headers, code)
 
+
 def generateBasicAuthHeader(username,password):
     """
     Generates a basic auth header
@@ -243,6 +227,7 @@ def generateBasicAuthHeader(username,password):
     """
     base64string = base64.encodestring('%s:%s' % (username, password)).replace('\n', '')
     return { 'Authorization': 'Basic %s' % base64string }
+
 
 def generateRequestHeaders(**kwargs):
     """

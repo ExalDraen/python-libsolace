@@ -19,6 +19,7 @@ import base64
 URLLIB2 = True
 URLLIB3 = False
 
+
 class SolaceAPI:
     """ Used by SolaceHelper, Use directly only if you know what you're doing. See SolaceHelper rather. """
     def __init__(self, environment, testmode=False, **kwargs):

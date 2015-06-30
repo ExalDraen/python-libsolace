@@ -1,15 +1,23 @@
 # libsolace
 
 ## intro
-this is a set of python helpers for managing solace appliances. 
+this is a set of python helpers for managing solace appliances.
+
+## limitations
+
+* XML can only be validated if it passes through a SolaceCommandQueue instance.
+* Appliance responses are difficult to validate since the "slave" appliance will almost always return errors when not "active", and already existing CI's will throw a error on create events and so forth.
 
 ## install
+
+you might need libyaml-devel or equivilant!
+
 ```
 python setup.py install
 ```
 
 ## configuration
-libsolace requires a `libsolace.yaml` file in order to know what environments exist and what appliances are part of those environments. A single applicance can be part of multiple environments. 
+libsolace requires a `libsolace.yaml` file in order to know what environments exist and what appliances are part of those environments. A single applicance can be part of multiple environments.
 
 the `libsolace.yaml` file is searched for in:
 
@@ -68,7 +76,7 @@ for cmd in queue.commands:
 
 ## Site Management
 
-Through some classes in `solacehelper.py` you can manage a simple set of configuration items in multiple datacenters or environments.  the `SolaceProvisionVPN` class can provision entire VPN's, Queues and Users. e.g. 
+Through some classes in `solacehelper.py` you can manage a simple set of configuration items in multiple datacenters or environments.  the `SolaceProvisionVPN` class can provision entire VPN's, Queues and Users. e.g.
 
 ```
 result = SolaceProvisionVPN(vpn_datanode=vpn, environment=options.env, client_profile="glassfish", users=users)
@@ -103,5 +111,3 @@ see ./bin/solace-provision.py
 ## extending
 
 adding new functionality is done through `solacehelper.py`. see the SolaceProvisionVPN.
-
-

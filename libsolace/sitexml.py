@@ -10,22 +10,6 @@ except AttributeError:
     from libsolace.util import NullHandler
     logging.getLogger().addHandler(NullHandler())
 
-# decorator that downcases all argument values when case insensitive searches
-# has been set during instantiation of XMLAPI
-def lower_arguments(func):
-    def wrapper(self, *args, **kwargs):
-        def lower_or_same(v):
-            if hasattr(v, 'lower'):
-                return v.lower()
-            else:
-                return v
-        if self.etree_case_insensitive:
-            rkwargs = dict((k, lower_or_same(v)) for k, v in kwargs.iteritems())
-        else:
-            rkwargs = kwargs
-        return func(self, *args, **rkwargs)
-    return wrapper
-
 
 class XMLAPI:
     """ XML API handles reading the XML configuiration from URL or FILE.
