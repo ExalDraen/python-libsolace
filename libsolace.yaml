@@ -1,0 +1,42 @@
+---
+# the url you might want to serve the site config from if not using local files
+CMDB_URL: "http://someurl/site.xml"
+CMDB_USER: ""
+CMDB_PASS: ""
+
+# the readonly user to use for test mode
+READ_ONLY_USER: ro
+READ_ONLY_PASS: ro
+
+# mapping of environment to solace appliances
+SOLACE_CONF:
+  ci1:
+    MGMT:
+      - solace1
+      - solace2
+    PASS: password
+    USER: admin
+  dev:
+    MGMT:
+      - solace1
+      - solace2
+    PASS: password
+    USER: admin
+  si1:
+    MGMT:
+      - solace3
+      - solace4
+    PASS: password
+    USER: admin
+  pt1:
+    MGMT:
+      - solace5
+      - solace6
+    PASS: password
+    USER: admin
+  qa1:
+    MGMT:
+      - solace5
+      - solace6
+    PASS: password
+    USER: admin

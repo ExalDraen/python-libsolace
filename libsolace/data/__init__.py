@@ -1,0 +1,3 @@
+'''
+libsolace data
+'''
