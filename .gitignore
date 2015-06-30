@@ -1,0 +1,5 @@
+/.eggs
+/.git
+/build
+/dist
+/libsolace.egg-info
