@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <config
-  xmlns="http://www.unibet.com/site-config-3.4"
+  xmlns="http://www.mycompany.com/site-config-3.4"
   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:schemaLocation="http://www.unibet.com/site-config-3.4 http://release.unibet.com/configuration/settings/site-config-3.4.xsd">
+  xsi:schemaLocation="http://www.mycompany.com/site-config-3.4 http://release.mycompany.com/configuration/settings/site-config-3.4.xsd">
 
   <solace type="" name="solace" version="6.2">
     <vpn type="" owner="SolaceTest" name="%s_testvpn" password="d0nt_u5se_thIs">
