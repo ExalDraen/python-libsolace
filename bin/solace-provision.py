@@ -32,6 +32,12 @@ import logging
 logging.basicConfig(format='[%(module)s] %(filename)s:%(lineno)s %(asctime)s %(levelname)s %(message)s',stream=sys.stdout)
 logging.getLogger().setLevel(logging.INFO)
 from optparse import OptionParser
+import pprint
+
+try:
+    import simplejson as json
+except:
+    import json
 
 import libsolace.settingsloader as settings
 
@@ -55,10 +61,10 @@ if __name__ == '__main__':
     usage = '''Examples:
 
     Running with a specified XML config file
-    ./bin/solace-provision.py -e dev -p SolaceTest  -x https://svn.unibet.com/svn/releases/site-config/trunk/index.xml
+    ./bin/solace-provision.py -e dev -p SolaceTest  -x https://svn.mydomain.com/v1.0.2.4/site.xml
 
     Running Testmode ( no-changes, just XML validation )
-    ./bin/solace-provision.py -e dev -p SolaceTest  -x https://svn.unibet.com/svn/releases/site-config/trunk/index.xml --testmode
+    ./bin/solace-provision.py -e dev -p SolaceTest  -x https://svn.mydomain.com/v1.0.2.4/site.xml --testmode
 
     Running with the default release site-config XML
     ./bin/solace-provision.py -e dev -p SolaceTest
@@ -146,7 +152,7 @@ if __name__ == '__main__':
     # Call main with environment from comand line
     for vpn in vpns:
         users = xmlapi.getUsersOfVpn(vpn.name, environment=options.env)
-        logging.info(vpn.__dict__)
+        logging.info(json.dumps(str(vpn.__dict__), ensure_ascii=False))
         logging.info('Found users %s' % users)
         logging.info("Provisioning %s" % vpn.name)
 

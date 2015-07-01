@@ -51,7 +51,6 @@ def xml2obj(src):
 		def __init__(self):
 			self._attrs = {}	# XML attributes and child elements
 			self.data = None	# child text data
-			self.mydict = {}
 		def __len__(self):
 			# treat single element as a list of 1
 			return 1
