@@ -12,7 +12,7 @@ from libsolace.solace import SolaceAPI
 import re
 
 try:
-    from collections import OrderdedDict
+    from collections import OrderedDict
 except ImportError, e:
     from ordereddict import OrderedDict
 
