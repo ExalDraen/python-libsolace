@@ -13,7 +13,7 @@ import base64
 from xml.dom.minidom import Document
 
 try:
-    from collections import OrderdedDict
+    from collections import OrderedDict
 except ImportError, e:
     from ordereddict import OrderedDict
 
