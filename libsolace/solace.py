@@ -15,6 +15,7 @@ except:
     from json import simplejson
 
 import urllib2
+import ssl
 import base64
 URLLIB2 = True
 URLLIB3 = False
@@ -27,6 +28,10 @@ class SolaceAPI:
             logging.debug("Solace Client initializing")
             self.config = settings.SOLACE_CONF[environment]
             self.testmode = testmode
+            if 'PROTOCOL' not in self.config:
+                self.config['PROTOCOL'] = 'http'
+            if 'VERIFY' not in self.config:
+                self.config['VERIFY'] = True
             if testmode:
                 self.config['USER'] = settings.READ_ONLY_USER
                 self.config['PASS'] = settings.READ_ONLY_PASS
@@ -41,13 +46,18 @@ class SolaceAPI:
         try:
             data = OrderedDict()
             for host in self.config['MGMT']:
-                url = 'http://%s/SEMP' % host
+                url = '%s://%s/SEMP' % (self.config['PROTOCOL'], host)
                 headers = base64.encodestring('%s:%s' % (self.config['USER'],self.config['PASS']))[:-1]
                 req = urllib2.Request(url=url,
                                       data=request,
                                       headers={'Content-Type': 'application/xml'})
                 req.add_header("Authorization", "Basic %s" % headers)
-                response = urllib2.urlopen(req)
+                ctx = None
+                if self.config['PROTOCOL'] == 'https' and not self.config['VERIFY']:
+                    ctx = ssl.create_default_context()
+                    ctx.check_hostname = False
+                    ctx.verify_mode = ssl.CERT_NONE
+                response = urllib2.urlopen(req, context=ctx)
                 data[host]=response.read()
             logging.debug(data)
             for k in data:
