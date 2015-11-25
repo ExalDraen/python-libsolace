@@ -16,6 +16,10 @@ try:
 except ImportError, e:
     from ordereddict import OrderedDict
 
+try:
+    import simplejson as json
+except:
+    import json
 
 class SolaceNode:
     """ A data node / leaf. Implemented on demand within SolaceXMLBuilder
@@ -23,6 +27,7 @@ class SolaceNode:
     def __init__(self):
         self.__dict__ = OrderedDict()
 
+    # cant have `-` in the key names, rewrite em.
     def __getattr__(self, name):
         name = re.sub("_", "-", name)
         try:
@@ -45,6 +50,41 @@ class SolaceNode:
         self.__dict__[name] = value
 
 
+class SolaceNodeFromJson(object):
+    """
+
+    instantiate with JSON String, should store the json as a dict on root.
+
+    """
+
+    def __init__(self, jsonString, **kwargs):
+        self.data = {}
+        self.jsonData = json.loads(jsonString)
+
+    def __getattr__(self, name):
+        try:
+            return self.data[name]
+        except:
+            self.data[name] = SolaceNodeFromJson(json.dumps(self.jsonData[name]))
+            return self.data[name]
+
+    def __call__(self, *args, **kwargs):
+        logging.info("call")
+        return self.data
+
+    def __str__(self):
+        return str(self.data)
+
+    def __repr__(self):
+        return str(self.data)
+
+    def __setattr__(self, name, value):
+        self.data[name] = value
+
+    # def __getitem__(self, name):
+    #     logging.info("name: %s" % name)
+    #     return self[name]
+
 class SolaceXMLBuilder(object):
     """ Builds Solace's SEMP XML Configuration Commands
 
@@ -65,6 +105,7 @@ class SolaceXMLBuilder(object):
         if description is not None:
             self.description=description
         self.version = kwargs.get("version", "soltr/6_0")
+
     def __getattr__(self, name):
         name = re.sub("_", "-", name)
         try:

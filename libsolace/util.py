@@ -50,7 +50,6 @@ def xml2obj(src):
 	class DataNode(object):
 		def __init__(self):
 			self._attrs = {}	# XML attributes and child elements
-			self.data = None	# child text data
 		def __len__(self):
 			# treat single element as a list of 1
 			return 1
