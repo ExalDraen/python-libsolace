@@ -145,6 +145,9 @@ if __name__ == '__main__':
     xmlapi = XMLAPI(url=settings.CMDB_URL, username=settings.CMDB_USER, password=settings.CMDB_PASS, xml_file=xmlfile)
     vpns = xmlapi.getSolaceByOwner(options.product, environment=options.env)
 
+
+
+
     logging.info('vpns %s' % vpns)
     if vpns == []:
         logging.warn("No VPN found with that owner / componentName")

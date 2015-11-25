@@ -13,7 +13,7 @@ import base64
 from xml.dom.minidom import Document
 
 try:
-    from collections import OrderdedDict
+    from collections import OrderedDict
 except ImportError, e:
     from ordereddict import OrderedDict
 
@@ -186,7 +186,11 @@ def httpRequest(url, fields=None, headers=None, method='GET', timeout=3, **kwarg
     if URLLIB3:
         logger.debug('Using urllib3')
         http = urllib3.PoolManager()
-        request = http.request_encode_url(method, url, fields=fields, headers=headers,timeout=timeout)
+        if method == 'GET':
+            request = http.request_encode_url(method, url, fields=fields, headers=headers, timeout=timeout)
+        elif method == 'POST':
+            # request = http.request_encode_body(method, url, fields=fields, headers=headers, timeout=timeout)
+            request = http.urlopen(method, url, headers=headers, body=fields)
         code = request.status
         headers = request.getheaders()
         data = request.data
@@ -243,4 +247,5 @@ def generateRequestHeaders(**kwargs):
     request_headers = { 'User-agent': 'libsolace/%s' % str(version) }
     for key in kwargs.keys():
       if type(kwargs[key]) is dict: request_headers.update(kwargs[key])
+    logger.debug("Headers generated: %s" % request_headers )
     return request_headers

@@ -14,10 +14,7 @@ try:
 except:
     from json import simplejson
 
-import urllib2
-import base64
-URLLIB2 = True
-URLLIB3 = False
+from libsolace.util import httpRequest, generateRequestHeaders, generateBasicAuthHeader
 
 
 class SolaceAPI:
@@ -26,11 +23,17 @@ class SolaceAPI:
         try:
             logging.debug("Solace Client initializing")
             self.config = settings.SOLACE_CONF[environment]
+            logging.debug("Loaded Config: %s" % self.config)
             self.testmode = testmode
+            if 'PROTOCOL' not in self.config:
+                self.config['PROTOCOL'] = 'http'
+            if 'VERIFY' not in self.config:
+                self.config['VERIFY'] = True
             if testmode:
                 self.config['USER'] = settings.READ_ONLY_USER
                 self.config['PASS'] = settings.READ_ONLY_PASS
-                logging.warning('READONLY mode')
+                logging.info('READONLY mode')
+            logging.debug("Final Config: %s" % self.config)
         except Exception, e:
             logging.warn("Solace Error %s" %e)
             raise BaseException("Configuration Error")
@@ -41,15 +44,19 @@ class SolaceAPI:
         try:
             data = OrderedDict()
             for host in self.config['MGMT']:
-                url = 'http://%s/SEMP' % host
-                headers = base64.encodestring('%s:%s' % (self.config['USER'],self.config['PASS']))[:-1]
-                req = urllib2.Request(url=url,
-                                      data=request,
-                                      headers={'Content-Type': 'application/xml'})
-                req.add_header("Authorization", "Basic %s" % headers)
-                response = urllib2.urlopen(req)
-                data[host]=response.read()
+
+                url = '%s://%s/SEMP' % (self.config['PROTOCOL'].lower(), host)
+                request_headers = generateRequestHeaders(
+                    default_headers = {
+                      'Content-type': 'text/xml',
+                      'Accept': 'text/xml'
+                    },
+                    auth_headers = generateBasicAuthHeader(self.config['USER'], self.config['PASS'])
+                )
+                (response, response_headers, code) = httpRequest(url, method='POST', headers=request_headers, fields=request, timeout=5000)
+                data[host]=response
             logging.debug(data)
+
             for k in data:
                 thisreply = xml2dict.parse(data[k])
                 if thisreply['rpc-reply'].has_key('execute-result'):
@@ -65,6 +72,7 @@ class SolaceAPI:
                     logging.debug("no execute-result in response. Device: %s" % k)
             logging.debug("Returning Data from rest_call")
             return data
+
         except Exception, e:
             logging.warn("Solace Error %s" % e )
             raise

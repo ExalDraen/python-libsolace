@@ -7,6 +7,7 @@ this is a set of python helpers for managing solace appliances.
 
 * XML can only be validated if it passes through a SolaceCommandQueue instance.
 * Appliance responses are difficult to validate since the "slave" appliance will almost always return errors when not "active", and already existing CI's will throw a error on create events and so forth.
+* since python dictionaries cannot contain `-` use `_`, and the SolaceNode class will substitute a `-` as needed
 
 ## install
 
@@ -17,7 +18,7 @@ python setup.py install
 ```
 
 ## configuration
-libsolace requires a `libsolace.yaml` file in order to know what environments exist and what appliances are part of those environments. A single applicance can be part of multiple environments.
+libsolace requires a `libsolace.yaml` file in order to know what environments exist and what appliances are part of those environments. A single appliance can be part of multiple environments.
 
 the `libsolace.yaml` file is searched for in:
 

@@ -12,7 +12,7 @@ from libsolace.solace import SolaceAPI
 import re
 
 try:
-    from collections import OrderdedDict
+    from collections import OrderedDict
 except ImportError, e:
     from ordereddict import OrderedDict
 
@@ -132,9 +132,10 @@ class SolaceCommandQueue:
 
     schema_files = {
         None: os.path.join(os.path.dirname(__file__), 'data/semp-rpc-soltr.xsd'),
-        "soltr/6_0": os.path.join(os.path.dirname(__file__), 'data/semp-rpc-soltr.xsd'),
+        "soltr/6_0": os.path.join(os.path.dirname(__file__), 'data/semp-rpc-soltr_6_0.xsd'),
         "soltr/6_2": os.path.join(os.path.dirname(__file__), 'data/semp-rpc-soltr_6_2.xsd'),
-        "soltr/7_0": os.path.join(os.path.dirname(__file__), 'data/semp-rpc-soltr_7_0.xsd')
+        "soltr/7_0": os.path.join(os.path.dirname(__file__), 'data/semp-rpc-soltr_7_0.xsd'),
+        "soltr/7_1": os.path.join(os.path.dirname(__file__), 'data/semp-rpc-soltr_7_1.xsd')
     }
 
     def __init__(self, version="soltr/6_0"):
@@ -240,7 +241,7 @@ class SolaceClientProfile60(SolaceClientProfileParent):
 
 class SolaceClientProfile62(SolaceClientProfileParent):
     """
-    Solace 6.2 / 7.0 SolaceClientProfile implementation
+    Solace 6.2+ / 7.0+ SolaceClientProfile implementation
     """
     def _new_client_profile(self):
         # Create client_profile
@@ -807,28 +808,32 @@ class SolaceProvisionVPN:
             self.create_queues = False
             pass
 
-        # create the client users
+        # Prepare users to create
         for user in users:
             logging.info("Provision user: %s for vpn %s" % (user, self.vpn_name))
             self.users.append(SolaceUser(self.environment_name, user['username'], user['password'], self.vpn,
                 client_profile=self.client_profile.name, testmode=self.testmode, shutdown_on_apply=self.shutdown_on_apply))
 
+        # Create the VPN
         logging.info("Create VPN %s" % self.vpn_name)
         for cmd in self.vpn.queue.commands:
             logging.info(str(cmd))
             self.connection.rpc(str(cmd))
 
+        # Create the ACL
         logging.info("Create ACL Profile for vpn %s" % self.vpn_name)
         for cmd in self.acl_profile.queue.commands:
             logging.info(str(cmd))
             self.connection.rpc(str(cmd))
 
+        # Create the users
         logging.info("Create User for vpn %s" % self.vpn_name)
         for user in self.users:
             for cmd in user.queue.commands:
                 logging.info(str(cmd))
                 self.connection.rpc(str(cmd))
 
+        # Create the queues
         logging.info("create queues: %s" % self.create_queues)
         if self.create_queues:
             logging.info("Create Queues for vpn %s" % self.vpn_name)

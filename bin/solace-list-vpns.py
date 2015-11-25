@@ -6,7 +6,9 @@ Deletes messages from the spool within queue list
 
 """
 
+import sys
 import logging
+logging.basicConfig(format='[%(module)s] %(filename)s:%(lineno)s %(asctime)s %(levelname)s %(message)s',stream=sys.stdout)
 import libsolace.settingsloader as settings
 from libsolace.solace import SolaceAPI
 from libsolace.solacehelper import SolaceXMLBuilder, SolaceCommandQueue
