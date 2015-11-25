@@ -131,7 +131,7 @@ class SolaceCommandQueue:
     """
 
     schema_files = {
-        None: os.path.join(os.path.dirname(__file__), 'data/semp-rpc-soltr.xsd'),
+        None: os.path.join(os.path.dirname(__file__), 'data/semp-rpc-soltr_6_0.xsd'),
         "soltr/6_0": os.path.join(os.path.dirname(__file__), 'data/semp-rpc-soltr_6_0.xsd'),
         "soltr/6_2": os.path.join(os.path.dirname(__file__), 'data/semp-rpc-soltr_6_2.xsd'),
         "soltr/7_0": os.path.join(os.path.dirname(__file__), 'data/semp-rpc-soltr_7_0.xsd'),

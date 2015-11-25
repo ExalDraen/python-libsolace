@@ -103,6 +103,8 @@ if __name__ == '__main__':
         default=None, help="path to sitexml file if on local storage")
     parser.add_option("-t", "--testmode", action="store_true", dest="testmode",
         default=False, help="only test configuration and exit")
+    parser.add_option("-c", "--clientprofile", action="store_true", dest="clientprofile",
+        default=False, help="client profile to associate, must exist")
     parser.add_option("-d", "--debug", action="store_true", dest="debugmode",
         default=False, help="enable debug mode logging")
 
@@ -142,16 +144,17 @@ if __name__ == '__main__':
 
     logging.info('CMDB_URL: %s' % settings.CMDB_URL)
 
+    # instantite the XMLAPI
     xmlapi = XMLAPI(url=settings.CMDB_URL, username=settings.CMDB_USER, password=settings.CMDB_PASS, xml_file=xmlfile)
+
+    # create a list of vpns by reading the XML
     vpns = xmlapi.getSolaceByOwner(options.product, environment=options.env)
 
-
-
-
-    logging.info('vpns %s' % vpns)
+    logging.info('VPNs: %s' % vpns)
     if vpns == []:
         logging.warn("No VPN found with that owner / componentName")
         raise Exception
+
     # Call main with environment from comand line
     for vpn in vpns:
         users = xmlapi.getUsersOfVpn(vpn.name, environment=options.env)
@@ -162,7 +165,7 @@ if __name__ == '__main__':
         result = SolaceProvisionVPN(
             vpn_datanode=vpn,
             environment=options.env,
-            client_profile="glassfish",
+            client_profile=options.clientprofile,
             users=users,
             testmode=options.testmode,
             shutdown_on_apply=options.shutdown_on_apply

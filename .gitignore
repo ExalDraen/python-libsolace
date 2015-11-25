@@ -4,3 +4,4 @@
 /dist
 /libsolace.egg-info
 *.pyc
+.DS_Store
