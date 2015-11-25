@@ -10,18 +10,19 @@ READ_ONLY_PASS: ro
 
 # mapping of environment to solace appliances
 SOLACE_CONF:
-  ci1:
-    MGMT:
-      - solace1
-      - solace2
-    PASS: password
-    USER: admin
   dev:
     MGMT:
-      - solace1
-      - solace2
+      - http://solace1.mydomain.com/SEMP
+      - http://solace2.mydomain.com/SEMP
     PASS: password
     USER: admin
+  ci1:
+    MGMT:
+      - https://solace1/SEMP
+      - https://solace2/SEMP
+    PASS: password
+    USER: admin
+    VERIFY_SSL: True
   si1:
     MGMT:
       - solace3

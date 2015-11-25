@@ -166,7 +166,7 @@ class d2x:
         return self.root.toxml()
 
 
-def httpRequest(url, fields=None, headers=None, method='GET', timeout=3, **kwargs):
+def httpRequest(url, fields=None, headers=None, method='GET', timeout=3, protocol="http", verifySsl=False, **kwargs):
     """
     Performs HTTP request
 
@@ -189,22 +189,26 @@ def httpRequest(url, fields=None, headers=None, method='GET', timeout=3, **kwarg
         if method == 'GET':
             request = http.request_encode_url(method, url, fields=fields, headers=headers, timeout=timeout)
         elif method == 'POST':
-            # request = http.request_encode_body(method, url, fields=fields, headers=headers, timeout=timeout)
             request = http.urlopen(method, url, headers=headers, body=fields)
         code = request.status
         headers = request.getheaders()
         data = request.data
     elif URLLIB2:
+        logger.debug('Using urllib2')
         if not method in [ 'GET', 'POST' ]:
             raise Exception('Unsupported HTTP method %s while using urllib2' % method)
-        logger.debug('Using urllib2')
-        if fields:
-            fields = urllib.urlencode(fields)
-        else:
-            if method != 'GET':
-                fields = urllib.urlencode({'':''})
-        request = urllib2.Request(url,headers=headers)
-        response = urllib2.urlopen(request,fields,timeout)
+
+        req = urllib2.Request(url=url,
+              data=fields,
+              headers=headers)
+
+        ctx = None
+        if protocol == 'https' and not verify:
+            ctx = ssl.create_default_context()
+            ctx.check_hostname = False
+            ctx.verify_mode = ssl.CERT_NONE
+        response = urllib2.urlopen(req, ctx)
+
         code = response.getcode()
         headers = response.headers.dict
         data = response.read()

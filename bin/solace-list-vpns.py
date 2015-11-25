@@ -24,13 +24,17 @@ if __name__ == '__main__':
     parser = OptionParser(usage=usage)
     parser.add_option("-e", "--env", "--environment", action="store", type="string", dest="env",
                       help="environment to run job in eg:[ dev | ci1 | si1 | qa1 | pt1 | prod ]")
+    parser.add_option("-d", "--debug", action="store_true", dest="debug",
+                      default=False, help="toggles solace debug mode")
 
     (options, args) = parser.parse_args()
 
     if not options.env:
         parser.print_help()
         sys.exit()
-
+    if options.debug:
+        logging.getLogger().setLevel(logging.DEBUG)
+        
     # forces read-only
     options.testmode = True
     settings.env = options.env.lower()

@@ -27,8 +27,8 @@ class SolaceAPI:
             self.testmode = testmode
             if 'PROTOCOL' not in self.config:
                 self.config['PROTOCOL'] = 'http'
-            if 'VERIFY' not in self.config:
-                self.config['VERIFY'] = True
+            if 'VERIFY_SSL' not in self.config:
+                self.config['VERIFY_SSL'] = True
             if testmode:
                 self.config['USER'] = settings.READ_ONLY_USER
                 self.config['PASS'] = settings.READ_ONLY_PASS
@@ -45,7 +45,8 @@ class SolaceAPI:
             data = OrderedDict()
             for host in self.config['MGMT']:
 
-                url = '%s://%s/SEMP' % (self.config['PROTOCOL'].lower(), host)
+                #url = '%s://%s/SEMP' % (self.config['PROTOCOL'].lower(), host)
+                url = host
                 request_headers = generateRequestHeaders(
                     default_headers = {
                       'Content-type': 'text/xml',
@@ -53,7 +54,7 @@ class SolaceAPI:
                     },
                     auth_headers = generateBasicAuthHeader(self.config['USER'], self.config['PASS'])
                 )
-                (response, response_headers, code) = httpRequest(url, method='POST', headers=request_headers, fields=request, timeout=5000)
+                (response, response_headers, code) = httpRequest(url, method='POST', headers=request_headers, fields=request, timeout=5000, verifySsl = self.config['VERIFY_SSL'])
                 data[host]=response
             logging.debug(data)
 
