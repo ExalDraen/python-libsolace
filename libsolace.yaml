@@ -8,13 +8,20 @@ CMDB_PASS: ""
 READ_ONLY_USER: ro
 READ_ONLY_PASS: ro
 
+# list of all plugins to load
+PLUGINS:
+  - libsolace.plugins.CMDBClient
+
+# the plugin name as registered in the registry we want to use for solace config
+SOLACE_CMDB_PLUGIN: CMDBClient
+
 # mapping of environment to solace appliances
 SOLACE_CONF:
   dev:
     MGMT:
       - http://solace1.mydomain.com/SEMP
       - http://solace2.mydomain.com/SEMP
-    PASS: password
+    PASS: admin
     USER: admin
   ci1:
     MGMT:

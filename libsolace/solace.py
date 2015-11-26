@@ -25,8 +25,6 @@ class SolaceAPI:
             self.config = settings.SOLACE_CONF[environment]
             logging.debug("Loaded Config: %s" % self.config)
             self.testmode = testmode
-            if 'PROTOCOL' not in self.config:
-                self.config['PROTOCOL'] = 'http'
             if 'VERIFY_SSL' not in self.config:
                 self.config['VERIFY_SSL'] = True
             if testmode:
@@ -78,21 +76,30 @@ class SolaceAPI:
             logging.warn("Solace Error %s" % e )
             raise
 
-    def get_memory(self):
-        """ Returns the Memory Usage """
+    def get_redundancy(self):
+        """ Return redundancy information """
         try:
-            request ='<rpc semp-version="soltr/5_3"><show><memory></memory></show></rpc>'
+            request = '<rpc semp-version="soltr/6_0"><show><redundancy></redundancy></show></rpc>'
             return self.rpc(request)
         except:
             raise
 
-    def get_queue(self, queue, vpn, **kwargs):
+
+    def get_memory(self):
+        """ Returns the Memory Usage """
+        try:
+            request ='<rpc semp-version="soltr/6_0"><show><memory></memory></show></rpc>'
+            return self.rpc(request)
+        except:
+            raise
+
+    def get_queue(self, queue, vpn, detail=False, **kwargs):
         """ Return Queue details """
         try:
             extras = []
-            if kwargs.has_key('detail'):
-                if kwargs['detail']: extras.append('<detail/>')
-            request = '<rpc semp-version="soltr/5_3"><show><queue><name>%s</name>' \
+            if detail:
+                extras.append('<detail/>')
+            request = '<rpc semp-version="soltr/6_0"><show><queue><name>%s</name>' \
                       '<vpn-name>%s</vpn-name>%s</queue></show></rpc>' % (queue, vpn, "".join(extras))
             return self.rpc(request)
         except:
@@ -101,7 +108,7 @@ class SolaceAPI:
     def list_queues(self, vpn, queue_filter='*'):
         """ List all queues in a VPN """
         try:
-            request = '<rpc semp-version="soltr/5_3"><show><queue><name>%s</name>' \
+            request = '<rpc semp-version="soltr/6_0"><show><queue><name>%s</name>' \
                       '<vpn-name>%s</vpn-name></queue></show></rpc>' % (queue_filter, vpn)
             response = self.rpc(request)
             logging.debug(response)
@@ -198,36 +205,37 @@ class SolaceAPI:
         else:
             return result[0]
 
-    def get_client_username(self, clientusername, vpn, **kwargs):
+    def get_client_username(self, clientusername, vpn, detail=False, **kwargs):
         """
         Get client username details
         """
         extras = []
-        if kwargs.has_key('detail'):
-            if kwargs['detail']: extras.append('<detail/>')
-        if kwargs.has_key('count'):
-            if kwargs['count']: extras.append('<count/>')
-        request = '<rpc semp-version="soltr/5_3"><show><client-username>' \
+        if detail:
+            extras.append('<detail/>')
+        request = '<rpc semp-version="soltr/6_0"><show><client-username>' \
                   '<name>%s</name><vpn-name>%s</vpn-name>%s</client-username></show></rpc>' % ( clientusername, vpn, "".join(extras))
         return self.rpc(request)
 
-    def get_client(self, client, vpn, **kwargs):
+    def get_client(self, client, vpn, detail=False, **kwargs):
         """ Get Client details """
         extras = []
-        if kwargs.has_key('detail'):
-            if kwargs['detail']: extras.append('<detail/>')
+        if detail:
+            extras.append('<detail/>')
         try:
-            request = '<rpc semp-version="soltr/5_3"><show><client>' \
+            request = '<rpc semp-version="soltr/6_0"><show><client>' \
                       '<name>%s</name><vpn-name>%s</vpn-name>%s</client></show></rpc>' % ( client, vpn, "".join(extras))
             return self.rpc(request)
         except:
             raise
 
-    def get_vpn(self, vpn):
+    def get_vpn(self, vpn, stats=False):
         """ Get VPN details """
+        extras = []
+        if stats:
+            extras.append('<stats/>')
         try:
             request = '<rpc semp-version="soltr/5_5"><show><message-vpn>' \
-                      '<vpn-name>%s</vpn-name></message-vpn></show></rpc>' % vpn
+                      '<vpn-name>%s</vpn-name>%s</message-vpn></show></rpc>' % ( vpn, "".join(extras))
             return self.rpc(request)
         except:
             raise

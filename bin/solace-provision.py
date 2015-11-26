@@ -44,7 +44,7 @@ import libsolace.settingsloader as settings
 try:
     import libsolace
     from libsolace import solace
-    from libsolace.sitexml import XMLAPI
+    # from libsolace.sitexml import XMLAPI
     from libsolace.solacehelper import SolaceProvisionVPN
 except:
     print("Unable to import required libraries, is libsolace installed? try 'pip install "
@@ -54,6 +54,8 @@ else:
     logging.info("Using libsolace version: %s" % libsolace.__version__)
 
 
+# load a class that implements the AbstractSolaceCMDB methods
+# CMDBClass = getattr(libsolace, settings.SOLACE_CMDB)
 
 if __name__ == '__main__':
     """ parse opts, read site.xml, start provisioning vpns. """
@@ -145,11 +147,17 @@ if __name__ == '__main__':
     logging.info('CMDB_URL: %s' % settings.CMDB_URL)
 
     # instantite the XMLAPI
-    xmlapi = XMLAPI(url=settings.CMDB_URL, username=settings.CMDB_USER, password=settings.CMDB_PASS, xml_file=xmlfile)
+    #xmlapi = XMLAPI(url=settings.CMDB_URL, username=settings.CMDB_USER, password=settings.CMDB_PASS, xml_file=xmlfile)
+
+    # load the cmdb API client
+    cmdbapi = libsolace.plugin_registry(settings.SOLACE_CMDB_PLUGIN)
 
     # create a list of vpns by reading the XML
-    vpns = xmlapi.getSolaceByOwner(options.product, environment=options.env)
+    #vpns = xmlapi.getSolaceByOwner(options.product, environment=options.env)
 
+    vpns = cmdbapi.get_vpns_by_owner(options.product, environment=options.env)
+
+    # pprint.pprint(vpns, width=1)
     logging.info('VPNs: %s' % vpns)
     if vpns == []:
         logging.warn("No VPN found with that owner / componentName")
@@ -157,18 +165,19 @@ if __name__ == '__main__':
 
     # Call main with environment from comand line
     for vpn in vpns:
-        users = xmlapi.getUsersOfVpn(vpn.name, environment=options.env)
-        logging.info(json.dumps(str(vpn.__dict__), ensure_ascii=False))
+        #users = xmlapi.getUsersOfVpn(vpn.name, environment=options.env)
+        users = cmdbapi.get_users_of_vpn(vpn['name'], environment=options.env)
+        queues = cmdbapi.get_queues_of_vpn(vpn['name'], environment=options.env)
+        logging.info(json.dumps(str(vpn), ensure_ascii=False))
         logging.info('Found users %s' % users)
-        logging.info("Provisioning %s" % vpn.name)
+        logging.info("Provisioning %s" % vpn['name'])
 
         result = SolaceProvisionVPN(
             vpn_datanode=vpn,
+            queue_datanode=queues,
             environment=options.env,
             client_profile=options.clientprofile,
             users=users,
             testmode=options.testmode,
             shutdown_on_apply=options.shutdown_on_apply
         )
-
-        logging.info(result)

@@ -29,7 +29,8 @@ setup(name='libsolace',
       author_email='Kegan.Holtzhausen@unibet.com',
       packages=[
           'libsolace',
-          'libsolace.data'
+          'libsolace.data',
+          'libsolace.plugins'
       ],
       package_data={'': ['*.xsd']},
       setup_requires=[

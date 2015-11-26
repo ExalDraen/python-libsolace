@@ -727,11 +727,17 @@ class SolaceQueue:
 
 class SolaceProvisionVPN:
     """ Provision the CLIENT_PROFILE, VPN, ACL_PROFILE, QUEUES and USERS """
-    def __init__(self, vpn_datanode=None, environment=None, client_profile="glassfish", users=None, testmode=False,
-                 create_queues=True, shutdown_on_apply=False, options=None, **kwargs):
+    def __init__(self, vpn_datanode=None, queue_datanodes=None, environment=None, client_profile="glassfish",
+                 users=None, testmode=False, create_queues=True, shutdown_on_apply=False, options=None, **kwargs):
         """ Init the provisioning
 
-        :type vpn_datanode: libsolace.util.xml2obj.DataNode
+        :type vpn_datanode: dictionary
+            eg: {'owner': u'SolaceTest', 'spool_size': u'4096', 'password': u'd0nt_u5se_thIs', 'name': u'%s_testvpn'}
+        :type queue_datanodes: list
+            eg: [
+                  {"exclusive": u"true", "type": "", "name": u"testqueue1", "queue_size": u"4096"},
+                  {"exclusive": u"false", "type": "", "name": u"testqueue2", "queue_size": u"4096"}
+                ]
         :type environment: str
         :type client_profile: str
         :type users: list
@@ -739,7 +745,8 @@ class SolaceProvisionVPN:
         :type create_queues: bool
         :type shutdown_on_apply: bool
 
-        :param vpn_datanode: instance of libsolace.util.xml2obj.DataNode
+        :param vpn_datanode: vpn dictionary
+        :param queue_datanodes: queue dictionary list
         :param environment: name of environment
         :param client_profile: name of client_profile, default='glassfish'
         :param users: list of user dictionaries to provision
@@ -751,8 +758,9 @@ class SolaceProvisionVPN:
         """
 
         self.vpn_datanode = vpn_datanode
+        self.queue_datanodes = queue_datanodes
         self.environment_name = environment
-        self.vpn_name = vpn_datanode.name
+        self.vpn_name = vpn_datanode['name']
         self.testmode = testmode
         self.create_queues = create_queues
         self.shutdown_on_apply = shutdown_on_apply
@@ -768,14 +776,14 @@ class SolaceProvisionVPN:
         self.connection = SolaceAPI(self.environment_name, testmode=self.testmode)
 
         # if the environment has any special vpn_config settings, bring them up
-        self._set_vpn_confg()
+        # self._set_vpn_confg()
 
         # get version of semp
         self.version = self._get_version_from_appliance()
 
         # prepare vpn commands
         self.vpn = SolaceVPN(self.environment_name, self.vpn_name,
-            max_spool_usage=self.vpn_datanode.vpn_config.spool_size)
+            max_spool_usage=self.vpn_datanode['spool_size'])
 
         # prepare the client_profile commands
         self.client_profile = SolaceClientProfile(client_profile, version=self.version, vpn_name=self.vpn.vpn_name)
@@ -788,16 +796,16 @@ class SolaceProvisionVPN:
         self.acl_profile = SolaceACLProfile(self.environment_name, self.vpn_name, self.vpn)
 
         # prepare the user that owns this vpn
-        self.users = [SolaceUser(self.environment_name, self.vpn_name , self.vpn_datanode.password, self.vpn,
+        self.users = [SolaceUser(self.environment_name, self.vpn_name , self.vpn_datanode['password'], self.vpn,
             client_profile=self.client_profile.name, testmode=self.testmode, shutdown_on_apply=self.shutdown_on_apply)]
 
         # prepare the queues for the vpn ( if any )
         try:
-            logging.info("Queue datanode %s" % self.vpn_datanode.queue)
-            if self.vpn_datanode.queue:
+            logging.info("Queue datanodes %s" % self.queue_datanodes)
+            if self.queue_datanodes:
                 try:
                     logging.info("Stacking queue commands for VPN: %s" % self.vpn_name)
-                    self.queues = SolaceQueue(self.environment_name, self.vpn, self.vpn_datanode.queue,
+                    self.queues = SolaceQueue(self.environment_name, self.vpn, self.queue_datanodes,
                         shutdown_on_apply=self.shutdown_on_apply)
                 except Exception, e:
                     raise BaseException("Something bad has happened which was unforseen by developers: %s" % e)
@@ -808,32 +816,28 @@ class SolaceProvisionVPN:
             self.create_queues = False
             pass
 
-        # Prepare users to create
+        # create the client users
         for user in users:
             logging.info("Provision user: %s for vpn %s" % (user, self.vpn_name))
             self.users.append(SolaceUser(self.environment_name, user['username'], user['password'], self.vpn,
                 client_profile=self.client_profile.name, testmode=self.testmode, shutdown_on_apply=self.shutdown_on_apply))
 
-        # Create the VPN
         logging.info("Create VPN %s" % self.vpn_name)
         for cmd in self.vpn.queue.commands:
             logging.info(str(cmd))
             self.connection.rpc(str(cmd))
 
-        # Create the ACL
         logging.info("Create ACL Profile for vpn %s" % self.vpn_name)
         for cmd in self.acl_profile.queue.commands:
             logging.info(str(cmd))
             self.connection.rpc(str(cmd))
 
-        # Create the users
         logging.info("Create User for vpn %s" % self.vpn_name)
         for user in self.users:
             for cmd in user.queue.commands:
                 logging.info(str(cmd))
                 self.connection.rpc(str(cmd))
 
-        # Create the queues
         logging.info("create queues: %s" % self.create_queues)
         if self.create_queues:
             logging.info("Create Queues for vpn %s" % self.vpn_name)

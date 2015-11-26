@@ -11,12 +11,14 @@ __doc__ = """
 "http://mydomain.com/path"
 """
 
+import importlib
 import yaml
 import os
 import logging
 
 log = logging.getLogger(__name__)
 yaml_loaded = False
+
 
 for yaml_file in __yamlfiles__:
     if not os.path.exists(yaml_file):
@@ -28,6 +30,10 @@ for yaml_file in __yamlfiles__:
         globals()[variable] = yaml_settings[variable]
     yaml_loaded = True
     log.info("Yaml loaded successful")
+
+    log.info("Loading plugins")
+    modules = map(__import__, globals()['PLUGINS'])
+
     break
 
 if yaml_loaded is False:
