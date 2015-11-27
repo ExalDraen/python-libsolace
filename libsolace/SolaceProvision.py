@@ -10,7 +10,7 @@ from libsolace.util import d2x
 from libsolace.SolaceAPI import SolaceAPI
 from libsolace.SolaceXMLBuilder import SolaceXMLBuilder
 from libsolace.SolaceCommandQueue import SolaceCommandQueue
-from libsolace.items.ClientProfile import SolaceClientProfileFactory
+from libsolace.items.SolaceClientProfile import SolaceClientProfileFactory
 from libsolace.items.SolaceACLProfile import SolaceACLProfile
 from libsolace.items.SolaceUser import SolaceUser
 from libsolace.items.SolaceVPN import SolaceVPN
@@ -95,7 +95,7 @@ class SolaceProvision:
 
         # prepare the user that owns this vpn
         self.users = [SolaceUser(self.environment_name, self.vpn_name , self.vpn_datanode['password'], self.vpn,
-            client_profile=self.client_profile.name, testmode=self.testmode, shutdown_on_apply=self.shutdown_on_apply)]
+            client_profile=self.client_profile.name, acl_profile=self.acl_profile.name, testmode=self.testmode, shutdown_on_apply=self.shutdown_on_apply)]
 
         # prepare the queues for the vpn ( if any )
         try:

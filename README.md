@@ -1,10 +1,61 @@
-# libsolace
+# libSolace
 
-## intro
+## Changelog
 
-this is a set of python helpers for managing solace appliances.
+* Customizable CMDB API supporting XML / JSON / Custom backends
+* Plugable CMDB API loading
+* Separated classes for each Configurable Item 
+	* SolaceClientProfile
+	* SolaceACLProfile
+	* SolaceQueue
+	* SolaceUser
+	* SolaceVPN
 
-## limitations
+## Intro
+
+This is a set of python helpers for managing Solace Messaging Appliances. The design is to be flexible and aimed at managing multiple clusters in multiple environments. 
+
+### Design Patterns
+
+In my requirements, each Solace cluster could potentially host multiple 'environments', so ALL objects are created with environment specific names. 
+
+e.g.:
+* development_MyVPN
+* development_MyUsername
+* development_MyProfile
+* development_MyACL
+
+This means that any cluster can host any number of environments combined without conflicting resources. Therefore, whenever you see '%s' in the name of a VPN, User or Profile, it will be substituted with the environment name at provision time. 
+
+### XML Generator
+
+The core of this provisioning system is the SolaceXMLBuilder class which can conjur up any XML code through recursive instantation of a speclial object. So if you want to create a new user within solace, you can do it with:
+
+```python
+>>> document=SolaceXMLBuilder(version="soltr/6_2")
+>>> document.create.client_username.username = "myUserName"
+>>> document.create.client_username.vpn_name = "dev_MyVPN"
+>>> str(document)
+'<rpc semp-version="soltr/6_2"><create><client-username><username>myUserName</username><vpn-name>dev_MyVPN</vpn-name></client-username></create></rpc>'
+```
+
+and if you want to create a new user and set the password, profile and so forth, you can use the SolaceUser class like so:
+
+```python
+>>> from libsolace.items.SolaceUser import SolaceUser
+>>> documents = SolaceUser('dev', '%s_myUser', 'myPassword', '%s_MyVPN', acl_profile='%s_MyVPN', client_profile='%s_glassfish')
+>>> documents.commands.commands
+[ list of XML documents to POST to `dev` appliances ]
+```
+
+
+## TODO FIXME
+
+* optional environment name substitusion
+* Item's are plugins ( version aware )
+
+
+## Limitations
 
 * XML can only be validated if it passes through a SolaceCommandQueue instance.
 * appliance responses are difficult to validate since the "slave" appliance will almost always return errors when NOT "active", and already existing CI's will throw a error on create events and so forth.

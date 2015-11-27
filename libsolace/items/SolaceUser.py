@@ -5,7 +5,7 @@ from libsolace.SolaceXMLBuilder import SolaceXMLBuilder
 class SolaceUser:
     """ Construct the ClientUser which is normally the application using a VPN. e.g: "si1_marcom" """
 
-    def __init__(self, environment, username, password, vpn, client_profile=None, testmode=False,
+    def __init__(self, environment, username, password, vpn_name, client_profile=None, acl_profile=None, testmode=False,
                  shutdown_on_apply=False, options=None, version="soltr/6_0", **kwargs):
         """ Init user object
 
@@ -26,13 +26,13 @@ class SolaceUser:
             client_profile=self.client_profile.name, testmode=self.testmode, shutdown_on_apply=self.shutdown_on_apply)]
 
         """
-        self.queue = SolaceCommandQueue(version=version)
+        self.commands = SolaceCommandQueue(version=version)
         self.environment = environment
         self.username = username % environment
         self.password = password
-        self.vpn = vpn
-        self.acl_profile = self.vpn.acl_profile
-        self.client_profile = client_profile
+        self.vpn_name = vpn_name % environment
+        self.acl_profile = acl_profile % environment
+        self.client_profile = client_profile % environment
         self.testmode = testmode
         self.shutdown_on_apply = shutdown_on_apply
 
@@ -74,17 +74,17 @@ class SolaceUser:
     def _new_user(self):
         cmd = SolaceXMLBuilder("New User %s" % self.username)
         cmd.create.client_username.username = self.username
-        cmd.create.client_username.vpn_name = self.vpn.vpn_name
-        self.queue.enqueue(cmd)
+        cmd.create.client_username.vpn_name = self.vpn_name
+        self.commands.enqueue(cmd)
 
     def _disable_user(self):
         if ( self.shutdown_on_apply=='b' ) or ( self.shutdown_on_apply == 'u' ) or ( self.shutdown_on_apply == True ):
             # Disable / Shutdown User ( else we cant change profiles )
             cmd = SolaceXMLBuilder("Disabling User %s" % self.username)
             cmd.client_username.username = self.username
-            cmd.client_username.vpn_name = self.vpn.vpn_name
+            cmd.client_username.vpn_name = self.vpn_name
             cmd.client_username.shutdown
-            self.queue.enqueue(cmd)
+            self.commands.enqueue(cmd)
         else:
             logging.warning("Not disabling User, commands could fail since shutdown_on_apply = %s" % self.shutdown_on_apply)
 
@@ -92,46 +92,46 @@ class SolaceUser:
         # Client Profile
         cmd = SolaceXMLBuilder("Setting User %s client profile to %s" % (self.username, self.client_profile))
         cmd.client_username.username = self.username
-        cmd.client_username.vpn_name = self.vpn.vpn_name
+        cmd.client_username.vpn_name = self.vpn_name
         cmd.client_username.client_profile.name = self.client_profile
-        self.queue.enqueue(cmd)
+        self.commands.enqueue(cmd)
 
     def _set_acl_profile(self):
         # Set client user profile
-        cmd = SolaceXMLBuilder("Set User %s ACL Profile to %s" % (self.username, self.vpn.vpn_name))
+        cmd = SolaceXMLBuilder("Set User %s ACL Profile to %s" % (self.username, self.vpn_name))
         cmd.client_username.username = self.username
-        cmd.client_username.vpn_name = self.vpn.vpn_name
-        cmd.client_username.acl_profile.name = self.vpn.vpn_name
-        self.queue.enqueue(cmd)
+        cmd.client_username.vpn_name = self.vpn_name
+        cmd.client_username.acl_profile.name = self.vpn_name
+        self.commands.enqueue(cmd)
 
     def _guarenteed_endpoint(self):
         # No Guarenteed Endpoint
         cmd = SolaceXMLBuilder("Default User %s guaranteed endpoint override" % self.username)
         cmd.client_username.username = self.username
-        cmd.client_username.vpn_name = self.vpn.vpn_name
+        cmd.client_username.vpn_name = self.vpn_name
         cmd.client_username.no.guaranteed_endpoint_permission_override
-        self.queue.enqueue(cmd)
+        self.commands.enqueue(cmd)
 
     def _subscription_manager(self):
         # No Subscription Managemer
         cmd = SolaceXMLBuilder("Default User %s subscription manager" % self.username)
         cmd.client_username.username = self.username
-        cmd.client_username.vpn_name = self.vpn.vpn_name
+        cmd.client_username.vpn_name = self.vpn_name
         cmd.client_username.no.subscription_manager
-        self.queue.enqueue(cmd)
+        self.commands.enqueue(cmd)
 
     def _password(self):
         # Set User Password
         cmd = SolaceXMLBuilder("Set User %s password" % self.username)
         cmd.client_username.username = self.username
-        cmd.client_username.vpn_name = self.vpn.vpn_name
+        cmd.client_username.vpn_name = self.vpn_name
         cmd.client_username.password.password = self.password
-        self.queue.enqueue(cmd)
+        self.commands.enqueue(cmd)
 
     def _enable_user(self):
         # Enable User
         cmd = SolaceXMLBuilder("Enable User %s" % self.username)
         cmd.client_username.username = self.username
-        cmd.client_username.vpn_name = self.vpn.vpn_name
+        cmd.client_username.vpn_name = self.vpn_name
         cmd.client_username.no.shutdown
-        self.queue.enqueue(cmd)
+        self.commands.enqueue(cmd)

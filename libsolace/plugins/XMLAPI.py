@@ -4,28 +4,23 @@ from libsolace.util import httpRequest, generateRequestHeaders, generateBasicAut
 from libsolace.plugin import Plugin
 from lxml import etree as ET
 
-# Let the code that implements this API deal with logging
-try:
-    logging.getLogger().addHandler(logging.NullHandler())
-except AttributeError:
-    from libsolace.util import NullHandler
-    logging.getLogger().addHandler(NullHandler())
-
 
 @libsolace.plugin_registry.register
 class XMLAPI(Plugin):
-    """ XML API handles reading the XML configuiration from URL or FILE.
+    """ LEGACY XML API handles reading the XML configuiration from URL or FILE.
 
-        xmlapi = XMLAPI(url="http://foo.com/config.xml" username="someuser", password="somepassword")
-        vpns = xmlapi.getSolaceByOwner(owner, environment=env)
-        users = xmlapi.getUsersOfVpn(vpn.name, environment=options.env)
+        cmdbapi = libsolace.plugin_registry(settings.SOLACE_CMDB_PLUGIN)
+        cmdbapi.configure(settings=settings)
+        vpns = cmdbapi.get_vpns_by_owner(options.product, environment=options.env)
+        users = cmdbapi.get_users_of_vpn(vpn['name'], environment=options.env)
+        queues = cmdbapi.get_queues_of_vpn(vpn['name'], environment=options.env)
 
     """
 
     plugin_name = "XMLAPI"
 
-
     def __init__(self, *args, **kwargs):
+        logging.warn("LEGACY xml plugin is being used, please port to JSON API!")
         pass
 
     #def __init__(self, url=None, username=None, password=None, timeout=10, xml_file=None, use_etree=False,
@@ -191,9 +186,7 @@ class XMLAPI(Plugin):
             if v.name == name:
                 logging.info("Getting queues for %s" % v.name )
                 vd = self.get_vpn(v.name)
-                queues.append(vd.queue)
-        logging.info(queues)
-        return queues
+                return vd.queue
 
     def get_users_of_vpn(self, vpn, environment=None):
         """ Returns all products users who use a specifig messaging VPN

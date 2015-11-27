@@ -1,3 +1,11 @@
+"""
+
+Mock implementation of what a CMDBClient should return, This is typically a simple HTTP client which
+interacts with whatever Configuration Management system you have. It could also just interact with JSON
+files if that is what you want.
+
+"""
+
 import logging
 import libsolace
 from libsolace.plugin import Plugin
