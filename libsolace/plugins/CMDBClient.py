@@ -25,6 +25,10 @@ class CMDBClient(Plugin):
         pass
 
     def get_vpns_by_owner(self, owner_name, environment='dev', **kwargs):
+        """
+        return a LIST of vpns groups by some "owner", each VPN contains final config,
+        so all environment overrides and that should be taken care of here!
+        """
         vpns = []
 
         vpn1 = {}
@@ -38,6 +42,9 @@ class CMDBClient(Plugin):
         return vpns
 
     def get_users_of_vpn(self, vpn_name, environment='dev', **kwargs):
+        """
+        Just return a list of users for a VPN
+        """
         users = []
 
         user1 = {}
@@ -48,6 +55,9 @@ class CMDBClient(Plugin):
         return users
 
     def get_queues_of_vpn(self, vpn_name, environment='dev', **kwargs):
+        """
+        As with VPN, all configs should be finalized before returned. 
+        """
         queues = []
 
         queue1 = {}
