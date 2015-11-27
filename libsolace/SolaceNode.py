@@ -3,16 +3,22 @@ try:
 except ImportError, e:
     from ordereddict import OrderedDict
 
+import re
 
-class SmartDict:
-    def __init__(self, *args, **kwargs):
+class SolaceNode:
+    """
+    A data node / leaf. recursive implemented creating keys on demand.
+    """
+    def __init__(self):
         self.__dict__ = OrderedDict()
 
+    # cant have `-` in the key names, rewrite em.
     def __getattr__(self, name):
+        name = re.sub("_", "-", name)
         try:
             return self.__dict__[name]
         except:
-            self.__dict__[name] = SmartDict()
+            self.__dict__[name] = SolaceNode()
             return self.__dict__[name]
 
     def __str__(self):
@@ -25,4 +31,5 @@ class SmartDict:
         return self.__dict__
 
     def __setattr__(self, name, value):
+        name = re.sub("_", "-", name)
         self.__dict__[name] = value

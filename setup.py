@@ -30,7 +30,8 @@ setup(name='libsolace',
       packages=[
           'libsolace',
           'libsolace.data',
-          'libsolace.plugins'
+          'libsolace.plugins',
+          'libsolace.items'
       ],
       package_data={'': ['*.xsd']},
       setup_requires=[

@@ -18,7 +18,7 @@ from libsolace.util import httpRequest, generateRequestHeaders, generateBasicAut
 
 
 class SolaceAPI:
-    """ Used by SolaceHelper, Use directly only if you know what you're doing. See SolaceHelper rather. """
+    """ Used by SolaceProvision, Use directly only if you know what you're doing. See SolaceProvision rather. """
     def __init__(self, environment, testmode=False, **kwargs):
         try:
             logging.debug("Solace Client initializing")
@@ -41,6 +41,7 @@ class SolaceAPI:
         self.kwargs = kwargs
         try:
             data = OrderedDict()
+            codes = OrderedDict()
             for host in self.config['MGMT']:
 
                 #url = '%s://%s/SEMP' % (self.config['PROTOCOL'].lower(), host)
@@ -53,24 +54,29 @@ class SolaceAPI:
                     auth_headers = generateBasicAuthHeader(self.config['USER'], self.config['PASS'])
                 )
                 (response, response_headers, code) = httpRequest(url, method='POST', headers=request_headers, fields=request, timeout=5000, verifySsl = self.config['VERIFY_SSL'])
-                data[host]=response
+                data[host] = response
+                codes[host] = code
             logging.debug(data)
 
             for k in data:
-                thisreply = xml2dict.parse(data[k])
-                if thisreply['rpc-reply'].has_key('execute-result'):
-                    if thisreply['rpc-reply']['execute-result']['@code'] != 'ok':
-                        logging.warn("Device: %s: %s %s" % (k, thisreply['rpc-reply']['execute-result']['@code'],
-                                                                 "Request that failed: %s" % request))
-                        logging.warn("Device: %s: %s: %s" % (k, thisreply['rpc-reply']['execute-result']['@code'],
-                                                                    "Reply from appliance: %s" % thisreply['rpc-reply']['execute-result']['@reason']))
+                thisreply = None
+                try:
+                    thisreply = xml2dict.parse(data[k])
+                    if thisreply['rpc-reply'].has_key('execute-result'):
+                        if thisreply['rpc-reply']['execute-result']['@code'] != 'ok':
+                            logging.warn("Device: %s: %s %s" % (k, thisreply['rpc-reply']['execute-result']['@code'],
+                                                                     "Request that failed: %s" % request))
+                            logging.warn("Device: %s: %s: %s" % (k, thisreply['rpc-reply']['execute-result']['@code'],
+                                                                        "Reply from appliance: %s" % thisreply['rpc-reply']['execute-result']['@reason']))
+                        else:
+                            logging.info("Device: %s: %s" % (k, thisreply['rpc-reply']['execute-result']['@code']))
+                        logging.debug("Device: %s: %s" % (k, thisreply))
                     else:
-                        logging.info("Device: %s: %s" % (k, thisreply['rpc-reply']['execute-result']['@code']))
-                    logging.debug("Device: %s: %s" % (k, thisreply))
-                else:
-                    logging.debug("no execute-result in response. Device: %s" % k)
+                        logging.debug("no execute-result in response. Device: %s" % k)
+                except:
+                    logging.error("Error decoding response from appliance")
             logging.debug("Returning Data from rest_call")
-            return data
+            return data, codes
 
         except Exception, e:
             logging.warn("Solace Error %s" % e )
@@ -254,9 +260,10 @@ class SolaceAPI:
 
     def rpc(self, xml, allowfail=False,  **kwargs):
         ''' Ships XML string direct to the Solace RPC '''
+        responses = None
         try:
             data = []
-            responses = self.__restcall(xml)
+            responses, codes = self.__restcall(xml)
             for k in responses:
                 response = xml2dict.parse(responses[k])
                 logging.debug(response)
@@ -276,4 +283,5 @@ class SolaceAPI:
                     data.append(response)
             return data
         except:
+            logging.error("codes: %s, responses: %s" % (responses, codes))
             raise

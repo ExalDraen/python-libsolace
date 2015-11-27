@@ -1,4 +1,6 @@
-#!/usr/bin/env python
+"""
+The plugin architecture
+"""
 
 import logging
 import re
@@ -65,33 +67,33 @@ class Plugin(object):
 
         logging.info("Registering Plugin: %s from class: %s " % (object_class.plugin_name, object_class) )
 
-        # TODO FIXME constructor kwargs and args if needed.
-        for name in dir(object_class):
-          if name.startswith('complete_'):
-            # completion function required a little more renaming magic
-            new_name = 'complete_%s_%s' % (object_class.plugin_name, re.sub('complete_', '' ,name))
-            logging.debug("registering alias for %s as: %s" % (name, new_name))
-            new_handler = self._make_cmd(object_class, name)
-            setattr(object_class, new_name, new_handler)
-            setattr(new_handler, '__doc__', getattr(object_class, name).__doc__)
-          if not name.startswith('_'):
-            # every other method that is not private gets an alias
-            new_name = '%s_%s' % (object_class.plugin_name, name) # eg: verify_pools -> lb_verify_pools
-            logging.debug("registering alias for %s as: %s" % (name, new_name))
-            new_handler = self._make_cmd(object_class, name)
-            setattr(object_class, new_name, new_handler)
-            setattr(new_handler, '__doc__', getattr(object_class, name).__doc__)
+        # # TODO FIXME constructor kwargs and args if needed.
+        # for name in dir(object_class):
+        #   if name.startswith('complete_'):
+        #     # completion function required a little more renaming magic
+        #     new_name = 'complete_%s_%s' % (object_class.plugin_name, re.sub('complete_', '' ,name))
+        #     logging.debug("registering alias for %s as: %s" % (name, new_name))
+        #     new_handler = self._make_cmd(object_class, name)
+        #     setattr(object_class, new_name, new_handler)
+        #     setattr(new_handler, '__doc__', getattr(object_class, name).__doc__)
+        #   if not name.startswith('_'):
+        #     # every other method that is not private gets an alias
+        #     new_name = '%s_%s' % (object_class.plugin_name, name) # eg: verify_pools -> lb_verify_pools
+        #     logging.debug("registering alias for %s as: %s" % (name, new_name))
+        #     new_handler = self._make_cmd(object_class, name)
+        #     setattr(object_class, new_name, new_handler)
+        #     setattr(new_handler, '__doc__', getattr(object_class, name).__doc__)
 
         self.plugins.append(object_class(*args, **kwargs))
         self.plugins_dict[object_class.plugin_name] = object_class(*args, **kwargs)
 
-    @staticmethod
-    def _make_cmd(plugin, name):
-      def handler(self, *args, **kwargs):
-        logging.debug("handler for %s and func %s. self: %s" % (plugin, name, self))
-        # return the function matching the requested name from self
-        return getattr(self, name, None)(*args, **kwargs)
-      return handler
+    # @staticmethod
+    # def _make_cmd(plugin, name):
+    #   def handler(self, *args, **kwargs):
+    #     logging.debug("handler for %s and func %s. self: %s" % (plugin, name, self))
+    #     # return the function matching the requested name from self
+    #     return getattr(self, name, None)(*args, **kwargs)
+    #   return handler
 
 
     def __call__(self, *args, **kwargs):

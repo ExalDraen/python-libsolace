@@ -1,14 +1,19 @@
 import logging
 import libsolace
 from libsolace.plugin import Plugin
-from libsolace.smartdict import SmartDict
 
 @libsolace.plugin_registry.register
 class CMDBClient(Plugin):
 
+    # the name used to call the plugin
     plugin_name = "CMDBClient"
 
     def __init__(self, *args, **kwargs):
+        logging.info("Spawning instance of CMDBClient")
+        pass
+
+    def configure(self, settings=None, **kwargs):
+        logging.info("Configuring")
         pass
 
     def get_vpns_by_owner(self, owner_name, environment='dev', **kwargs):
@@ -16,7 +21,8 @@ class CMDBClient(Plugin):
 
         vpn1 = {}
         vpn1['owner'] = 'SolaceTest'
-        vpn1['spool_size'] = '1024'
+        vpn1['vpn_config'] = {}
+        vpn1['vpn_config']['spool_size'] = '1024'
         vpn1['password'] = 'd0nt_u5e_th1s'
         vpn1['name'] = '%s_testvpn'
 
@@ -37,10 +43,12 @@ class CMDBClient(Plugin):
         queues = []
 
         queue1 = {}
-        queue1["exclusive"] = "true"
-        queue1["type"] = ""
+        queue1['queue_config'] = {}
+        queue1['queue_config']["exclusive"] = "true"
+        queue1['queue_config']["queue_size"] = "4096"
+        queue1['queue_config']["retries"] = 0
+        queue1['queue_config']["exclusive"] = "false"
         queue1["name"] = "testqueue1"
-        queue1["queue_size"] = "4096"
 
         queues.append(queue1)
         return queues

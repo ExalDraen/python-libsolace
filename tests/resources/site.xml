@@ -6,13 +6,16 @@
 
   <solace  name='solace' version='6.2'>
     <vpn  owner='SolaceTest' name='%s_testvpn' password='d0nt_u5se_thIs'>
-      <!-- default VPN spool size -->
+
+      <!-- default VPN spool size and other configs that you want to override perhaps on a environment level -->
       <vpn_config  spool_size='4096'/>
 
       <!-- define your durable queues here, if you need anything fancy, refer to libpipeline solace examples -->
       <queue  name='testqueue1'>
+
         <!-- defaults for all environments if not overridden -->
         <queue_config  queue_size='1024' exclusive='true'/>
+
         <!-- environment overrides -->
         <env name='pt1'>
           <queue_config  queue_size='4096' exclusive='true'/>
@@ -20,6 +23,7 @@
         <env name='prod'>
           <queue_config  queue_size='4096' exclusive='true'/>
         </env>
+
       </queue>
 
       <queue  name='testqueue2'>

@@ -1,6 +1,7 @@
-from libsolace.util import httpRequest, generateRequestHeaders, generateBasicAuthHeader, xml2obj
-
 import logging
+import libsolace
+from libsolace.util import httpRequest, generateRequestHeaders, generateBasicAuthHeader, xml2obj
+from libsolace.plugin import Plugin
 from lxml import etree as ET
 
 # Let the code that implements this API deal with logging
@@ -11,7 +12,8 @@ except AttributeError:
     logging.getLogger().addHandler(NullHandler())
 
 
-class XMLAPI:
+@libsolace.plugin_registry.register
+class XMLAPI(Plugin):
     """ XML API handles reading the XML configuiration from URL or FILE.
 
         xmlapi = XMLAPI(url="http://foo.com/config.xml" username="someuser", password="somepassword")
@@ -19,8 +21,28 @@ class XMLAPI:
         users = xmlapi.getUsersOfVpn(vpn.name, environment=options.env)
 
     """
-    def __init__(self, url=None, username=None, password=None, timeout=10, xml_file=None, use_etree=False,
-                 use_xml2obj=True, etree_case_insensitive=False, **kwargs):
+
+    plugin_name = "XMLAPI"
+
+
+    def __init__(self, *args, **kwargs):
+        pass
+
+    #def __init__(self, url=None, username=None, password=None, timeout=10, xml_file=None, use_etree=False,
+    #             use_xml2obj=True, etree_case_insensitive=False, **kwargs):
+    def configure(self, settings=None, **kwargs):
+
+        logging.info(settings)
+
+        url = settings.CMDB_URL
+        username = settings.CMDB_USER
+        password = settings.CMDB_PASS
+        timeout = 10
+        xml_file = settings.CMDB_FILE
+        use_etree = False
+        use_xml2obj = True
+        etree_case_insensitive = False
+
         """ Fetches data from site-config XML over URL or localfs and returns subsets of the data as requested.
 
         :type url: string
@@ -48,6 +70,7 @@ class XMLAPI:
 
         if xml_file:
             logging.debug('Local file will be read, REST Calls disabled')
+            xml_file = open(xml_file, 'r')
             self.xml_file_data = xml_file.read()
         else:
             self.xml_file_data = None
@@ -129,7 +152,7 @@ class XMLAPI:
             myXML = self.__route_call(self.url)
             self.deploydata = xml2obj(myXML)
 
-    def getSolace(self, vpn):
+    def get_vpn(self, vpn):
         """ Return a VPN by name
 
         :return: a solace vpn
@@ -141,7 +164,7 @@ class XMLAPI:
                 return v
         raise BaseException('Unable to find solace configuration for vpn: %s' % vpn)
 
-    def getSolaceByOwner(self, owner, **kwargs):
+    def get_vpns_by_owner(self, owner, **kwargs):
         """
         Return a VPN by owner
 
@@ -155,11 +178,24 @@ class XMLAPI:
         vpns = []
         for v in self.deploydata.solace.vpn:
             logging.debug("VPN: %s in solace" % v.name)
+            logging.debug("document: %s" % v._attrs)
             if v.owner == owner:
-                vpns.append(v)
+                vpns.append(v._attrs)
         return vpns
 
-    def getUsersOfVpn(self, vpn, environment=None):
+    def get_queues_of_vpn(self, name, **kwargs):
+        self.populateDeployData()
+        queues = []
+        for v in self.deploydata.solace.vpn:
+            logging.debug("VPN: %s in solace" % v.name)
+            if v.name == name:
+                logging.info("Getting queues for %s" % v.name )
+                vd = self.get_vpn(v.name)
+                queues.append(vd.queue)
+        logging.info(queues)
+        return queues
+
+    def get_users_of_vpn(self, vpn, environment=None):
         """ Returns all products users who use a specifig messaging VPN
 
         :type vpn: str

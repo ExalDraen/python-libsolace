@@ -1,7 +1,19 @@
-class AbstractSolaceCMDB(object):
+from libsolace.plugin import Plugin
 
-    # def __init__(self, *args, **kwargs):
-    #     raise NotImplementedError( "Should have implemented this" )
+class AbstractSolaceCMDB():
+
+    """
+    this is not called with any args on instantiation, so do all configuring via
+    the settings kwarg in "configure"
+    """
+    def __init__(self, *args, **kwargs):
+        raise NotImplementedError( "Should have implemented this" )
+
+    """
+    Called as kind of a init, so do your "init" here.
+    """
+    def configure(self, settings=None, **kwargs):
+        raise NotImplementedError( "Should have implemented this" )
 
     """
     Abstract implementation of the CMDB getter for vpns, users and queues
