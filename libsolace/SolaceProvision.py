@@ -95,7 +95,7 @@ class SolaceProvision:
         # prepare the user that owns this vpn
         logging.info("self.vpn_name: %s" % self.vpn_name)
         self.users = [SolaceUser(self.environment_name, self.vpn_name , self.vpn_dict['password'], self.vpn_name,
-            client_profile=self.client_profile.name, acl_profile=self.acl_profile.name, testmode=self.testmode, shutdown_on_apply=self.shutdown_on_apply)]
+           client_profile=self.client_profile.name, acl_profile=self.acl_profile.name, testmode=self.testmode, shutdown_on_apply=self.shutdown_on_apply)]
 
         # prepare the queues for the vpn ( if any )
         try:

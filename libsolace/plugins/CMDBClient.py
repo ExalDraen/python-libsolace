@@ -32,6 +32,7 @@ class CMDBClient(Plugin):
         vpn1['owner'] = 'SolaceTest'
         vpn1['vpn_config'] = {}
         vpn1['vpn_config']['spool_size'] = '1024'
+        vpn1['password'] = 'd0nt_u5e_th1s'
         vpn1['name'] = '%s_testvpn'
 
         vpns.append(vpn1)

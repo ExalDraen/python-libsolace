@@ -119,8 +119,6 @@ class SolaceAPI:
     def list_queues(self, vpn, queue_filter='*'):
         """ List all queues in a VPN """
         try:
-            # request = '<rpc semp-version="soltr/6_0"><show><queue><name>%s</name>' \
-            #           '<vpn-name>%s</vpn-name></queue></show></rpc>' % (queue_filter, vpn)
             request = SolaceXMLBuilder(version=self.version)
             request.show.queue.name=queue_filter
             request.show.queue.vpn_name = vpn
