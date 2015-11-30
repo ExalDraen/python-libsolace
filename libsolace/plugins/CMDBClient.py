@@ -17,7 +17,7 @@ class CMDBClient(Plugin):
     plugin_name = "CMDBClient"
 
     # since we instantiate instances early on, call configure before use to
-    # "init" the instance of the Plugin
+    # "init" the instance object of the Plugin
     def configure(self, settings=None, **kwargs):
         logging.info("Configuring with settings: %s" % settings)
 
@@ -32,7 +32,6 @@ class CMDBClient(Plugin):
         vpn1['owner'] = 'SolaceTest'
         vpn1['vpn_config'] = {}
         vpn1['vpn_config']['spool_size'] = '1024'
-        vpn1['password'] = 'd0nt_u5e_th1s'
         vpn1['name'] = '%s_testvpn'
 
         vpns.append(vpn1)
@@ -62,7 +61,6 @@ class CMDBClient(Plugin):
         queue1['queue_config']["exclusive"] = "true"
         queue1['queue_config']["queue_size"] = "4096"
         queue1['queue_config']["retries"] = 0
-        queue1['queue_config']["exclusive"] = "false"
         queue1["name"] = "testqueue1"
 
         queues.append(queue1)

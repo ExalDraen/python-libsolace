@@ -1,6 +1,7 @@
 
-import libsolace.settingsloader as settings
 import logging
+import libsolace.settingsloader as settings
+from libsolace.SolaceXMLBuilder import SolaceXMLBuilder
 from libsolace import xml2dict
 import pprint
 
@@ -19,12 +20,13 @@ from libsolace.util import httpRequest, generateRequestHeaders, generateBasicAut
 
 class SolaceAPI:
     """ Used by SolaceProvision, Use directly only if you know what you're doing. See SolaceProvision rather. """
-    def __init__(self, environment, testmode=False, **kwargs):
+    def __init__(self, environment, version="soltr/6_0", testmode=False, **kwargs):
         try:
             logging.debug("Solace Client initializing")
             self.config = settings.SOLACE_CONF[environment]
             logging.debug("Loaded Config: %s" % self.config)
             self.testmode = testmode
+            self.version = version
             if 'VERIFY_SSL' not in self.config:
                 self.config['VERIFY_SSL'] = True
             if testmode:
@@ -85,8 +87,10 @@ class SolaceAPI:
     def get_redundancy(self):
         """ Return redundancy information """
         try:
-            request = '<rpc semp-version="soltr/6_0"><show><redundancy></redundancy></show></rpc>'
-            return self.rpc(request)
+            #request = '<rpc semp-version="soltr/6_0"><show><redundancy></redundancy></show></rpc>'
+            request = SolaceXMLBuilder(version=self.version)
+            request.show.redundancy
+            return self.rpc(str(request))
         except:
             raise
 
@@ -94,20 +98,27 @@ class SolaceAPI:
     def get_memory(self):
         """ Returns the Memory Usage """
         try:
-            request ='<rpc semp-version="soltr/6_0"><show><memory></memory></show></rpc>'
-            return self.rpc(request)
+            #request ='<rpc semp-version="soltr/6_0"><show><memory></memory></show></rpc>'
+            request = SolaceXMLBuilder(version=self.version)
+            request.show.memory
+            return self.rpc(str(request))
         except:
             raise
 
     def get_queue(self, queue, vpn, detail=False, **kwargs):
         """ Return Queue details """
         try:
-            extras = []
+#            extras = []
+#            if detail:
+#                extras.append('<detail/>')
+#            request = '<rpc semp-version="soltr/6_0"><show><queue><name>%s</name>' \
+#                      '<vpn-name>%s</vpn-name>%s</queue></show></rpc>' % (queue, vpn, "".join(extras)
+            request = SolaceXMLBuilder()
+            request.show.queue.name = queue
+            request.show.queue.vpn_name = vpn
             if detail:
-                extras.append('<detail/>')
-            request = '<rpc semp-version="soltr/6_0"><show><queue><name>%s</name>' \
-                      '<vpn-name>%s</vpn-name>%s</queue></show></rpc>' % (queue, vpn, "".join(extras))
-            return self.rpc(request)
+                request.show.queue.detail
+            return self.rpc(str(request))
         except:
             raise
 
@@ -283,5 +294,5 @@ class SolaceAPI:
                     data.append(response)
             return data
         except:
-            logging.error("codes: %s, responses: %s" % (responses, codes))
+            logging.error("responses: %s" % responses)
             raise

@@ -31,7 +31,6 @@ class SolaceVPN:
 
         self.queue = SolaceCommandQueue(version=version)
         self.vpn_name = vpn_name % environment
-        self.owner_username = self.vpn_name
         self.environment = environment
         self.acl_profile = self.vpn_name
 
