@@ -24,13 +24,13 @@ except:
 
 class SolaceProvision:
     """ Provision the CLIENT_PROFILE, VPN, ACL_PROFILE, QUEUES and USERS """
-    def __init__(self, vpn_datanode=None, queue_datanodes=None, environment=None, client_profile="glassfish",
+    def __init__(self, vpn_dict=None, queue_dict=None, environment=None, client_profile="glassfish",
                  users=None, testmode=False, create_queues=True, shutdown_on_apply=False, options=None, **kwargs):
         """ Init the provisioning
 
-        :type vpn_datanode: dictionary
+        :type vpn_dict: dictionary
             eg: {'owner': u'SolaceTest', 'spool_size': u'4096', 'password': u'd0nt_u5se_thIs', 'name': u'%s_testvpn'}
-        :type queue_datanodes: list
+        :type queue_dict: list
             eg: [
                   {"exclusive": u"true", "type": "", "name": u"testqueue1", "queue_size": u"4096"},
                   {"exclusive": u"false", "type": "", "name": u"testqueue2", "queue_size": u"4096"}
@@ -42,8 +42,8 @@ class SolaceProvision:
         :type create_queues: bool
         :type shutdown_on_apply: bool
 
-        :param vpn_datanode: vpn dictionary
-        :param queue_datanodes: queue dictionary list
+        :param vpn_dict: vpn dictionary
+        :param queue_dict: queue dictionary list
         :param environment: name of environment
         :param client_profile: name of client_profile, default='glassfish'
         :param users: list of user dictionaries to provision
@@ -54,10 +54,13 @@ class SolaceProvision:
 
         """
 
-        self.vpn_datanode = vpn_datanode
-        self.queue_datanodes = queue_datanodes
+        self.vpn_dict = vpn_dict
+        self.queue_dict = queue_dict
         self.environment_name = environment
-        self.vpn_name = vpn_datanode['name']
+        logging.info("environment: %s" % environment)
+        self.vpn_name = vpn_dict['name']
+        logging.info("vpn_dict: %s" % self.vpn_dict)
+        logging.info("vpn_name: %s" % self.vpn_name)
         self.testmode = testmode
         self.create_queues = create_queues
         self.shutdown_on_apply = shutdown_on_apply
@@ -78,36 +81,34 @@ class SolaceProvision:
         # get version of semp
         self.version = self._get_version_from_appliance()
 
-        logging.debug("VPN Data Node: %s" % json.dumps(str(self.vpn_datanode), ensure_ascii=False))
+        logging.debug("VPN Data Node: %s" % json.dumps(str(self.vpn_dict), ensure_ascii=False))
         # prepare vpn commands
         self.vpn = SolaceVPN(self.environment_name, self.vpn_name,
-            max_spool_usage=self.vpn_datanode['vpn_config']['spool_size'])
+            max_spool_usage=self.vpn_dict['vpn_config']['spool_size'])
 
         # prepare the client_profile commands
-        self.client_profile = SolaceClientProfileFactory(client_profile, version=self.version, vpn_name=self.vpn.vpn_name)
+        self.client_profile = SolaceClientProfileFactory(client_profile, version=self.version, vpn_name=self.vpn_name)
 
-        # Provision profile now already since we need to link to it.
-        for cmd in self.client_profile.queue.commands:
-            self.connection.rpc(str(cmd))
-
-        # prepare acl_profile commands
-        self.acl_profile = SolaceACLProfile(self.environment_name, self.vpn_name, self.vpn)
+        # prepare acl_profile commands, we create a profile named the same as the VPN for simplicity
+        self.acl_profile = SolaceACLProfile(self.environment_name, self.vpn_name, self.vpn_name)
 
         # prepare the user that owns this vpn
-        self.users = [SolaceUser(self.environment_name, self.vpn_name , self.vpn_datanode['password'], self.vpn,
+        logging.info("self.vpn_name: %s" % self.vpn_name)
+        self.users = [SolaceUser(self.environment_name, self.vpn_name , self.vpn_dict['password'], self.vpn_name,
             client_profile=self.client_profile.name, acl_profile=self.acl_profile.name, testmode=self.testmode, shutdown_on_apply=self.shutdown_on_apply)]
 
         # prepare the queues for the vpn ( if any )
         try:
-            logging.info("Queue datanodes %s" % self.queue_datanodes)
-            if self.queue_datanodes:
+            logging.info("Queue datanodes %s" % self.queue_dict)
+            if self.queue_dict:
                 try:
                     logging.info("Stacking queue commands for VPN: %s" % self.vpn_name)
-                    self.queues = SolaceQueue(self.environment_name, self.vpn, self.queue_datanodes,
+                    self.queues = SolaceQueue(self.environment_name, self.vpn, self.queue_dict,
                         shutdown_on_apply=self.shutdown_on_apply)
                 except Exception, e:
                     raise BaseException("Something bad has happened which was unforseen by developers: %s" % e)
             else:
+                logginf.warning("No Queue dictionary was passed, disabling queue creation")
                 self.create_queues = False
         except AttributeError:
             logging.warning("No queue declaration for this vpn in site-config, skipping")
@@ -117,7 +118,7 @@ class SolaceProvision:
         # create the client users
         for user in users:
             logging.info("Provision user: %s for vpn %s" % (user, self.vpn_name))
-            self.users.append(SolaceUser(self.environment_name, user['username'], user['password'], self.vpn,
+            self.users.append(SolaceUser(self.environment_name, user['username'], user['password'], self.vpn_name,
                 client_profile=self.client_profile.name, testmode=self.testmode, shutdown_on_apply=self.shutdown_on_apply))
 
         logging.info("Create VPN %s" % self.vpn_name)
@@ -125,18 +126,23 @@ class SolaceProvision:
             logging.info(str(cmd))
             self.connection.rpc(str(cmd))
 
+        logging.info("Create Client Profile")
+        # Provision profile now already since we need to link to it.
+        for cmd in self.client_profile.queue.commands:
+            self.connection.rpc(str(cmd))
+
         logging.info("Create ACL Profile for vpn %s" % self.vpn_name)
         for cmd in self.acl_profile.queue.commands:
             logging.info(str(cmd))
             self.connection.rpc(str(cmd))
 
-        logging.info("Create User for vpn %s" % self.vpn_name)
         for user in self.users:
-            for cmd in user.queue.commands:
+            logging.info("Create user: %s for vpn %s" % (user.username,self.vpn_name))
+            for cmd in user.commands.commands:
                 logging.info(str(cmd))
                 self.connection.rpc(str(cmd))
 
-        logging.info("Create Queues: %s in %s" % (self.create_queues, self.vpn_name))
+        logging.info("Create Queues Bool?: %s in %s" % (self.create_queues, self.vpn_name))
         if self.create_queues:
             logging.info("Create Queues for vpn %s" % self.vpn_name)
             for cmd in self.queues.queue.commands:
@@ -152,11 +158,11 @@ class SolaceProvision:
     def _set_vpn_confg(self):
         try:
             # Check if there is environment overide for VPN
-            for e in self.vpn_datanode.env:
+            for e in self.vpn_dict.env:
                 if e.name == self.environment_name:
                     logging.info('setting vpn_config to %s values' % e.name )
-                    self.vpn_datanode.vpn_config = e.vpn_config
-                    logging.info("Spool Size: %s" % self.vpn_datanode.vpn_config['spool_size'])
+                    self.vpn_dict.vpn_config = e.vpn_config
+                    logging.info("Spool Size: %s" % self.vpn_dict.vpn_config['spool_size'])
         except:
-            logging.warning("No environment overides for vpn: %s" % self.vpn_datanode.name)
+            logging.warning("No environment overides for vpn: %s" % self.vpn_dict.name)
             pass

@@ -16,13 +16,10 @@ class CMDBClient(Plugin):
     # the name used to call the plugin
     plugin_name = "CMDBClient"
 
-    def __init__(self, *args, **kwargs):
-        logging.info("Spawning instance of CMDBClient")
-        pass
-
+    # since we instantiate instances early on, call configure before use to
+    # "init" the instance of the Plugin
     def configure(self, settings=None, **kwargs):
-        logging.info("Configuring")
-        pass
+        logging.info("Configuring with settings: %s" % settings)
 
     def get_vpns_by_owner(self, owner_name, environment='dev', **kwargs):
         """
@@ -56,7 +53,7 @@ class CMDBClient(Plugin):
 
     def get_queues_of_vpn(self, vpn_name, environment='dev', **kwargs):
         """
-        As with VPN, all configs should be finalized before returned. 
+        As with VPN, all configs should be finalized before returned.
         """
         queues = []
 

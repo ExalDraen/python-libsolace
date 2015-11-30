@@ -5,7 +5,8 @@ from libsolace.SolaceXMLBuilder import SolaceXMLBuilder
 class SolaceVPN:
     """
 
-    Build up all the commands with SolaceXMLBuilder required to build this VPN, then append them to the command queue.
+    Build up all the commands with SolaceXMLBuilder required to build this VPN,
+    then append them to the command queue.
 
     """
 

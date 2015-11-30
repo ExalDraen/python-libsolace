@@ -39,7 +39,7 @@ The core of this provisioning system is the SolaceXMLBuilder class which can con
 '<rpc semp-version="soltr/6_2"><create><client-username><username>myUserName</username><vpn-name>dev_MyVPN</vpn-name></client-username></create></rpc>'
 ```
 
-and if you want to create a new user and set the password, profile and so forth, you can use the SolaceUser class like so:
+If you want to create a new user and set the password, acl profile and client profile, you can use the SolaceUser class:
 
 ```python
 >>> from libsolace.items.SolaceUser import SolaceUser
@@ -61,17 +61,17 @@ and if you want to create a new user and set the password, profile and so forth,
 * appliance responses are difficult to validate since the "slave" appliance will almost always return errors when NOT "active", and already existing CI's will throw a error on create events and so forth.
 * since python dictionaries cannot contain `-` use `_`, the SolaceNode class will substitute a `-` as needed
 
-## install
+## Install
 
-you might need libyaml-devel or equivilant!
+You might need libyaml-devel or equivilant!
 
 ```
 python setup.py install
 ```
 
-## configuration
+## Configuration
 
-libsolace requires a `libsolace.yaml` file in order to know what environments exist and what appliances are part of those environments. A single appliance can be part of multiple environments.
+libSolace requires a `libsolace.yaml` file in order to know what environments exist and what appliances are part of those environments. A single appliance can be part of multiple environments.
 
 the `libsolace.yaml` file is searched for in:
 
@@ -89,61 +89,61 @@ see the `bin` directory for examples of various activities.
 
 ### SolaceAPI
 
-connects to an appliance *set* on the *environment* key.
+Connects to an appliance *cluster* on the *environment* key.
 
 ```
 import libsolace.settingsloader as settings
-from libsolace.solace import SolaceAPI
+from libsolace.SolaceAPI import SolaceAPI
 connection = SolaceAPI('dev')
 ```
 
 #### get_redundancy
 
-returns the redundancy status of each node in the cluster.
+Returns the redundancy status of each node in the cluster.
 
 #### get_memory
 
-returns the memory usage of the appliance.
+Returns the memory usage of the appliance.
 
 #### get_queue(queue, vpn, detail=False)
 
-shows a queue in a vpn, optionally added detail
+Shows a queue in a vpn, optionally added detail
 
 #### list_queues(vpn, queue_filter="*")
 
-shows a list of queues in a vpn matching a queue_filter
+Shows a list of queues in a vpn matching a queue_filter
 
 #### get_client_username_queues(username, vpn_name)
 
-return a list of queues owned by a specific user
+Return a list of queues owned by a specific user
 
 #### is_client_username_inuse(client_username, vpn)
 
-returns boolean if username is in-use or not
+Returns boolean if username is in-use or not
 
 #### does_client_username_exist(client_username, vpn)
 
-returns boolean if a user exists
+Returns boolean if a user exists
 
 #### is_client_username_enabled(client_username, vpn)
 
-returns boolean is a client username within a vpn is enabled
+Returns boolean is a client username within a vpn is enabled
 
 #### get_client_username(clientusername, vpn, detail=False)
 
-get a client username with details and or counts
+Get a client username with details and or counts
 
 #### get_client(client, vpn, detail=False)
 
-get a client "session" stats with optional details
+Get client "session" stats with optional details
 
 #### get_vpn(vpn, stats=False)
 
-get a vpn info with optional stats
+Get a VPN info with optional stats
 
 #### list_vpns(vpns)
 
-returns list of vpns matching a filter
+Returns list of vpns matching a filter
 
 ```sh
 >>> connection.list_vpns('*keghol*')
@@ -151,18 +151,19 @@ returns list of vpns matching a filter
 ```
 
 ### SolaceXMLBuilder
-the builder is a cheat to construct XML string requests.  e.g.
+The builder is a cheat to construct XML string requests.  e.g.
 
 ```python
-from libsolace.solacehelper import SolaceXMLBuilder
-a=SolaceXMLBuilder(version="soltr/6_2")
-a.foo.bar.baz=2
-str(a)
+from libsolace.SolaceXMLBuilder import SolaceXMLBuilder
+xml=SolaceXMLBuilder(version="soltr/6_2")
+xml.foo.bar.baz=2
+str(xml)
 '<rpc semp-version="soltr/6_2">\n<foo><bar><baz>2</baz></bar></foo></rpc>'
 ```
 
 ### SolaceCommandQueue
-the command queue is handy for creating a sequential list of SolaceXMLBuilder commands, each command is *validated* against the Solace's SEMP XSD on *enqueue*.  e.g.
+
+The command queue is handy for creating a sequential list of SolaceXMLBuilder commands, each command is *validated* against the Solace's SEMP XSD when *enqueue* is called.
 
 ```python
 queue = SolaceCommandQueue(version="soltr/6_2")
@@ -174,25 +175,25 @@ queue.enqueue(cmd)
 
 ### Executing on Appliances
 
-simply iterate over SolaceCommandQueue `commands` and call `rpc` on appliance connection.
+In order to run actual provisioning commands, iterate over SolaceCommandQueue  instance's `commands` and call `rpc` on the SolaceAPI connection instance.
 
 ```python
 import libsolace.settingsloader as settings
-from libsolace.solace import SolaceAPI
-self.connection = SolaceAPI('ci1')
+from libsolace.SolaceAPI import SolaceAPI
+connection = SolaceAPI('ci1')
 for cmd in queue.commands:
-  self.connection.rpc(str(cmd))
+  connection.rpc(str(cmd))
 ```
 
 ## Site Management
 
-Through some classes in `solacehelper.py` you can manage a simple set of configuration items in multiple datacenters or environments.  the `SolaceProvisionVPN` class can provision entire VPN's, Queues and Users. e.g.
+You can manage a simple set of configuration items in multiple datacenters or environments utilizing the `SolaceProvisionVPN` class, which  can provision entire VPN's, Queues, Profiles and Users. e.g.
 
 ```
-result = SolaceProvisionVPN(vpn_datanode=vpn, environment=options.env, client_profile="glassfish", users=users)
+SolaceProvision(vpn_dict=vpn, queue_dict=queues, environment="dev", client_profile="glassfish", users=users)
 ```
 
-see the following classes and methods:
+See the following classes and methods:
 
 * SolaceClientProfile
 * SolaceACLProfile
@@ -200,9 +201,11 @@ see the following classes and methods:
 * SolaceVPN
 * SolaceQueue
 
-### site.xml
+### site.xml ( legacy )
 
-VPNs are declared with a `<vpn>` tag in the `<solace>` tag of `site.xml`, each VPN **must** have its `owner` attribute set, the `owner` attribute is used as a key to select which VPNs will be provisioned. e.g.
+**The XML provisioning schema is legacy, it will be replaced with a JSON-only version going forward.**
+
+VPNs can be declared with a `<vpn>` tag in the `<solace>` tag of `site.xml`, each VPN **must** have its `owner` attribute set, the `owner` attribute is used as a key to select which VPNs will be provisioned. e.g.
 
 `solace-provision.py -p EcoSystemA -e ci1 -f /path/to/site.xml`
 
@@ -210,103 +213,27 @@ VPN's are named with a special environment placeholder e.g. `%s_testvpn`. the li
 
 Certain items can be overridden on a environment level in the `site.xml`, current supported items:
 
-* queue queue_size
-* vpn spool_size
+* queue's queue_size
+* vpn's spool_size
 
-and the environment_name is used to prefix all VPN names to avoid collision
+The environment_name is used to prefix **all** VPN names, User names, Profile names and ACL names in order to avoid collisions. This facilitates multi-environment setups to share appliances, and still maintain a certain degree of isolation.
 
 ### Integration with a custom CMDB
 
-You can implement your own integration with whatever CMDB you use.
-See CMDBClient plugin class and associated libpipeline.yaml properties for plugins and CMDB.
+You should implement your own integration with whatever CMDB you use.
+See CMDBClient plugin *class* and associated libpipeline.yaml properties for plugin structure and how to configure libsolace to use it.
 
-#### get_vpns_by_owner(owner_name, **kwargs)
+Any CMDB implementation must implement the following methods as part of the contract.
+
+#### configure(settings=None, **kwargs)
+
+#### get_vpns_by_owner(owner_name, environment='dev', **kwargs)
 
 Returns all VPNS owned by a specific "owner".
 
-Example of the results your implementation should return.
-```json
-[
-   {
-      env:[
-         {
-            name:'dev',
-            vpn_config:{
-               spool_size:'1024'
-            }
-         },
-         {
-            name:'pt1',
-            vpn_config:{
-               spool_size:'16384'
-            }
-         },
-         {
-            name:'prod',
-            vpn_config:{
-               spool_size:'16384'
-            }
-         }
-      ],
-      name:'%s_testvpn',
-      owner:'SolaceTest',
-      password:'d0nt_u5se_thIs',
-      queue:[
-         {
-            env:[
-               {
-                  name:'pt1',
-                  queue_config:{
-                     exclusive:'true',
-                     queue_size:'4096'
-                  }
-               },
-               {
-                  name:'prod',
-                  queue_config:{
-                     exclusive:'true',
-                     queue_size:'4096'
-                  }
-               }
-            ],
-            name:'testqueue1',
-            queue_config:{
-               exclusive:'true',
-               queue_size:'1024'
-            }
-         },
-         {
-            env:[
-               {
-                  name:'pt1',
-                  queue_config:{
-                     exclusive:'false',
-                     queue_size:'4096'
-                  }
-               },
-               {
-                  name:'prod',
-                  queue_config:{
-                     exclusive:'false',
-                     queue_size:'4096'
-                  }
-               }
-            ],
-            name:'testqueue2',
-            queue_config:{
-               exclusive:'false',
-               queue_size:'1024'
-            }
-         }
-      ],
-      vpn_config:{
-         spool_size:'4096'
-      }
-   }
-]
-```
+See CMDBClient for example. 
 
-#### get_users_of_vpn(vpn_name, **kwargs)
+#### get_users_of_vpn(vpn_name, environment='dev', **kwargs)
 
 ```json
 [  
@@ -321,7 +248,7 @@ Example of the results your implementation should return.
 ]
 ```
 
-#### get_queues_of_vpn(vpn_name, **kwargs)
+#### get_queues_of_vpn(vpn_name, environment='dev', **kwargs)
 
 ```json
 [

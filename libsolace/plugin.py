@@ -13,7 +13,6 @@ class PluginClass(type):
         new_object = super(PluginClass, cls).__new__(cls, clsname, bases, dct)
         return new_object
 
-
 class Plugin(object):
     """
     This is the plugin core object where all pluggables should extend from and register too.
@@ -54,8 +53,7 @@ class Plugin(object):
     plugin_name = None
 
     def __init__(self, *args, **kwargs):
-        logging.debug("Plugin Init")
-        pass
+        logging.debug("Plugin Init: %s, %s" % (args, kwargs))
 
     def register(self, object_class, *args, **kwargs):
         """
@@ -106,5 +104,5 @@ class Plugin(object):
         :param kwargs:
         :return: object
         """
-        logging.debug("retrieving %s, %s, %s" % (self, args, kwargs))
+        logging.info("Retrieving self:%s, args:%s, kwargs:%s" % (self, args, kwargs))
         return self.plugins_dict[args[0]]

@@ -12,7 +12,7 @@ class SolaceUser:
         :type environment: str
         :type username: str
         :type password: str
-        :type vpn: SolaceVPN
+        :type vpn_name: str
         :type client_profile: str
 
         :param environment: environment name
@@ -30,11 +30,17 @@ class SolaceUser:
         self.environment = environment
         self.username = username % environment
         self.password = password
+        logging.info("vpn_name: %s" % vpn_name)
         self.vpn_name = vpn_name % environment
-        self.acl_profile = acl_profile % environment
-        self.client_profile = client_profile % environment
+        self.acl_profile = acl_profile
+        self.client_profile = client_profile
         self.testmode = testmode
         self.shutdown_on_apply = shutdown_on_apply
+
+        logging.info("""Commands: %s, Environment: %s, Username: %s, Password: %s, vpn_name: %s,
+            acl_profile: %s, client_profile: %s, testmode: %s, shutdown_on_apply: %s""" % (self.commands,
+                self.environment, self.username, self.password, self.vpn_name, self.acl_profile, self.client_profile,
+                self.testmode, self.shutdown_on_apply))
 
         if self.testmode:
             logging.info('TESTMODE ACTIVE')

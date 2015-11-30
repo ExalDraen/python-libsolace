@@ -44,7 +44,6 @@ import libsolace.settingsloader as settings
 try:
     import libsolace
     from libsolace import solace
-    # from libsolace.sitexml import XMLAPI
     from libsolace.SolaceProvision import SolaceProvision
 except:
     print("Unable to import required libraries, is libsolace installed? try 'pip install "
@@ -148,9 +147,10 @@ if __name__ == '__main__':
 
 
     # load the cmdb API client
-    cmdbapi = libsolace.plugin_registry(settings.SOLACE_CMDB_PLUGIN)
+    cmdbapi = libsolace.plugin_registry(settings.SOLACE_CMDB_PLUGIN, settings=settings)
 
-    # configure the client ( what init should normally do )
+    # configure the client ( what init would normally do, but the plugin system
+    # lacks the ability to implement stuff in init )
     cmdbapi.configure(settings=settings)
 
     # get the list of vpns to provision
@@ -171,8 +171,8 @@ if __name__ == '__main__':
         logging.info("Provisioning %s" % vpn['name'])
 
         result = SolaceProvision(
-            vpn_datanode=vpn,
-            queue_datanodes=queues,
+            vpn_dict=vpn,
+            queue_dict=queues,
             environment=options.env,
             client_profile=options.clientprofile,
             users=users,
