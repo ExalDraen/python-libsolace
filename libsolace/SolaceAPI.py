@@ -94,7 +94,6 @@ class SolaceAPI:
         except:
             raise
 
-
     def get_memory(self):
         """ Returns the Memory Usage """
         try:
@@ -108,12 +107,7 @@ class SolaceAPI:
     def get_queue(self, queue, vpn, detail=False, **kwargs):
         """ Return Queue details """
         try:
-#            extras = []
-#            if detail:
-#                extras.append('<detail/>')
-#            request = '<rpc semp-version="soltr/6_0"><show><queue><name>%s</name>' \
-#                      '<vpn-name>%s</vpn-name>%s</queue></show></rpc>' % (queue, vpn, "".join(extras)
-            request = SolaceXMLBuilder()
+            request = SolaceXMLBuilder(version=self.version)
             request.show.queue.name = queue
             request.show.queue.vpn_name = vpn
             if detail:
@@ -125,9 +119,12 @@ class SolaceAPI:
     def list_queues(self, vpn, queue_filter='*'):
         """ List all queues in a VPN """
         try:
-            request = '<rpc semp-version="soltr/6_0"><show><queue><name>%s</name>' \
-                      '<vpn-name>%s</vpn-name></queue></show></rpc>' % (queue_filter, vpn)
-            response = self.rpc(request)
+            # request = '<rpc semp-version="soltr/6_0"><show><queue><name>%s</name>' \
+            #           '<vpn-name>%s</vpn-name></queue></show></rpc>' % (queue_filter, vpn)
+            request = SolaceXMLBuilder(version=self.version)
+            request.show.queue.name=queue_filter
+            request.show.queue.vpn_name = vpn
+            response = self.rpc(str(request))
             logging.debug(response)
             queues = []
             for k in response:
@@ -226,46 +223,49 @@ class SolaceAPI:
         """
         Get client username details
         """
-        extras = []
-        if detail:
-            extras.append('<detail/>')
-        request = '<rpc semp-version="soltr/6_0"><show><client-username>' \
-                  '<name>%s</name><vpn-name>%s</vpn-name>%s</client-username></show></rpc>' % ( clientusername, vpn, "".join(extras))
-        return self.rpc(request)
+        try:
+            request = SolaceXMLBuilder(version = self.version)
+            request.show.client_username.name = clientusername
+            request.show.client_username.vpn_name = vpn
+            if detail:
+                request.show.client_username.detail
+
+            return self.rpc(str(request))
+        except:
+            raise
 
     def get_client(self, client, vpn, detail=False, **kwargs):
         """ Get Client details """
-        extras = []
-        if detail:
-            extras.append('<detail/>')
         try:
-            request = '<rpc semp-version="soltr/6_0"><show><client>' \
-                      '<name>%s</name><vpn-name>%s</vpn-name>%s</client></show></rpc>' % ( client, vpn, "".join(extras))
-            return self.rpc(request)
+            request = SolaceXMLBuilder(version = self.version)
+            request.show.client.name = client
+            request.show.client.vpn_name = vpn
+            if detail:
+                request.show.client.detail
+            return self.rpc(str(request))
         except:
             raise
 
     def get_vpn(self, vpn, stats=False):
         """ Get VPN details """
-        extras = []
-        if stats:
-            extras.append('<stats/>')
         try:
-            request = '<rpc semp-version="soltr/5_5"><show><message-vpn>' \
-                      '<vpn-name>%s</vpn-name>%s</message-vpn></show></rpc>' % ( vpn, "".join(extras))
-            return self.rpc(request)
+            request = SolaceXMLBuilder(version = self.version)
+            request.show.message_vpn.vpn_name = vpn
+            if stats:
+                request.show.message_vpn.stats
+            return self.rpc(str(request))
         except:
             raise
 
     def list_vpns(self, vpn):
         try:
-            request = '<rpc semp-version="soltr/5_5"><show><message-vpn><vpn-name>%s</vpn-name>' \
-                      '<replication/></message-vpn></show></rpc>' % vpn
-            response = self.rpc(request)
-            try:
-                return [vpn['vpn-name'] for vpn in response[0]['rpc-reply']['rpc']['show']['message-vpn']['replication']['message-vpns']['message-vpn']]
-            except:
-                return [response[0]['rpc-reply']['rpc']['show']['message-vpn']['replication']['message-vpns']['message-vpn']['vpn-name']]
+            request = SolaceXMLBuilder(version = self.version)
+            request.show.message_vpn.vpn_name = vpn
+            response = self.rpc(str(request))
+            #try:
+            return [vpn['name'] for vpn in response[0]['rpc-reply']['rpc']['show']['message-vpn']['vpn']] #['replication']['message-vpns']['message-vpn']]
+            #except:
+            #    return [response[0]['rpc-reply']['rpc']['show']['message-vpn']['vpn']]
         except:
             raise
 
