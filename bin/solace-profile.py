@@ -10,7 +10,7 @@ from libsolace.solacehelper import SolaceXMLBuilder
 import libsolace.settingsloader as settings
 
 
-def solace_profile(options=None):
+def solace_profile(options=None, vpn=None):
     """ Create / Update Profile
 
     """
@@ -22,9 +22,9 @@ def solace_profile(options=None):
 
         # try substitite environment into vpn_name if it is formated '%s_somename'
         try:
-            vpnname = options.vpnname % environment
+            vpnname = vpn % environment
         except Exception, e:
-            vpnname = options.vpnname
+            vpnname = vpn
 
         logging.info("VPN Name: %s" % vpnname)
 
@@ -43,16 +43,7 @@ def solace_profile(options=None):
                 cmd.create.client_profile.vpn_name = vpnname
             solace.rpc(str(cmd))
 
-            '''
-            <rpc xmlns="http://www.solacesystems.com/semp/topic_routing/6_0">
-              <client-profile>
-                <name>glassfish</name>
-                <max-connections-per-client-username>
-                  <value>500</value>
-                </max-connections-per-client-username>
-              </client-profile>
-            </rpc>
-            '''
+
             cmd = SolaceXMLBuilder("Setting Properties", version=options.soltr_version)
             cmd.client_profile.name = profile
             if options.soltr_version == "soltr/6_2":
@@ -61,17 +52,20 @@ def solace_profile(options=None):
             solace.rpc(str(cmd))
 
 if __name__ == "__main__":
-    usage = """ Delete a Solace Client User within a VPN
+    usage = """ Create / Update a Solace Client Profile
+
 		Example:
-		./solace-profile.py -e ci1,dev,si1,qa1,pt1 -v %s_domainevent -p "%s_someprofile"
-		./solace-profile.py -e ci1,dev,si1,qa1,pt1 -v %s_domainevent -p someprofile,%s_otherprofile
+
+		solace-profile.py -e ci1,dev,si1,qa1,pt1 -v %s_domainevent -p "%s_someprofile"
+		solace-profile.py -e ci1,dev,si1,qa1,pt1 -v %s_domainevent -p someprofile,%s_otherprofile
+        solace-profile.py -e si1 -v %s_domainevent,%s_bonus -p glassfish -s "soltr/6_2"
 
 """
     parser = OptionParser(usage=usage)
     parser.add_option("-e", "--environment", action="store", type="string", dest="environment",
-                      help="environment to apply changes to eg:[ qa1 | ci1 | si1 | prod | qa1,ci1,si1 ]")
+                      help="environment(s) to apply changes to eg:[ qa1 | prod | qa1,ci1,si1 ]")
     parser.add_option("-v", "--vpn", action="store", type="string", dest="vpnname",
-                      default=None, help="vpn name to apply changes to eg: my_vpn or %s_domainevent, %s is literal and will be replaced with env!")
+                      default=None, help="VPN name for 6.2+ appliances %s is rewritten to env-name at provision time, eg: %s_event | %s_myvpn,othervpn")
     parser.add_option("-p", "--profile", action="store", type="string", dest="profile",
                       help="profile or comma separated list of profiles to delete, the %s is literal eg: [ somevpn | %s_sitemq,%s_foo ] and will be replaced with env")
     parser.add_option("-s", "--soltr_version", action="store", type="string", dest="soltr_version",
@@ -92,6 +86,11 @@ if __name__ == "__main__":
     except:
         parser.print_help()
 
+    try:
+        options.vpnname = options.vpnname.lower().split(',')
+    except:
+        parser.print_help()
+
     if options.debugmode:
         logging.getLogger().setLevel(logging.DEBUG)
     if not options.environment:   # if filename is not given
@@ -104,4 +103,6 @@ if __name__ == "__main__":
     options.profile = options.profile.split(',')
 
     # call the provision function
-    solace_profile(options=options)
+    for vpn in options.vpnname:
+        logging.info("VPN: %s" % vpn)
+        solace_profile(options=options, vpn=vpn)
