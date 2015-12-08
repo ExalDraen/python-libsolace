@@ -68,46 +68,46 @@ def solace_bridge(options=None, **kwargs):
 
         # primary cluster, primary bridge remote QCOK
         primaryCluster.xmlbuilder = SolaceXMLBuilder("Creating Primary Cluster, Primary remote %s" % primaryBridgeName, version=options.soltr_version)
-        primaryCluster.xmlbuilder.create.bridge.bridge_name = primaryBridgeName
-        primaryCluster.xmlbuilder.create.bridge.vpn_name = vpn
-        primaryCluster.xmlbuilder.create.bridge.primary
-        primaryCluster.xmlbuilder.remote.create.message_vpn.vpn_name = vpn
-        primaryCluster.xmlbuilder.remote.create.connect_via
-        primaryCluster.xmlbuilder.remote.addr = options.backup_addr
-        primaryCluster.xmlbuilder.remote.interface
-        primaryCluster.xmlbuilder.phys_intf = options.primary_phys_intf
+        primaryCluster.xmlbuilder.bridge.bridge_name = primaryBridgeName
+        primaryCluster.xmlbuilder.bridge.vpn_name = vpn
+        primaryCluster.xmlbuilder.bridge.primary
+        primaryCluster.xmlbuilder.bridge.remote.create.message_vpn.vpn_name = vpn
+        primaryCluster.xmlbuilder.bridge.remote.create.message_vpn.connect_via
+        primaryCluster.xmlbuilder.bridge.remote.create.message_vpn.addr = options.backup_addr
+        primaryCluster.xmlbuilder.bridge.remote.create.message_vpn.interface
+        primaryCluster.xmlbuilder.bridge.remote.create.message_vpn.phys_intf = options.primary_phys_intf
         primaryCluster.rpc(str(primaryCluster.xmlbuilder), primaryOnly=True)
 
         # primary cluster, backup bridge remote QCOK
         primaryCluster.xmlbuilder = SolaceXMLBuilder("Creating Primary Cluster, Backup remote %s" % primaryBridgeName, version=options.soltr_version)
-        primaryCluster.xmlbuilder.create.bridge.bridge_name = backupBridgeName
-        primaryCluster.xmlbuilder.create.bridge.vpn_name = vpn
-        primaryCluster.xmlbuilder.create.bridge.backup
-        primaryCluster.xmlbuilder.remote.create.message_vpn.vpn_name = vpn
-        primaryCluster.xmlbuilder.remote.create.connect_via
-        primaryCluster.xmlbuilder.remote.addr = options.backup_addr
-        primaryCluster.xmlbuilder.remote.interface
-        primaryCluster.xmlbuilder.phys_intf = options.primary_phys_intf
+        primaryCluster.xmlbuilder.bridge.bridge_name = primaryBridgeName
+        primaryCluster.xmlbuilder.bridge.vpn_name = vpn
+        primaryCluster.xmlbuilder.bridge.backup
+        primaryCluster.xmlbuilder.bridge.remote.create.message_vpn.vpn_name = vpn
+        primaryCluster.xmlbuilder.bridge.remote.create.message_vpn.connect_via
+        primaryCluster.xmlbuilder.bridge.remote.create.message_vpn.addr = options.backup_addr
+        primaryCluster.xmlbuilder.bridge.remote.create.message_vpn.interface
+        primaryCluster.xmlbuilder.bridge.remote.create.message_vpn.phys_intf = options.primary_phys_intf
         primaryCluster.rpc(str(primaryCluster.xmlbuilder), backupOnly=True)
 
         # backup cluster, primary bridge remote QCOK
         drCluster.xmlbuilder = SolaceXMLBuilder("Creating DR Primary Bridge remote %s" % primaryBridgeName, version=options.soltr_version)
-        drCluster.xmlbuilder.create.bridge.bridge_name = primaryBridgeName
-        drCluster.xmlbuilder.create.bridge.vpn_name = vpn
-        drCluster.xmlbuilder.create.bridge.primary
-        drCluster.xmlbuilder.remote.create.message_vpn.vpn_name = vpn
-        drCluster.xmlbuilder.remote.create.router
-        drCluster.xmlbuilder.remote.create.virtual_router_name = "v:%s" % options.primary_cluster_primary_node_name
+        drCluster.xmlbuilder.bridge.bridge_name = primaryBridgeName
+        drCluster.xmlbuilder.bridge.vpn_name = vpn
+        drCluster.xmlbuilder.bridge.primary
+        drCluster.xmlbuilder.bridge.remote.create.message_vpn.vpn_name = vpn
+        drCluster.xmlbuilder.bridge.remote.create.message_vpn.router
+        drCluster.xmlbuilder.bridge.remote.create.message_vpn.virtual_router_name = "v:%s" % options.primary_cluster_primary_node_name
         drCluster.rpc(str(drCluster.xmlbuilder), primaryOnly=True)
 
         # backup cluster, backup bridge remote
         drCluster.xmlbuilder = SolaceXMLBuilder("Creating DR Primary Bridge remote %s" % primaryBridgeName, version=options.soltr_version)
-        drCluster.xmlbuilder.create.bridge.bridge_name = backupBridgeName
-        drCluster.xmlbuilder.create.bridge.vpn_name = vpn
-        drCluster.xmlbuilder.create.bridge.primary
-        drCluster.xmlbuilder.remote.create.message_vpn.vpn_name = vpn
-        drCluster.xmlbuilder.remote.create.router
-        drCluster.xmlbuilder.remote.create.virtual_router_name = "v:%s" % options.primary_cluster_primary_node_name
+        drCluster.xmlbuilder.bridge.bridge_name = primaryBridgeName
+        drCluster.xmlbuilder.bridge.vpn_name = vpn
+        drCluster.xmlbuilder.bridge.backup
+        drCluster.xmlbuilder.bridge.remote.create.message_vpn.vpn_name = vpn
+        drCluster.xmlbuilder.bridge.remote.create.message_vpn.router
+        drCluster.xmlbuilder.bridge.remote.create.message_vpn.virtual_router_name = "v:%s" % options.primary_cluster_primary_node_name
         drCluster.rpc(str(drCluster.xmlbuilder), backupOnly=True)
 
 
