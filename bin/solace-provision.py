@@ -43,7 +43,7 @@ import libsolace.settingsloader as settings
 
 try:
     import libsolace
-    from libsolace import solace
+    from libsolace import SolaceAPI
     from libsolace.SolaceProvision import SolaceProvision
 except:
     print("Unable to import required libraries, is libsolace installed? try 'pip install "

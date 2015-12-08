@@ -5,8 +5,8 @@ import logging
 logging.basicConfig(format='[%(module)s] %(filename)s:%(lineno)s %(asctime)s %(levelname)s %(message)s',stream=sys.stdout)
 logging.getLogger().setLevel(logging.INFO)
 from optparse import OptionParser
-from libsolace.solace import SolaceAPI
-from libsolace.solacehelper import SolaceXMLBuilder
+from libsolace.SolaceAPI import SolaceAPI
+from libsolace.SolaceXMLBuilder import SolaceXMLBuilder
 import libsolace.settingsloader as settings
 
 def solace_delete_profile(options):

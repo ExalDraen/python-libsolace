@@ -10,8 +10,9 @@ import sys
 import logging
 logging.basicConfig(format='[%(module)s] %(filename)s:%(lineno)s %(asctime)s %(levelname)s %(message)s',stream=sys.stdout)
 import libsolace.settingsloader as settings
-from libsolace.solace import SolaceAPI
-from libsolace.solacehelper import SolaceXMLBuilder, SolaceCommandQueue
+from libsolace.SolaceAPI import SolaceAPI
+from libsolace.SolaceXMLBuilder import SolaceXMLBuilder
+from libsolace.SolaceCommandQueue import SolaceCommandQueue
 from optparse import OptionParser
 import sys
 import pprint
@@ -34,7 +35,7 @@ if __name__ == '__main__':
         sys.exit()
     if options.debug:
         logging.getLogger().setLevel(logging.DEBUG)
-        
+
     # forces read-only
     options.testmode = True
     settings.env = options.env.lower()

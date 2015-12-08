@@ -8,8 +8,9 @@ Deletes messages from the spool within queue list
 
 import logging
 import libsolace.settingsloader as settings
-from libsolace.solace import SolaceAPI
-from libsolace.solacehelper import SolaceXMLBuilder, SolaceCommandQueue
+from libsolace.SolaceAPI import SolaceAPI
+from libsolace.SolaceXMLBuilder import SolaceXMLBuilder
+from libsolace.SolaceCommandQueue import SolaceCommandQueue
 from optparse import OptionParser
 import sys
 import pprint

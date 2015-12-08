@@ -20,7 +20,7 @@ class XMLAPI(Plugin):
     plugin_name = "XMLAPI"
 
     def __init__(self, *args, **kwargs):
-        logging.warn("LEGACY xml plugin is being used, please port to JSON API!")
+        logging.info("LEGACY xml plugin is being used, please port to JSON API!")
         pass
 
     #def __init__(self, url=None, username=None, password=None, timeout=10, xml_file=None, use_etree=False,

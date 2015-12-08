@@ -6,8 +6,8 @@ logging.basicConfig(format='[%(module)s] %(filename)s:%(lineno)s %(asctime)s %(l
 
 from optparse import OptionParser
 import pprint
-from libsolace.solace import SolaceAPI
-from libsolace.solacehelper import SolaceXMLBuilder
+from libsolace.SolaceAPI import SolaceAPI
+from libsolace.SolaceXMLBuilder import SolaceXMLBuilder
 import libsolace.settingsloader as settings
 settings.debugmode = False
 

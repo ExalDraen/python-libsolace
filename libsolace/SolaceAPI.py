@@ -34,19 +34,50 @@ class SolaceAPI:
                 self.config['PASS'] = settings.READ_ONLY_PASS
                 logging.info('READONLY mode')
             logging.debug("Final Config: %s" % self.config)
+            self.xmlbuilder = SolaceXMLBuilder(version=version)
+
+            # get the spool statuses since its a fairly reliable way to determin
+            # the primary vs backup routers
+            self.status = self.get_message_spool()
+
+            self.primaryRouter = None
+            self.backupRouter = None
+
+            for node in self.status:
+                spoolStatus = node['rpc-reply']['rpc']['show']['message-spool']['message-spool-info']['operational-status']
+                logging.info(spoolStatus)
+                if spoolStatus == 'AD-Active' and self.primaryRouter == None:
+                    self.primaryRouter = node['HOST']
+                elif self.backupRouter == None and self.primaryRouter != None:
+                    self.backupRouter = node['HOST']
+                else:
+                    logging.warn("More than one backup router?")
+                    self.primaryRouter = node['HOST']
+                    #raise BaseException("Appliance State(s) Error")
+
         except Exception, e:
             logging.warn("Solace Error %s" %e)
             raise BaseException("Configuration Error")
 
-    def __restcall(self, request, **kwargs):
+    def __restcall(self, request, primaryOnly=False, backupOnly=False, **kwargs):
         logging.info("%s user requesting: %s" % (self.config['USER'], request))
         self.kwargs = kwargs
+
+        # appliances in the query
+        appliances = self.config['MGMT']
+
+        # change appliances based on boolean conditions
+        if primaryOnly:
+            logging.info("Primary appliance ONLY")
+            appliances=[self.primaryRouter]
+        if backupOnly:
+            logging.info("Backup appliance ONLY")
+            appliances=[self.backupRouter]
+
         try:
             data = OrderedDict()
             codes = OrderedDict()
-            for host in self.config['MGMT']:
-
-                #url = '%s://%s/SEMP' % (self.config['PROTOCOL'].lower(), host)
+            for host in appliances:
                 url = host
                 request_headers = generateRequestHeaders(
                     default_headers = {
@@ -100,6 +131,15 @@ class SolaceAPI:
             #request ='<rpc semp-version="soltr/6_0"><show><memory></memory></show></rpc>'
             request = SolaceXMLBuilder(version=self.version)
             request.show.memory
+            return self.rpc(str(request))
+        except:
+            raise
+
+    def get_message_spool(self):
+        """ Returns the Message Spool """
+        try:
+            request = SolaceXMLBuilder(version=self.version)
+            request.show.message_spool
             return self.rpc(str(request))
         except:
             raise
@@ -267,12 +307,14 @@ class SolaceAPI:
         except:
             raise
 
-    def rpc(self, xml, allowfail=False,  **kwargs):
+    def rpc(self, xml, allowfail=False, **kwargs):
         ''' Ships XML string direct to the Solace RPC '''
         responses = None
+        mywargs = kwargs
+        logging.info("Kwargs: %s" % mywargs)
         try:
             data = []
-            responses, codes = self.__restcall(xml)
+            responses, codes = self.__restcall(xml, **mywargs)
             for k in responses:
                 response = xml2dict.parse(responses[k])
                 logging.debug(response)
