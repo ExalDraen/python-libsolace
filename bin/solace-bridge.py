@@ -7,6 +7,7 @@ logging.getLogger().setLevel(logging.INFO)
 from optparse import OptionParser
 from libsolace.SolaceAPI import SolaceAPI
 from libsolace.SolaceXMLBuilder import SolaceXMLBuilder
+from libsolace.SolaceCommandQueue import SolaceCommandQueue
 import libsolace.settingsloader as settings
 
 def solace_bridge(options=None, **kwargs):
@@ -15,6 +16,7 @@ def solace_bridge(options=None, **kwargs):
     logging.info("Bridge Options: %s" % options)
     primaryCluster = SolaceAPI(options.primary, testmode=options.testmode)
     drCluster = SolaceAPI(options.backup, testmode=options.testmode)
+    cq = SolaceCommandQueue()
 
     # VPN's to bridge
     vpns = []
@@ -43,6 +45,7 @@ def solace_bridge(options=None, **kwargs):
         primaryCluster.xmlbuilder.create.bridge.bridge_name = primaryBridgeName
         primaryCluster.xmlbuilder.create.bridge.vpn_name = vpn
         primaryCluster.xmlbuilder.create.bridge.primary
+        cq.enqueue(str(primaryCluster.xmlbuilder))
         primaryCluster.rpc(str(primaryCluster.xmlbuilder), primaryOnly=True)
 
         # primary cluster, backup bridge QCOK
@@ -50,6 +53,7 @@ def solace_bridge(options=None, **kwargs):
         primaryCluster.xmlbuilder.create.bridge.bridge_name = backupBridgeName
         primaryCluster.xmlbuilder.create.bridge.vpn_name = vpn
         primaryCluster.xmlbuilder.create.bridge.backup
+        cq.enqueue(str(primaryCluster.xmlbuilder))
         primaryCluster.rpc(str(primaryCluster.xmlbuilder), backupOnly=True)
 
         # backup cluster, primary bridge QCOK
@@ -57,6 +61,7 @@ def solace_bridge(options=None, **kwargs):
         drCluster.xmlbuilder.create.bridge.bridge_name = primaryBridgeName
         drCluster.xmlbuilder.create.bridge.vpn_name = vpn
         drCluster.xmlbuilder.create.bridge.primary
+        cq.enqueue(str(drCluster.xmlbuilder))
         drCluster.rpc(str(drCluster.xmlbuilder), primaryOnly=True)
 
         # backup cluster, backup bridge QCOK
@@ -64,6 +69,7 @@ def solace_bridge(options=None, **kwargs):
         drCluster.xmlbuilder.create.bridge.bridge_name = backupBridgeName
         drCluster.xmlbuilder.create.bridge.vpn_name = vpn
         drCluster.xmlbuilder.create.bridge.backup
+        cq.enqueue(str(drCluster.xmlbuilder))
         drCluster.rpc(str(drCluster.xmlbuilder), backupOnly=True)
 
         # primary cluster, primary bridge remote QCOK
@@ -76,6 +82,7 @@ def solace_bridge(options=None, **kwargs):
         primaryCluster.xmlbuilder.bridge.remote.create.message_vpn.addr = options.backup_addr
         primaryCluster.xmlbuilder.bridge.remote.create.message_vpn.interface
         primaryCluster.xmlbuilder.bridge.remote.create.message_vpn.phys_intf = options.primary_phys_intf
+        cq.enqueue(str(primaryCluster.xmlbuilder))
         primaryCluster.rpc(str(primaryCluster.xmlbuilder), primaryOnly=True)
 
         # primary cluster, backup bridge remote QCOK
@@ -88,6 +95,7 @@ def solace_bridge(options=None, **kwargs):
         primaryCluster.xmlbuilder.bridge.remote.create.message_vpn.addr = options.backup_addr
         primaryCluster.xmlbuilder.bridge.remote.create.message_vpn.interface
         primaryCluster.xmlbuilder.bridge.remote.create.message_vpn.phys_intf = options.primary_phys_intf
+        cq.enqueue(str(primaryCluster.xmlbuilder))
         primaryCluster.rpc(str(primaryCluster.xmlbuilder), backupOnly=True)
 
         # backup cluster, primary bridge remote QCOK
@@ -98,6 +106,7 @@ def solace_bridge(options=None, **kwargs):
         drCluster.xmlbuilder.bridge.remote.create.message_vpn.vpn_name = vpn
         drCluster.xmlbuilder.bridge.remote.create.message_vpn.router
         drCluster.xmlbuilder.bridge.remote.create.message_vpn.virtual_router_name = "v:%s" % options.primary_cluster_primary_node_name
+        cq.enqueue(str(drCluster.xmlbuilder))
         drCluster.rpc(str(drCluster.xmlbuilder), primaryOnly=True)
 
         # backup cluster, backup bridge remote
@@ -108,6 +117,7 @@ def solace_bridge(options=None, **kwargs):
         drCluster.xmlbuilder.bridge.remote.create.message_vpn.vpn_name = vpn
         drCluster.xmlbuilder.bridge.remote.create.message_vpn.router
         drCluster.xmlbuilder.bridge.remote.create.message_vpn.virtual_router_name = "v:%s" % options.primary_cluster_primary_node_name
+        cq.enqueue(str(drCluster.xmlbuilder))
         drCluster.rpc(str(drCluster.xmlbuilder), backupOnly=True)
 
 
