@@ -1,3 +1,5 @@
+import logging
+
 try:
     from collections import OrderedDict
 except ImportError, e:
@@ -30,6 +32,7 @@ class SolaceXMLBuilder(object):
         if description is not None:
             self.description=description
         self.version = kwargs.get("version", "soltr/6_0")
+        logging.info(description)
 
     def __getattr__(self, name):
         name = re.sub("_", "-", name)

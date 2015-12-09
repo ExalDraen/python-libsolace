@@ -28,13 +28,14 @@ class SolaceCommandQueue:
         self.parser = etree.XMLParser(schema=schema)
         self.commands = []
 
-    def enqueue(self, command):
+    def enqueue(self, command, primaryOnly=False, backupOnly=False, **kwargs):
         """ Validate and append a command onto the command list.
 
         :type command: SolaceXMLBuilder
         :param command: SEMP command to validate
         :return: None
         """
+        
         logging.debug("command %s" % str(command))
 
         try:
