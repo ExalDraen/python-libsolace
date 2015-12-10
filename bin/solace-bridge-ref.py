@@ -2,7 +2,7 @@
 
 import sys
 import logging
-logging.basicConfig(format='[%(module)s] %(filename)s:%(lineno)s %(asctime)s %(levelname)s %(message)s',stream=sys.stdout)
+logging.basicConfig(format='[%(filename)s:%(lineno)s %(levelname)s %(message)s',stream=sys.stdout)
 logging.getLogger().setLevel(logging.INFO)
 from optparse import OptionParser
 from libsolace.SolaceAPI import SolaceAPI
@@ -19,7 +19,8 @@ def solace_bridge(options=None, **kwargs):
     bridgeApi = SolaceBridge(options=options)
 
     for command in bridgeApi.cq.commands:
-        logging.info("Command: %s kwargs: %s" % command)
+        logging.info("api: %s, command: %s kwargs: %s" % command)
+
 
 if __name__ == "__main__":
     usage = """
@@ -42,12 +43,16 @@ if __name__ == "__main__":
                       help="Backup / DR appliance service address e.g. 10.96.12.6:55555")
     parser.add_option("-e", "--environment", action="store", type="string", dest="environment",
                       help="Environment prefix of VPN's, used in concert with vpn name %s place holder. e.g. qa1")
+    parser.add_option("--username", action="store", type="string", dest="username",
+                      default="default", help="Username of remote VPN, default: default )")
     parser.add_option("--password", action="store", type="string", dest="password",
-                      default="password", help="Password for username of remote VPN ( the username is the vpn_name )")
+                      default="password", help="Password for username of remote VPN")
+    parser.add_option("--queue", action="store", type="string", dest="queue",
+                      default="bridge", help="The queue to create and attach bridge to, default: bridge")
     parser.add_option("-v", "--vpn", action="store", type="string", dest="vpnname",
                       default=None, help="VPN name(s) to bridge, eg: %s_event | %s_myvpn,othervpn")
     parser.add_option("-s", "--soltr_version", action="store", type="string", dest="soltr_version",
-                      default="soltr/6_0", help="solOS TR version e.g. soltr/6_2 for 6.2+ appliances which uses VPN scoped profiles")
+                      default=None, help="solOS TR version e.g. soltr/6_2 for 6.2+ appliances which uses VPN scoped profiles")
     parser.add_option("-d", "--debug", action="store_true", dest="debugmode",
                       default=False, help="enable debug mode logging")
     parser.add_option("-t", "--testmode", action="store_true", dest="testmode",

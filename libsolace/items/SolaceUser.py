@@ -1,6 +1,7 @@
 import logging
 from libsolace.SolaceCommandQueue import SolaceCommandQueue
 from libsolace.SolaceXMLBuilder import SolaceXMLBuilder
+from libsolace.SolaceAPI import SolaceAPI
 
 class SolaceUser:
     """ Construct the ClientUser which is normally the application using a VPN. e.g: "si1_marcom" """
@@ -26,7 +27,8 @@ class SolaceUser:
             client_profile=self.client_profile.name, testmode=self.testmode, shutdown_on_apply=self.shutdown_on_apply)]
 
         """
-        self.commands = SolaceCommandQueue(version=version)
+        self.version = version
+        self.commands = SolaceCommandQueue(version=self.version)
         self.environment = environment
         self.username = username % environment
         self.password = password
@@ -47,7 +49,7 @@ class SolaceUser:
             try:
                 self._tests()
             except Exception, e:
-                logging.error("Tests Failed")
+                logging.error("Tests Failed %s" % e)
                 raise BaseException("Tests Failed")
 
         # backwards compatibility for None options passed to still execute "add" code
@@ -68,9 +70,9 @@ class SolaceUser:
 
     def _check_client_profile(self):
         logging.info('Checking if client_profile is present on devices')
-        cmd = SolaceXMLBuilder("Checking client_profile %s is present on device" % self.client_profile)
+        cmd = SolaceXMLBuilder("Checking client_profile %s is present on device" % self.client_profile, version="soltr/6_0")
         cmd.show.client_profile.name=self.client_profile
-        mysolace = SolaceAPI(self.environment)
+        mysolace = SolaceAPI(self.environment, version=self.version)
         response = mysolace.rpc(str(cmd), allowfail=False)
         for v in response:
             if v['rpc-reply']['execute-result']['@code'] == 'fail':
@@ -78,7 +80,7 @@ class SolaceUser:
                 raise BaseException("no such client_profile")
 
     def _new_user(self):
-        cmd = SolaceXMLBuilder("New User %s" % self.username)
+        cmd = SolaceXMLBuilder("New User %s" % self.username, version=self.version)
         cmd.create.client_username.username = self.username
         cmd.create.client_username.vpn_name = self.vpn_name
         self.commands.enqueue(cmd)
@@ -86,7 +88,7 @@ class SolaceUser:
     def _disable_user(self):
         if ( self.shutdown_on_apply=='b' ) or ( self.shutdown_on_apply == 'u' ) or ( self.shutdown_on_apply == True ):
             # Disable / Shutdown User ( else we cant change profiles )
-            cmd = SolaceXMLBuilder("Disabling User %s" % self.username)
+            cmd = SolaceXMLBuilder("Disabling User %s" % self.username, version=self.version)
             cmd.client_username.username = self.username
             cmd.client_username.vpn_name = self.vpn_name
             cmd.client_username.shutdown
@@ -96,7 +98,7 @@ class SolaceUser:
 
     def _set_client_profile(self):
         # Client Profile
-        cmd = SolaceXMLBuilder("Setting User %s client profile to %s" % (self.username, self.client_profile))
+        cmd = SolaceXMLBuilder("Setting User %s client profile to %s" % (self.username, self.client_profile), version=self.version)
         cmd.client_username.username = self.username
         cmd.client_username.vpn_name = self.vpn_name
         cmd.client_username.client_profile.name = self.client_profile
@@ -104,7 +106,7 @@ class SolaceUser:
 
     def _set_acl_profile(self):
         # Set client user profile
-        cmd = SolaceXMLBuilder("Set User %s ACL Profile to %s" % (self.username, self.vpn_name))
+        cmd = SolaceXMLBuilder("Set User %s ACL Profile to %s" % (self.username, self.vpn_name), version=self.version)
         cmd.client_username.username = self.username
         cmd.client_username.vpn_name = self.vpn_name
         cmd.client_username.acl_profile.name = self.vpn_name
@@ -112,7 +114,7 @@ class SolaceUser:
 
     def _guarenteed_endpoint(self):
         # No Guarenteed Endpoint
-        cmd = SolaceXMLBuilder("Default User %s guaranteed endpoint override" % self.username)
+        cmd = SolaceXMLBuilder("Default User %s guaranteed endpoint override" % self.username, version=self.version)
         cmd.client_username.username = self.username
         cmd.client_username.vpn_name = self.vpn_name
         cmd.client_username.no.guaranteed_endpoint_permission_override
@@ -120,7 +122,7 @@ class SolaceUser:
 
     def _subscription_manager(self):
         # No Subscription Managemer
-        cmd = SolaceXMLBuilder("Default User %s subscription manager" % self.username)
+        cmd = SolaceXMLBuilder("Default User %s subscription manager" % self.username, version=self.version)
         cmd.client_username.username = self.username
         cmd.client_username.vpn_name = self.vpn_name
         cmd.client_username.no.subscription_manager
@@ -128,7 +130,7 @@ class SolaceUser:
 
     def _password(self):
         # Set User Password
-        cmd = SolaceXMLBuilder("Set User %s password" % self.username)
+        cmd = SolaceXMLBuilder("Set User %s password" % self.username, version=self.version)
         cmd.client_username.username = self.username
         cmd.client_username.vpn_name = self.vpn_name
         cmd.client_username.password.password = self.password
@@ -136,7 +138,7 @@ class SolaceUser:
 
     def _enable_user(self):
         # Enable User
-        cmd = SolaceXMLBuilder("Enable User %s" % self.username)
+        cmd = SolaceXMLBuilder("Enable User %s" % self.username, version=self.version)
         cmd.client_username.username = self.username
         cmd.client_username.vpn_name = self.vpn_name
         cmd.client_username.no.shutdown

@@ -15,13 +15,14 @@ class SolaceCommandQueue:
         "soltr/6_0": os.path.join(os.path.dirname(__file__), 'data/semp-rpc-soltr_6_0.xsd'),
         "soltr/6_2": os.path.join(os.path.dirname(__file__), 'data/semp-rpc-soltr_6_2.xsd'),
         "soltr/7_0": os.path.join(os.path.dirname(__file__), 'data/semp-rpc-soltr_7_0.xsd'),
-        "soltr/7_1": os.path.join(os.path.dirname(__file__), 'data/semp-rpc-soltr_7_1.xsd')
+        "soltr/7_1_1": os.path.join(os.path.dirname(__file__), 'data/semp-rpc-soltr_7_1.xsd')
     }
 
     def __init__(self, version="soltr/6_0"):
         """
         Initializes the queue as a list
         """
+        logging.debug("Init with soltr version: %s" % version)
         schema_file = open(self.schema_files[version])
         schema_root = etree.XML(schema_file.read())
         schema = etree.XMLSchema(schema_root)
@@ -47,7 +48,7 @@ class SolaceCommandQueue:
             logging.error('XML failed to validate, the XML was:')
             logging.error(command)
             raise
-    def enqueue(self, command, **kwargs):
+    def enqueueV2(self, command, **kwargs):
         """ Validate and append a command onto the command list.
 
         :type command: SolaceXMLBuilder

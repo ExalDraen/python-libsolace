@@ -26,13 +26,13 @@ class SolaceXMLBuilder(object):
 
     """
 
-    def __init__(self, description=None, **kwargs):
+    def __init__(self, description=None, version="soltr/6_0", **kwargs):
         self.__dict__ = OrderedDict()
         self.__setattr__ = None
         if description is not None:
             self.description=description
-        self.version = kwargs.get("version", "soltr/6_0")
-        logging.info(description)
+        self.version = version
+        logging.info("%s description: %s " % (self.version, description))
 
     def __getattr__(self, name):
         name = re.sub("_", "-", name)
@@ -46,6 +46,7 @@ class SolaceXMLBuilder(object):
         myxml = d2x(eval(str(self.__dict__)))
         # I had to conjur up my own header cause solace doesnt like </rpc> to have attribs
         complete_xml = str('<rpc semp-version="%s">%s</rpc>' % (self.version, myxml.display(version=self.version)))
+        logging.debug("Returning XML: %s" % complete_xml)
         return complete_xml
 
     def __call__(self, *args, **kwargs):

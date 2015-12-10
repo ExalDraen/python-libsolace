@@ -96,6 +96,8 @@ if __name__ == '__main__':
         help="owner name as in sitexml eg: SolaceTest")
     parser.add_option("-v", "--version", action="store", type="string", dest="version",
         default=jobdata['defaultversion'], help="version to release eg: '1.2.3.4'")
+    parser.add_option("--soltr_version", action="store", type="string", dest="soltr_version",
+        default=None, help="semp language version")
     parser.add_option("-s", "--shutdown", action="store", type="string", dest="shutdown_on_apply",
         default='n', help="--shutdown=n for none OR --shutdown=b for both OR --shutdown=q for queues OR --shutdown=u for user during config update, only required if changing existing queue/user")
     parser.add_option("-x", "--xmlurl", action="store", type="string", dest="xmlurl",
@@ -171,11 +173,12 @@ if __name__ == '__main__':
         logging.info("Provisioning %s" % vpn['name'])
 
         result = SolaceProvision(
-            vpn_dict=vpn,
-            queue_dict=queues,
-            environment=options.env,
-            client_profile=options.clientprofile,
-            users=users,
+            vpn_dict = vpn,
+            queue_dict = queues,
+            environment = options.env,
+            client_profile = options.clientprofile,
+            users = users,
             testmode=options.testmode,
-            shutdown_on_apply=options.shutdown_on_apply
+            shutdown_on_apply = options.shutdown_on_apply,
+            version = options.soltr_version
         )

@@ -2,7 +2,7 @@ import logging
 from libsolace.SolaceCommandQueue import SolaceCommandQueue
 from libsolace.SolaceXMLBuilder import SolaceXMLBuilder
 
-class SolaceVPN:
+class SolaceVPN(object):
     """
 
     Build up all the commands with SolaceXMLBuilder required to build this VPN,
@@ -34,6 +34,7 @@ class SolaceVPN:
         self.owner_username = self.vpn_name
         self.environment = environment
         self.acl_profile = self.vpn_name
+        self.version = version
 
         # set defaults
         for k,v in self.default_settings.items():
@@ -60,51 +61,61 @@ class SolaceVPN:
 
     def _create_vpn(self):
         # Create domain-event VPN, this can fail if VPN exists, but thats ok.
-        cmd = SolaceXMLBuilder('VPN Create new VPN %s' % self.vpn_name)
+        cmd = SolaceXMLBuilder('VPN Create new VPN %s' % self.vpn_name, version=self.version)
         cmd.create.message_vpn.vpn_name = self.vpn_name
         self.queue.enqueue(cmd)
 
     def _clear_radius(self):
         # Switch Radius Domain to nothing
-        cmd = SolaceXMLBuilder("VPN %s Clearing Radius" % self.vpn_name)
+        cmd = SolaceXMLBuilder("VPN %s Clearing Radius" % self.vpn_name, version=self.version)
         cmd.message_vpn.vpn_name = self.vpn_name
         cmd.message_vpn.authentication.user_class.client
-        cmd.message_vpn.authentication.user_class.radius_domain.radius_domain
+        if self.version == "soltr/7_1_1" or self.version == "soltr/7_0":
+            cmd.message_vpn.authentication.user_class.basic
+        else:
+            cmd.message_vpn.authentication.user_class.radius_domain.radius_domain
         self.queue.enqueue(cmd)
 
     def _set_internal_auth(self):
         # Switch to Internal Auth
-        cmd = SolaceXMLBuilder("VPN %s Enable Internal Auth" % self.vpn_name)
-        cmd.message_vpn.vpn_name = self.vpn_name
-        cmd.message_vpn.authentication.user_class.client
-        cmd.message_vpn.authentication.user_class.auth_type.internal
-        self.queue.enqueue(cmd)
+        if self.version == "soltr/7_1_1" or self.version == "soltr/7_0":
+            logging.warn("disabled, possibly not supported in soltr/7+")
+            pass
+        else:
+            cmd = SolaceXMLBuilder("VPN %s Enable Internal Auth" % self.vpn_name, version=self.version)
+            cmd.message_vpn.vpn_name = self.vpn_name
+            cmd.message_vpn.authentication.user_class.client
+            cmd.message_vpn.authentication.user_class.auth_type.internal
+            self.queue.enqueue(cmd)
 
     def _set_spool_size(self):
         logging.debug("Setting spool size to %s" % getattr(self, 'max_spool_usage'))
         # Set the Spool Size
-        cmd = SolaceXMLBuilder("VPN %s Set spool size to %s" % (self.vpn_name, self.max_spool_usage))
+        cmd = SolaceXMLBuilder("VPN %s Set spool size to %s" % (self.vpn_name, self.max_spool_usage), version=self.version)
         cmd.message_spool.vpn_name = self.vpn_name
         cmd.message_spool.max_spool_usage.size = getattr(self, 'max_spool_usage')
         self.queue.enqueue(cmd)
 
     def _set_large_message_threshold(self):
         # Large Message Threshold
-        cmd = SolaceXMLBuilder("VPN %s Settings large message threshold event to %s" % (self.vpn_name, self.large_message_threshold))
+        cmd = SolaceXMLBuilder("VPN %s Settings large message threshold event to %s" % (self.vpn_name, self.large_message_threshold), version=self.version)
         cmd.message_vpn.vpn_name = self.vpn_name
         cmd.message_vpn.event.large_message_threshold.size = self.large_message_threshold
         self.queue.enqueue(cmd)
 
     def _set_logging_tag(self):
         # Logging Tag for this VPN
-        cmd = SolaceXMLBuilder("VPN %s Setting logging tag to %s" % (self.vpn_name, self.vpn_name))
+        cmd = SolaceXMLBuilder("VPN %s Setting logging tag to %s" % (self.vpn_name, self.vpn_name), version=self.version)
         cmd.message_vpn.vpn_name = self.vpn_name
         cmd.message_vpn.event.log_tag.tag_string = self.vpn_name
         self.queue.enqueue(cmd)
 
     def _enable_vpn(self):
         # Enable the VPN
-        cmd = SolaceXMLBuilder("VPN %s Enabling the vpn" % self.vpn_name)
+        cmd = SolaceXMLBuilder("VPN %s Enabling the vpn" % self.vpn_name, version=self.version)
         cmd.message_vpn.vpn_name = self.vpn_name
         cmd.message_vpn.no.shutdown
         self.queue.enqueue(cmd)
+
+    def __getitem__(self, k):
+        return self.__dict__[k]

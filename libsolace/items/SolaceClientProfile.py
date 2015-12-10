@@ -12,7 +12,7 @@ def SolaceClientProfileFactory(name, options=None, version="soltr/6_0", vpn_name
         "soltr/6_0": SolaceClientProfile60,
         "soltr/6_2": SolaceClientProfile62,
         "soltr/7_0": SolaceClientProfile62,
-        "soltr/7_1": SolaceClientProfile62
+        "soltr/7_1_1": SolaceClientProfile62
     }
     return objects[version](name, options=options, version=version, vpn_name=vpn_name, **kwargs)
 

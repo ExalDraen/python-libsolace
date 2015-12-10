@@ -2,6 +2,7 @@
 import logging
 import libsolace.settingsloader as settings
 from libsolace.SolaceXMLBuilder import SolaceXMLBuilder
+from libsolace.SolaceCommandQueue import SolaceCommandQueue
 from libsolace import xml2dict
 import pprint
 
@@ -19,14 +20,33 @@ from libsolace.util import httpRequest, generateRequestHeaders, generateBasicAut
 
 
 class SolaceAPI:
-    """ Used by SolaceProvision, Use directly only if you know what you're doing. See SolaceProvision rather. """
-    def __init__(self, environment, version="soltr/6_0", testmode=False, **kwargs):
+    """
+    Used by SolaceProvision, Use directly only if you know what you're doing. See SolaceProvision rather.
+
+    Example:
+
+    api = SolaceAPI("dev")
+    api.x = XMLBuilder("My Something something", version=api.version)
+    api.cq.enqueueV2(str(api.x))
+
+    Set version on primary cluster node only:
+
+    api = SolaceAPI("dev", version="soltr/7_1_1")
+    api.x = XMLBuilder("My Something something", version=api.version)
+    api.cq.enqueueV2(str(api.x), primaryOnly=True)
+
+    Backup cluster node only:
+    api = SolaceAPI("dev")
+    api.x = XMLBuilder("My Something something", version=api.version)
+    api.cq.enqueueV2(str(api.x), backupOnly=True)
+
+    """
+    def __init__(self, environment, version=None, testmode=False, **kwargs):
         try:
-            logging.debug("Solace Client initializing")
+            logging.debug("Solace Client initializing version: %s" % version)
             self.config = settings.SOLACE_CONF[environment]
             logging.debug("Loaded Config: %s" % self.config)
             self.testmode = testmode
-            self.version = version
             if 'VERIFY_SSL' not in self.config:
                 self.config['VERIFY_SSL'] = True
             if testmode:
@@ -34,8 +54,6 @@ class SolaceAPI:
                 self.config['PASS'] = settings.READ_ONLY_PASS
                 logging.info('READONLY mode')
             logging.debug("Final Config: %s" % self.config)
-            self.xmlbuilder = SolaceXMLBuilder(version=version)
-            self.x = SolaceXMLBuilder(version=version)
 
             # get the spool statuses since its a fairly reliable way to determin
             # the primary vs backup routers
@@ -55,6 +73,24 @@ class SolaceAPI:
                     logging.warn("More than one backup router?")
                     self.primaryRouter = node['HOST']
                     #raise BaseException("Appliance State(s) Error")
+
+            if version == None:
+                logging.info("Detecting Version")
+                self.xmlbuilder = SolaceXMLBuilder("Getting Version")
+                self.xmlbuilder.show.version
+                result = self.rpc(str(self.xmlbuilder))
+                self.version = result[0]['rpc-reply']['@semp-version']
+            else:
+                logging.info("Setting Version %s" % version)
+                self.version = version
+            logging.info("Detected version: %s" % self.version)
+
+            # backwards compatibility
+            self.xmlbuilder = SolaceXMLBuilder(version = self.version)
+
+            # shortcut / new methods
+            self.x = SolaceXMLBuilder(version = self.version)
+            self.cq = SolaceCommandQueue(version = self.version)
 
         except Exception, e:
             logging.warn("Solace Error %s" %e)
@@ -107,8 +143,10 @@ class SolaceAPI:
                         logging.debug("Device: %s: %s" % (k, thisreply))
                     else:
                         logging.debug("no execute-result in response. Device: %s" % k)
-                except:
+                except Exception, e:
                     logging.error("Error decoding response from appliance")
+                    logging.error("Response Codes: %s" % codes)
+                    raise(Exception("Appliance Communication Failure"))
             logging.debug("Returning Data from rest_call")
             return data, codes
 
@@ -139,7 +177,7 @@ class SolaceAPI:
     def get_message_spool(self):
         """ Returns the Message Spool """
         try:
-            request = SolaceXMLBuilder(version=self.version)
+            request = SolaceXMLBuilder(version="soltr/6_0")
             request.show.message_spool
             return self.rpc(str(request))
         except:

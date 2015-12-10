@@ -17,7 +17,8 @@ class SolaceACLProfile:
         :param vpn: instance of vpn to link to
 
         """
-        self.queue = SolaceCommandQueue(version=version)
+        self.version = version
+        self.queue = SolaceCommandQueue(version=self.version)
         self.environment = environment
         self.name = name % environment
         self.vpn_name = vpn_name
@@ -35,27 +36,27 @@ class SolaceACLProfile:
             self._allow_connect()
 
     def _new_acl(self):
-        cmd = SolaceXMLBuilder("Profile %s" % self.name)
+        cmd = SolaceXMLBuilder("Profile %s" % self.name, version=self.version)
         cmd.create.acl_profile.name = self.name
         cmd.create.acl_profile.vpn_name = self.vpn_name
         self.queue.enqueue(cmd)
 
     def _allow_publish(self):
-        cmd = SolaceXMLBuilder("Allow Publish %s" % self.name)
+        cmd = SolaceXMLBuilder("Allow Publish %s" % self.name, version=self.version)
         cmd.acl_profile.name = self.name
         cmd.acl_profile.vpn_name = self.vpn_name
         cmd.acl_profile.publish_topic.default_action.allow
         self.queue.enqueue(cmd)
 
     def _allow_subscribe(self):
-        cmd = SolaceXMLBuilder("VPN %s Allowing ACL Profile to subscribe to VPN" % self.name)
+        cmd = SolaceXMLBuilder("VPN %s Allowing ACL Profile to subscribe to VPN" % self.name, version=self.version)
         cmd.acl_profile.name = self.name
         cmd.acl_profile.vpn_name = self.vpn_name
         cmd.acl_profile.subscribe_topic.default_action.allow
         self.queue.enqueue(cmd)
 
     def _allow_connect(self):
-        cmd = SolaceXMLBuilder("VPN %s Allowing ACL Profile to connect to VPN" % self.name)
+        cmd = SolaceXMLBuilder("VPN %s Allowing ACL Profile to connect to VPN" % self.name, version=self.version)
         cmd.acl_profile.name = self.name
         cmd.acl_profile.vpn_name = self.vpn_name
         cmd.acl_profile.client_connect.default_action.allow
