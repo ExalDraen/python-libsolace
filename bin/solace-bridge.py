@@ -8,6 +8,7 @@ from optparse import OptionParser
 from libsolace.SolaceAPI import SolaceAPI
 from libsolace.SolaceXMLBuilder import SolaceXMLBuilder
 from libsolace.SolaceCommandQueue import SolaceCommandQueue
+from libsolace.items.SolaceQueue import SolaceQueue
 import libsolace.settingsloader as settings
 
 def solace_bridge(options=None, **kwargs):
@@ -302,6 +303,107 @@ def solace_bridge(options=None, **kwargs):
         drCluster.xmlbuilder.bridge.remote.message_vpn.no.shutdown
         cq.enqueue(str(drCluster.xmlbuilder)) # validate the XML
         drCluster.rpc(str(drCluster.xmlbuilder), backupOnly=True)
+
+
+        queue1 = {}
+        queue1['queue_config'] = {}
+        queue1['queue_config']["exclusive"] = "true"
+        queue1['queue_config']["queue_size"] = "4096"
+        queue1['queue_config']["retries"] = 0
+        queue1["name"] = "bridge"
+
+        vpnd = {}
+        vpnd['vpn_name'] = vpn
+        vpnd['owner_username'] = vpn
+
+        q1 = SolaceQueue(options.primary, vpnd, [queue1])
+        q2 = SolaceQueue(options.backup, vpnd, [queue1])
+
+        for c in q1.queue.commands:
+            primaryCluster.rpc(str(c))
+
+
+
+        for c in q2.queue.commands:
+            drCluster.rpc(str(c))
+
+
+        # Primary Cluster, Primary Router, remote queue "bridge"
+        primaryCluster.xmlbuilder = SolaceXMLBuilder("Primary Cluster, Queue \"bridge\" Remote %s on Primary Appliance" % primaryBridgeName, version=options.soltr_version)
+        primaryCluster.xmlbuilder.bridge.bridge_name = primaryBridgeName
+        primaryCluster.xmlbuilder.bridge.vpn_name = vpn
+        primaryCluster.xmlbuilder.bridge.primary
+        primaryCluster.xmlbuilder.bridge.remote.message_vpn.vpn_name = vpn
+        primaryCluster.xmlbuilder.bridge.remote.message_vpn.connect_via
+        primaryCluster.xmlbuilder.bridge.remote.message_vpn.addr = options.backup_addr
+        primaryCluster.xmlbuilder.bridge.remote.message_vpn.interface
+        primaryCluster.xmlbuilder.bridge.remote.message_vpn.phys_intf = options.primary_phys_intf
+        primaryCluster.xmlbuilder.bridge.remote.message_vpn.message_spool.queue.name = "bridge"
+        cq.enqueue(str(primaryCluster.xmlbuilder)) # validate the XML
+        primaryCluster.rpc(str(primaryCluster.xmlbuilder), primaryOnly=True)
+
+        # Primary Cluster, Backup Router, remote queue "bridge"
+        primaryCluster.xmlbuilder = SolaceXMLBuilder("Primary Cluster, Queue \"bridge\" Remote %s on Backup Appliance" % primaryBridgeName, version=options.soltr_version)
+        primaryCluster.xmlbuilder.bridge.bridge_name = primaryBridgeName
+        primaryCluster.xmlbuilder.bridge.vpn_name = vpn
+        primaryCluster.xmlbuilder.bridge.backup
+        primaryCluster.xmlbuilder.bridge.remote.message_vpn.vpn_name = vpn
+        primaryCluster.xmlbuilder.bridge.remote.message_vpn.connect_via
+        primaryCluster.xmlbuilder.bridge.remote.message_vpn.addr = options.backup_addr
+        primaryCluster.xmlbuilder.bridge.remote.message_vpn.interface
+        primaryCluster.xmlbuilder.bridge.remote.message_vpn.phys_intf = options.primary_phys_intf
+        primaryCluster.xmlbuilder.bridge.remote.message_vpn.message_spool.queue.name = "bridge"
+        cq.enqueue(str(primaryCluster.xmlbuilder)) # validate the XML
+        primaryCluster.rpc(str(primaryCluster.xmlbuilder), backupOnly=True)
+
+        # dr cluster, primary appliance, remote queue "bridge"
+        drCluster.xmlbuilder = SolaceXMLBuilder("DR Cluster, Queue \"bridge\" Remote %s on Primary Appliance" % backupBridgeName, version=options.soltr_version)
+        drCluster.xmlbuilder.bridge.bridge_name = backupBridgeName
+        drCluster.xmlbuilder.bridge.vpn_name = vpn
+        drCluster.xmlbuilder.bridge.primary
+        drCluster.xmlbuilder.bridge.remote.message_vpn.vpn_name = vpn
+        drCluster.xmlbuilder.bridge.remote.message_vpn.router
+        drCluster.xmlbuilder.bridge.remote.message_vpn.virtual_router_name = "v:%s" % options.primary_cluster_primary_node_name
+        drCluster.xmlbuilder.bridge.remote.message_vpn.message_spool.queue.name = "bridge"
+        cq.enqueue(str(drCluster.xmlbuilder)) # validate the XML
+        drCluster.rpc(str(drCluster.xmlbuilder), primaryOnly=True)
+
+        # dr cluster, backup appliance, backup bridge, enable remote
+        drCluster.xmlbuilder = SolaceXMLBuilder("DR Cluster, Queue \"bridge\" Remote %s on Backup Appliance" % backupBridgeName, version=options.soltr_version)
+        drCluster.xmlbuilder.bridge.bridge_name = backupBridgeName
+        drCluster.xmlbuilder.bridge.vpn_name = vpn
+        drCluster.xmlbuilder.bridge.backup
+        drCluster.xmlbuilder.bridge.remote.message_vpn.vpn_name = vpn
+        drCluster.xmlbuilder.bridge.remote.message_vpn.router
+        drCluster.xmlbuilder.bridge.remote.message_vpn.virtual_router_name = "v:%s" % options.primary_cluster_primary_node_name
+        drCluster.xmlbuilder.bridge.remote.message_vpn.message_spool.queue.name = "bridge"
+        cq.enqueue(str(drCluster.xmlbuilder)) # validate the XML
+        drCluster.rpc(str(drCluster.xmlbuilder), backupOnly=True)
+
+
+        # Subscriptions for "bridge" queue
+        primaryCluster.xmlbuilder = SolaceXMLBuilder("Creating wildcard subscription in bridge queue", version=options.soltr_version)
+        primaryCluster.xmlbuilder.message_spool.vpn_name = vpn
+        primaryCluster.xmlbuilder.message_spool.queue.name = "bridge"
+        primaryCluster.xmlbuilder.message_spool.queue.subscription.topic = "*"
+        cq.enqueue(str(primaryCluster.xmlbuilder)) # validate the XML
+        primaryCluster.rpc(str(primaryCluster.xmlbuilder))
+
+# Subscription
+        '''
+
+<rpc xmlns="http://www.solacesystems.com/semp/topic_routing/6_0">
+  <message-spool>
+    <vpn-name>dev_testvpn</vpn-name>
+    <queue>
+      <name>bridge</name>
+      <subscription>
+        <topic>*</topic>
+      </subscription>
+    </queue>
+  </message-spool>
+</rpc>
+        '''
 
 if __name__ == "__main__":
     usage = """

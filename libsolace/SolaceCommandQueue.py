@@ -27,21 +27,43 @@ class SolaceCommandQueue:
         schema = etree.XMLSchema(schema_root)
         self.parser = etree.XMLParser(schema=schema)
         self.commands = []
+        self.commandsv2 = [] # list or tuples ( command, kwargs )
 
-    def enqueue(self, command, primaryOnly=False, backupOnly=False, **kwargs):
+    def enqueue(self, command):
         """ Validate and append a command onto the command list.
 
         :type command: SolaceXMLBuilder
         :param command: SEMP command to validate
         :return: None
         """
-        
+
         logging.debug("command %s" % str(command))
 
         try:
             root = etree.fromstring(str(command), self.parser)
             logging.debug('XML Validated')
             self.commands.append(command)
+        except:
+            logging.error('XML failed to validate, the XML was:')
+            logging.error(command)
+            raise
+    def enqueue(self, command, **kwargs):
+        """ Validate and append a command onto the command list.
+
+        :type command: SolaceXMLBuilder
+        :type kwargs: kwargs
+        :param command: SEMP command to validate
+        :param kwargs: primaryOnly = True, backupOnly = True
+        :return: None
+        """
+
+        logging.debug("command %s" % str(command))
+        logging.debug("kwargs: %s" % kwargs)
+
+        try:
+            root = etree.fromstring(str(command), self.parser)
+            logging.debug('XML Validated')
+            self.commands.append((command, kwargs))
         except:
             logging.error('XML failed to validate, the XML was:')
             logging.error(command)

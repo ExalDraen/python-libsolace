@@ -35,6 +35,7 @@ class SolaceAPI:
                 logging.info('READONLY mode')
             logging.debug("Final Config: %s" % self.config)
             self.xmlbuilder = SolaceXMLBuilder(version=version)
+            self.x = SolaceXMLBuilder(version=version)
 
             # get the spool statuses since its a fairly reliable way to determin
             # the primary vs backup routers
