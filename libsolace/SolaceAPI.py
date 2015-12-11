@@ -21,26 +21,56 @@ from libsolace.util import httpRequest, generateRequestHeaders, generateBasicAut
 
 class SolaceAPI:
     """
-    Used by SolaceProvision, Use directly only if you know what you're doing. See SolaceProvision rather.
+    Connects to a Solace cluster *primary* and *backup* appliance
 
-    Example:
+    a SolaceAPI instance provides a SolaceXMLBuilder and a SolaceCommandQueue to
+    in order to facilitate the generation of SEMP XML requests, queing those
+    requests, and sending them to the appliance(s).
 
-    api = SolaceAPI("dev")
-    api.x = XMLBuilder("My Something something", version=api.version)
-    api.cq.enqueueV2(str(api.x))
+    SolaceAPI connects to **both** appliances in a redundant pair setup and gets
+    the the *primary* and *backup* node states. Typically you issue the same SEMP
+    command to both appliances. Commands can also be issued to either the primary
+    or the backup appliance utilizing the `primaryOnly` and `backupOnly` kwargs.
+    see: :func:`~libsolace.SolaceAPI.SolaceAPI.rpc`
 
-    Set version on primary cluster node only:
+    The version of the SolOS-TR OS is detected on instantiation, and this behaviour
+    can be overridden with the `version` kwarg.
 
-    api = SolaceAPI("dev", version="soltr/7_1_1")
-    api.x = XMLBuilder("My Something something", version=api.version)
-    api.cq.enqueueV2(str(api.x), primaryOnly=True)
+    Args:
+        environment (str): the environment name to connect to as defined in
+            libsolace.yaml. The environment is used to read the cluster nodes
+            and credentials.
+        version (Optional(str)): set the version to disable version detection
+            example of version: "soltr/6_0"
+        testmode (Optional(bool)): Uses readonly user from config
+            Communication with the appliance(s) will use the READ_ONLY_USER
+            and READ_ONLY_PASS as defined in libsolace.yaml
 
-    Backup cluster node only:
-    api = SolaceAPI("dev")
-    api.x = XMLBuilder("My Something something", version=api.version)
-    api.cq.enqueueV2(str(api.x), backupOnly=True)
+    Returns:
+        SolaceAPI: instance of SolaceAPI
 
+    Examples:
+
+        >>> api = SolaceAPI("dev")
+        >>> api.x = :class::SolaceXMLBuilder("My Something something", version=api.version)
+        >>> api.x.show.message_spool.detail
+        >>> api.cq.enqueueV2(str(api.x))
+
+        Set version on primary cluster node only:
+
+        >>> api = SolaceAPI("dev", version="soltr/7_1_1")
+        >>> api.x = XMLBuilder("My Something something", version=api.version)
+        >>> api.x.foo.bar
+        >>> api.cq.enqueueV2(str(api.x), primaryOnly=True)
+
+        Backup cluster node only:
+
+        >>> api = SolaceAPI("dev")
+        >>> api.x = XMLBuilder("My Something something", version=api.version)
+        >>> api.x.ultimate.answer="42"
+        >>> api.cq.enqueueV2(str(api.x), backupOnly=True)
     """
+
     def __init__(self, environment, version=None, testmode=False, **kwargs):
         try:
             logging.debug("Solace Client initializing version: %s" % version)
@@ -346,8 +376,18 @@ class SolaceAPI:
         except:
             raise
 
-    def rpc(self, xml, allowfail=False, **kwargs):
-        ''' Ships XML string direct to the Solace RPC '''
+    def rpc(self, xml, allowfail=False, primaryOnly=False, backupOnly=False, **kwargs):
+        """
+        Execute a SEMP command on the appliance(s)
+
+        Args:
+            xml(str): string representation of a SolaceXMLBuilder instance.
+            allowFail(Optional(bool)): tollerate some types of errors from the
+                appliance.
+            primaryOnly(Optional(bool)): only execute on primary appliance.
+            backupOnly(Optional(bool)): only execute on backup appliance.
+
+        """
         responses = None
         mywargs = kwargs
         logging.info("Kwargs: %s" % mywargs)

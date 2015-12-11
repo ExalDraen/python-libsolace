@@ -60,7 +60,7 @@ if __name__ == "__main__":
 
     # Parse Opts
     (options, args) = parser.parse_args()
-
+    # logging.info(type(options))
 
     if not options.environment:   # if filename is not given
         parser.error('Environment Not Given')
