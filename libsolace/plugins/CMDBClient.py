@@ -62,6 +62,10 @@ class CMDBClient(Plugin):
         queue1['queue_config']["exclusive"] = "true"
         queue1['queue_config']["queue_size"] = "4096"
         queue1['queue_config']["retries"] = 0
+        queue1['queue_config']['max_bind_count'] = 1000
+        # %lsVPN is a special owner which sets the owner to the VPN itself
+        queue1['queue_config']['owner'] = "%lsVPN"
+        queue1['queue_config']["consume"] = "all"
         queue1["name"] = "testqueue1"
 
         queues.append(queue1)

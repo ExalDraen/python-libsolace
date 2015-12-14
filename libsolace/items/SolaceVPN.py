@@ -25,17 +25,11 @@ class SolaceVPN(Plugin):
 
     def init(self, **kwargs):
         """
-        environment, vpn_name, options=None, version="soltr/6_0",
 
-        :type environment: str
         :type vpn_name: str
+        :type owner_name: str
         :type max_spool_usage: int
         :type large_message_threshold: int
-
-        :param environment: environment name
-        :param vpn_name: vpn name
-        :param max_spool_usage: size in MB of the spool
-        :param large_message_threshold: size in bytes of the large_message_threshold
 
         """
 
@@ -46,7 +40,7 @@ class SolaceVPN(Plugin):
             logging.info("No vpn_name kwarg, assuming query mode")
         else:
             self.vpn_name = name(kwargs.get("vpn_name"), self.api.environment)
-            self.owner_username = self.vpn_name
+            self.owner_username = name(kwargs.get("vpn_name"), self.api.environment)
             self.environment = kwargs.get("environment")
             self.acl_profile = self.vpn_name
             self.options = None

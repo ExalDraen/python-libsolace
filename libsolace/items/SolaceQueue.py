@@ -1,155 +1,236 @@
 import logging
+import libsolace
+from libsolace.plugin import Plugin
 from libsolace.SolaceCommandQueue import SolaceCommandQueue
 from libsolace.SolaceXMLBuilder import SolaceXMLBuilder
 
-class SolaceQueue:
+@libsolace.plugin_registry.register
+class SolaceQueue(Plugin):
     """ Construct Queues """
-    def __init__(self, environment, vpn, queues, testmode=False, shutdown_on_apply=False, options=None, version="soltr/6_0"):
-        """ Creates queue commands
 
-        :type environment: str
-        :type vpn: SolaceVPN
+    plugin_name = "SolaceQueue"
+
+    def init(self, **kwargs):
+        """ Manage Queues
+
+        Query mode when initialized with only the "api" kwarg.
+        Create mode if initialized with vpn_name and queues dictionary.
+
+        :type api: SolaceAPI
+        :type vpn_name: str
         :type queues: dict
+        :type testmode: bool
+        :type shutdown_on_apply: bool / char b / chart q
 
-        :param environment: environment name
-        :param vpn: Datanode instance
-        :param queues: queues to create:
+        queues = [
+            {
+
+            }
+
+
+        ]
 
         """
-        self.version = version
-        self.queue = SolaceCommandQueue(version=self.version)
-        self.environment = environment
-        self.vpn = vpn
-        self.testmode = testmode
-        self.queues = queues # dictionary of queues to create
-        self.shutdown_on_apply = shutdown_on_apply
-        logging.info("New Queue")
-        logging.info("Queues: %s" % self.queues)
-        # backwards compatibility for None options passed to still execute "add" code
-        if options == None:
-            logging.warning("No options passed, assuming you meant 'add', please update usage of this class to pass a OptionParser instance")
-            self._create_queue()
 
-    def _get_queue_confg(self, queue):
+        self.api = kwargs.get("api")
+        self.commands = SolaceCommandQueue(version = self.api.version)
+
+        if not "vpn_name" in kwargs:
+            logging.info("Query mode because vpn_name not in kwargs")
+
+        else:
+            self.vpn_name = kwargs.get("vpn_name")
+            self.testmode = kwargs.get("testmode")
+            self.queues = kwargs.get("queues")
+            self.shutdown_on_apply = kwargs.get("shutdown_on_apply")
+            self.options = None
+            logging.info("Queues: %s" % self.queues)
+
+            # backwards compatibility for None options passed to still execute "add" code
+            if self.options == None:
+                logging.warning("No options passed, assuming you meant 'add', please update usage of this class to pass a OptionParser instance")
+
+                for queue in self.queues:
+                    queue_config = self.get_queue_config(queue, **kwargs)
+                    self.create_queue(queue_name = queue['name'], **kwargs)
+                    self.shutdown_egress(queue_name = queue['name'], **kwargs)
+                    if queue_config['exclusive'].lower() == "true":
+                        self.exclusive(queue_name = queue['name'], exclusive=True, **kwargs)
+                    else:
+                        self.exclusive(queue_name = queue['name'], exclusive=False, **kwargs)
+                    self.owner(queue_name = queue['name'], owner_username = queue_config['owner'], **kwargs)
+                    self.max_bind_count(queue_name = queue['name'], max_bind_count = queue_config['max_bind_count'], **kwargs)
+                    self.consume(queue_name = queue['name'], consume = queue_config['consume'], **kwargs)
+                    self.spool_size(queue_name = queue['name'], queue_size = queue_config['queue_size'], **kwargs)
+                    self.retries(queue_name = queue['name'], retries = queue_config['retries'], **kwargs)
+                    self.reject_on_discard(queue_name = queue['name'], **kwargs)
+                    self.enable(queue_name = queue['name'], **kwargs)
+
+
+    def get_queue_config(self, queue, **kwargs):
         """ Returns a queue config for the queue and overrides where neccesary
 
         :type queue: libsolace.gfmisc.DataNode
         :param queue: single queue datanode object
 
         """
+
+        queue_name = kwargs.get("queue_name")
+
         try:
             logging.debug("Checking env overrides for queue %s" % queue['env'])
             for e in queue['env']:
-                if e['name'] == self.environment:
+                if e['name'] == self.api.environment:
                     logging.info('setting queue_config to environment %s values' % e['name'] )
                     return e['queue_config']
         except:
-            logging.warn("No environment overides for queue %s" % queue['name'])
+            logging.warn("No environment overides for queue %s" % queue_name)
             pass
         try:
             return queue['queue_config']
         except:
-            logging.warning("No queue_config for queue: %s found, please check site-config" % queue['name'])
+            logging.warning("No queue_config for queue: %s found, please check site-config" % queue_name)
             raise
 
-    def _create_queue(self):
-        logging.debug("Building queues in %s" % self.queues)
-        for queue in self.queues:
-            logging.info("Preparing to build queue: %s" % queue)
-            queue_config = self._get_queue_confg(queue)
-            # Create some queues now
-            cmd = SolaceXMLBuilder("Creating Queue %s in vpn: %s" % (queue['name'], self.vpn['vpn_name']), version=self.version)
-            cmd.message_spool.vpn_name = self.vpn['vpn_name']
-            cmd.message_spool.create.queue.name = queue['name']
-            self.queue.enqueue(cmd)
+    def create_queue(self, **kwargs):
+        queue_name = kwargs.get("gueue_name")
+        vpn_name = kwargs.get("vpn_name")
 
-            if ( self.shutdown_on_apply=='b' ) or ( self.shutdown_on_apply == 'q' ) or ( self.shutdown_on_apply == True):
-                # Lets only shutdown the egress of the queue
-                cmd = SolaceXMLBuilder("Shutting down egress for queue:%s" % queue['name'], version=self.version)
-                cmd.message_spool.vpn_name = self.vpn['vpn_name']
-                cmd.message_spool.queue.name = queue['name']
-                cmd.message_spool.queue.shutdown.egress
-                self.queue.enqueue(cmd)
-            else:
-                logging.warning("Not disabling Queue, commands could fail since shutdown_on_apply = %s" % self.shutdown_on_apply)
+        # Create a queue
+        self.api.x = SolaceXMLBuilder("Creating Queue %s in vpn: %s" % (queue_name, vpn_name), version=self.api.version)
+        self.api.x.message_spool.vpn_name = vpn_name
+        self.api.x.message_spool.create.queue.name = queue_name
+        self.commands.enqueue(self.api.x)
+        return self.api.x
 
-            # Default to NON Exclusive queue
-            cmd = SolaceXMLBuilder("Set Queue %s to Non Exclusive " % queue['name'] , version=self.version)
-            cmd.message_spool.vpn_name = self.vpn['vpn_name']
-            cmd.message_spool.queue.name = queue['name']
-            cmd.message_spool.queue.access_type.non_exclusive
-            self.queue.enqueue(cmd)
+    def shutdown_egress(self, **kwargs):
 
-            if queue_config['exclusive'] == "true":
-                # Non Exclusive queue
-                cmd = SolaceXMLBuilder("Set Queue %s to Exclusive " % queue['name'] , version=self.version)
-                cmd.message_spool.vpn_name = self.vpn['vpn_name']
-                cmd.message_spool.queue.name = queue['name']
-                cmd.message_spool.queue.access_type.exclusive
-                self.queue.enqueue(cmd)
+        shutdown_on_apply = kwargs.get("shutdown_on_apply")
+        vpn_name = kwargs.get("vpn_name")
+        queue_name = kwargs.get("queue_name")
 
-            # Queue Owner
-            cmd = SolaceXMLBuilder("Set Queue %s owner to %s" % (queue['name'], self.vpn['vpn_name']), version=self.version)
-            cmd.message_spool.vpn_name = self.vpn['vpn_name']
-            cmd.message_spool.queue.name = queue['name']
-            cmd.message_spool.queue.owner.owner = self.vpn['owner_username']
-            self.queue.enqueue(cmd)
+        if ( shutdown_on_apply=='b' ) or ( shutdown_on_apply == 'q' ) or ( shutdown_on_apply == True):
+            # Lets only shutdown the egress of the queue
+            self.api.x = SolaceXMLBuilder("Shutting down egress for queue:%s" % queue_name, version = self.api.version)
+            self.api.x.message_spool.vpn_name = vpn_name
+            self.api.x.message_spool.queue.name = queue_name
+            self.api.x.message_spool.queue.shutdown.egress
+            self.commands.enqueue(self.api.x)
+        else:
+            logging.warning("Not disabling Queue, commands could fail since shutdown_on_apply = %s" % self.shutdown_on_apply)
 
-            cmd = SolaceXMLBuilder("Settings Queue %s max bind count to %s" % (queue['name'], str(1000)), version=self.version)
-            cmd.message_spool.vpn_name = self.vpn['vpn_name']
-            cmd.message_spool.queue.name = queue['name']
-            cmd.message_spool.queue.max_bind_count.value = 1000
-            self.queue.enqueue(cmd)
+    def exclusive(self, **kwargs):
+        """
+        type: exclusive bool
+        """
 
-            # Open Access
-            cmd = SolaceXMLBuilder("Settings Queue %s Permission to Consume" % queue['name'], version=self.version)
-            cmd.message_spool.vpn_name = self.vpn['vpn_name']
-            cmd.message_spool.queue.name = queue['name']
-            cmd.message_spool.queue.permission.all
-            cmd.message_spool.queue.permission.consume
-            self.queue.enqueue(cmd)
+        vpn_name = kwargs.get("vpn_name")
+        queue_name = kwargs.get("queue_name")
+        exclusive = kwargs.get("exclusive")
 
-            # Configure Queue Spool Usage
-            cmd = SolaceXMLBuilder("Set Queue %s spool size: %s" % (queue['name'], queue_config['queue_size']), version=self.version)
-            cmd.message_spool.vpn_name = self.vpn['vpn_name']
-            cmd.message_spool.queue.name = queue['name']
-            cmd.message_spool.queue.max_spool_usage.size = queue_config['queue_size']
-            self.queue.enqueue(cmd)
+        # Default to NON Exclusive queue
+        if not exclusive:
+            self.api.x = SolaceXMLBuilder("Set Queue %s to Non Exclusive " % queue_name , version=self.api.version)
+            self.api.x.message_spool.vpn_name = vpn_name
+            self.api.x.message_spool.queue.name = queue_name
+            self.api.x.message_spool.queue.access_type.non_exclusive
+            self.commands.enqueue(self.api.x)
+        else:
+            # Non Exclusive queue
+            self.api.x = SolaceXMLBuilder("Set Queue %s to Exclusive " % queue_name , version=self.api.version)
+            self.api.x.message_spool.vpn_name = vpn_name
+            self.api.x.message_spool.queue.name = queue_name
+            self.api.x.message_spool.queue.access_type.exclusive
+            self.commands.enqueue(self.api.x)
 
-            if queue_config['retries']:
-                cmd = SolaceXMLBuilder("Tuning max-redelivery retries for %s to %s" % (queue['name'], queue_config.retries), version=self.version)
-                cmd.message_spool.vpn_name = self.vpn['vpn_name']
-                cmd.message_spool.queue.name = queue['name']
-                cmd.message_spool.queue.max_redelivery.value = queue_config['retries']
-                self.queue.enqueue(cmd)
-            else:
-                cmd = SolaceXMLBuilder("Tuning max-redelivery retries for %s to infinite" % queue['name'], version=self.version)
-                cmd.message_spool.vpn_name = self.vpn['vpn_name']
-                cmd.message_spool.queue.name = queue['name']
-                cmd.message_spool.queue.max_redelivery.value = 0
-                self.queue.enqueue(cmd)
+    def owner(self, **kwargs):
 
-            # Enable the Queue
-            cmd = SolaceXMLBuilder("Enabling Queue %s" % queue['name'], version=self.version)
-            cmd.message_spool.vpn_name = self.vpn['vpn_name']
-            cmd.message_spool.queue.name = queue['name']
-            cmd.message_spool.queue.no.shutdown.full
-            self.queue.enqueue(cmd)
+        vpn_name = kwargs.get("vpn_name")
+        queue_name = kwargs.get("queue_name")
+        owner = kwargs.get("owner_username")
 
-            # Queue Reject on Drop
-            """
-            <rpc xmlns="http://www.solacesystems.com/semp/topic_routing/6_0">
-              <message-spool>
-                <vpn-name>prod_testvpn</vpn-name>
-                <queue>
-                  <name>testqueue1</name>
-                  <reject-msg-to-sender-on-discard/>
-                </queue>
-              </message-spool>
-            </rpc>
-            """
-            cmd = SolaceXMLBuilder("Setting Queue to Reject Drops", version=self.version)
-            cmd.message_spool.vpn_name = self.vpn['vpn_name']
-            cmd.message_spool.queue.name = queue['name']
-            cmd.message_spool.queue.reject_msg_to_sender_on_discard
-            self.queue.enqueue(cmd)
+        if owner == "%lsVPN":
+            logging.info("Owner being set to VPN")
+            owner = vpn_name
+
+        # Queue Owner
+        self.api.x = SolaceXMLBuilder("Set Queue %s owner to %s" % (queue_name, vpn_name), version=self.api.version)
+        self.api.x.message_spool.vpn_name = vpn_name
+        self.api.x.message_spool.queue.name = queue_name
+        self.api.x.message_spool.queue.owner.owner = owner
+        self.commands.enqueue(self.api.x)
+
+    def max_bind_count(self, **kwargs):
+
+        vpn_name = kwargs.get("vpn_name")
+        queue_name = kwargs.get("queue_name")
+        max_bind_count = kwargs.get("max_bind_count")
+
+        self.api.x = SolaceXMLBuilder("Settings Queue %s max bind count to %s" % (queue_name, str(max_bind_count)), version=self.api.version)
+        self.api.x.message_spool.vpn_name = vpn_name
+        self.api.x.message_spool.queue.name = queue_name
+        self.api.x.message_spool.queue.max_bind_count.value = max_bind_count
+        self.commands.enqueue(self.api.x)
+
+    def consume(self, **kwargs):
+
+        vpn_name = kwargs.get("vpn_name")
+        queue_name = kwargs.get("queue_name")
+        consume = kwargs.get("consume")
+
+        # Open Access
+        self.api.x = SolaceXMLBuilder("Settings Queue %s Permission to Consume" % queue_name, version=self.api.version)
+        self.api.x.message_spool.vpn_name = vpn_name
+        self.api.x.message_spool.queue.name = queue_name
+        if consume == "all":
+            self.api.x.message_spool.queue.permission.all
+        self.api.x.message_spool.queue.permission.consume
+        self.commands.enqueue(self.api.x)
+
+    def spool_size(self, **kwargs):
+
+        vpn_name = kwargs.get("vpn_name")
+        queue_name = kwargs.get("queue_name")
+        queue_size = kwargs.get("queue_size")
+
+        # Configure Queue Spool Usage
+        self.api.x = SolaceXMLBuilder("Set Queue %s spool size: %s" % (queue_name, queue_size), version=self.api.version)
+        self.api.x.message_spool.vpn_name = vpn_name
+        self.api.x.message_spool.queue.name = queue_name
+        self.api.x.message_spool.queue.max_spool_usage.size = queue_size
+        self.commands.enqueue(self.api.x)
+
+    def retries(self, **kwargs):
+
+        vpn_name = kwargs.get("vpn_name")
+        queue_name = kwargs.get("queue_name")
+        retries = kwargs.get("retries", 0)
+
+        self.api.x = SolaceXMLBuilder("Tuning max-redelivery retries for %s to %s" % (queue_name, retries), version=self.api.version)
+        self.api.x.message_spool.vpn_name = vpn_name
+        self.api.x.message_spool.queue.name = queue_name
+        self.api.x.message_spool.queue.max_redelivery.value = retries
+        self.commands.enqueue(self.api.x)
+
+    def enable(self, **kwargs):
+
+        vpn_name = kwargs.get("vpn_name")
+        queue_name = kwargs.get("queue_name")
+
+        # Enable the Queue
+        self.api.x = SolaceXMLBuilder("Enabling Queue %s" % queue_name, version=self.api.version)
+        self.api.x.message_spool.vpn_name = vpn_name
+        self.api.x.message_spool.queue.name = queue_name
+        self.api.x.message_spool.queue.no.shutdown.full
+        self.commands.enqueue(self.api.x)
+
+    def reject_on_discard(self, **kwargs):
+
+        vpn_name = kwargs.get("vpn_name")
+        queue_name = kwargs.get("queue_name")
+
+        self.api.x = SolaceXMLBuilder("Setting Queue to Reject Drops", version=self.api.version)
+        self.api.x.message_spool.vpn_name = vpn_name
+        self.api.x.message_spool.queue.name = queue_name
+        self.api.x.message_spool.queue.reject_msg_to_sender_on_discard
+        self.commands.enqueue(self.api.x)

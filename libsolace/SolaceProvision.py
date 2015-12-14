@@ -14,7 +14,7 @@ from libsolace.SolaceCommandQueue import SolaceCommandQueue
 from libsolace.items.SolaceClientProfile import SolaceClientProfileFactory
 from libsolace.items.SolaceACLProfile import SolaceACLProfile
 from libsolace.items.SolaceVPN import SolaceVPN
-from libsolace.items.SolaceQueue import SolaceQueue
+# from libsolace.items.SolaceQueue import SolaceQueue
 
 try:
     import simplejson as json
@@ -78,30 +78,26 @@ class SolaceProvision:
         # create a connection for RPC calls to the environment
         self.connection = SolaceAPI(self.environment_name, testmode=self.testmode, version=self.version)
 
-        # if the environment has any special vpn_config settings, bring them up
-        # self._set_vpn_confg()
-
-        # get version of semp
+        # get version of semp TODO FIXME, this should not be needed after Plugin implemented
         if (version==None):
-            self.version = self._get_version_from_appliance()
+            self.version = self.connection.version
         else:
             logging.warn("Overriding default semp version %s" % version)
             self.version=version
 
         logging.debug("VPN Data Node: %s" % json.dumps(str(self.vpn_dict), ensure_ascii=False))
+
         # prepare vpn commands
-        self.vpn = self.connection.manage("SolaceVPN", environment=self.environment_name,
-                                vpn_name=self.vpn_name,
-                                max_spool_usage=self.vpn_dict['vpn_config']['spool_size'])
+        self.vpn = self.connection.manage("SolaceVPN",
+                                vpn_name = self.vpn_name,
+                                owner_name = self.vpn_name,
+                                max_spool_usage = self.vpn_dict['vpn_config']['spool_size'])
 
         logging.info("Create VPN %s" % self.vpn_name)
         for cmd in self.vpn.commands.commands:
             logging.info(str(cmd))
             if not self.testmode:
                 self.connection.rpc(str(cmd))
-
-        # self.vpn = SolaceVPN(self.environment_name, self.vpn_name,
-        #     max_spool_usage=self.vpn_dict['vpn_config']['spool_size'], version=self.version)
 
         # prepare the client_profile commands
         self.client_profile = SolaceClientProfileFactory(client_profile, vpn_name=self.vpn_name, version=self.version)
@@ -124,21 +120,23 @@ class SolaceProvision:
         # prepare the queues for the vpn ( if any )
         try:
             logging.info("Queue datanodes %s" % self.queue_dict)
-            if self.queue_dict:
+            if not self.queue_dict == None:
                 try:
                     logging.info("Stacking queue commands for VPN: %s" % self.vpn_name)
-                    self.queues = SolaceQueue(self.environment_name, self.vpn, self.queue_dict,
-                        shutdown_on_apply=self.shutdown_on_apply, version=self.version)
+                    self.queues = self.connection.manage("SolaceQueue",
+                                                        vpn_name = self.vpn_name,
+                                                        queues = self.queue_dict,
+                                                        shutdown_on_apply = self.shutdown_on_apply)
                 except Exception, e:
                     raise
                     # raise BaseException("Something bad has happened which was unforseen by developers: %s" % e)
             else:
-                logginf.warning("No Queue dictionary was passed, disabling queue creation")
+                logging.warning("No Queue dictionary was passed, disabling queue creation")
                 self.create_queues = False
         except AttributeError:
             logging.warning("No queue declaration for this vpn in site-config, skipping")
             self.create_queues = False
-            pass
+            raise
 
         # create the client users
         for user in users:
@@ -176,7 +174,7 @@ class SolaceProvision:
         logging.info("Create Queues Bool?: %s in %s" % (self.create_queues, self.vpn_name))
         if self.create_queues:
             logging.info("Create Queues for vpn %s" % self.vpn_name)
-            for cmd in self.queues.queue.commands:
+            for cmd in self.queues.commands.commands:
                 logging.info(cmd)
                 if not self.testmode:
                     self.connection.rpc(str(cmd))

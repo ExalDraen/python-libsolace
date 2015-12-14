@@ -105,7 +105,12 @@ class Plugin(object):
         :return: object
         """
         logging.info("Retrieving self:%s, args:%s, kwargs:%s" % (self, args, kwargs))
-        return self.plugins_dict[args[0]]
+        try:
+            return self.plugins_dict[args[0]]
+        except:
+            logging.warn("No plugin named: %s found" % args[0])
+            logging.warn("Please check the plugin is listed in the yaml config and that you have @libsolace.plugin_registry.register in the class")
+            raise
 
     # def __getitem__(self, k):
     #     return self.__dict__[k]
