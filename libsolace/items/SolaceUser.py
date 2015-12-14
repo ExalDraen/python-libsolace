@@ -15,45 +15,29 @@ class SolaceUser(Plugin):
 
     plugin_name = "SolaceUser"
 
-    '''
-environment=None, username=None, password=None, vpn_name=None,
-             client_profile=None, acl_profile=None, testmode=False,
-             shutdown_on_apply=False, options=None, version="soltr/6_0",
-             api=None,
-    '''
-
     def init(self, **kwargs):
         """ Init user object
 
-        :type environment: str
         :type username: str
         :type password: str
         :type vpn_name: str
         :type client_profile: str
         :type acl_profile: str
-        :type shutdwn_on_apply: bool
+        :type shutdown_on_apply: bool / char b / char u
         :type options: Options
         :type version: str
         :type api: SolaceAPI
 
-        :param environment: environment name
-        :param username: username including %s placeholder: eg: %s_keghol
-        :param password: password
-        :param vpn: SolaceVPN instance
-        :param client_profile: name of client_profile
-
         Example:
             >>> connection = SolaceAPI("dev")
             >>> self.users = [connection.manage("SolaceUser",
-                                    environment = self.environment_name,
-                                    username = self.vpn_name,
-                                    password = self.vpn_dict['password'],
-                                    vpn_name = self.vpn_name,
-                                    client_profile = self.client_profile.name,
-                                    acl_profile = self.acl_profile.name,
-                                    testmode = self.testmode,
-                                    shutdown_on_apply = self.shutdown_on_apply,
-                                    version = self.version)]
+                                    username = "%s_testuser",
+                                    password = "mypassword",
+                                    vpn_name = "%s_testvpn",
+                                    client_profile = "glassfish",
+                                    acl_profile = "%s_testvpn",
+                                    testmode = True,
+                                    shutdown_on_apply = False)]
         """
 
         logging.info("SolaceUser: kwargs: %s " % kwargs)
@@ -81,7 +65,11 @@ environment=None, username=None, password=None, vpn_name=None,
             except TypeError, e:
                 self.vpn_name = kwargs.get("vpn_name")
 
-            self.acl_profile = kwargs.get("acl_profile")
+            try:
+                self.acl_profile = kwargs.get("acl_profile") % self.api.environment
+            except TypeError, e:
+                self.acl_profile = kwargs.get("acl_profile")
+
             self.client_profile = kwargs.get("client_profile")
             self.testmode = kwargs.get("testmode")
             self.shutdown_on_apply = kwargs.get("shutdown_on_apply")
