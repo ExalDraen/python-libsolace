@@ -8,6 +8,7 @@ class SolaceCommandQueue:
     A simple queue which validates SEMP XML against correct version of xsd,
     and then puts returns the commands list object.
 
+
     """
 
     schema_files = {

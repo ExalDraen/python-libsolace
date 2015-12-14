@@ -106,6 +106,8 @@ if __name__ == '__main__':
         default=None, help="path to sitexml file if on local storage")
     parser.add_option("-t", "--testmode", action="store_true", dest="testmode",
         default=False, help="only test configuration and exit")
+    parser.add_option("--aclprofile", action="store", type="string", dest="acl_profile",
+        default="default", help="client acl profile to associate")
     parser.add_option("-c", "--clientprofile", action="store", type="string", dest="clientprofile",
         default="glassfish", help="client profile to associate, must exist")
     parser.add_option("-d", "--debug", action="store_true", dest="debugmode",

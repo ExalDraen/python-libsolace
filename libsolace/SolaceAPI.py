@@ -60,14 +60,14 @@ class SolaceAPI:
 
         >>> api = SolaceAPI("dev", version="soltr/7_1_1")
         >>> api.x = XMLBuilder("My Something something", version=api.version)
-        >>> api.x.foo.bar
+        >>> api.x.show.message_spool
         >>> api.cq.enqueueV2(str(api.x), primaryOnly=True)
 
         Backup cluster node only:
 
         >>> api = SolaceAPI("dev")
-        >>> api.x = XMLBuilder("My Something something", version=api.version)
-        >>> api.x.ultimate.answer="42"
+        >>> api.x = SolaceXMLBuilder("My Something something", version=api.version)
+        >>> api.x.show.version
         >>> api.cq.enqueueV2(str(api.x), backupOnly=True)
     """
 
@@ -84,6 +84,8 @@ class SolaceAPI:
                 self.config['PASS'] = settings.READ_ONLY_PASS
                 logging.info('READONLY mode')
             logging.debug("Final Config: %s" % self.config)
+
+            self.environment = environment
 
             # get the spool statuses since its a fairly reliable way to determin
             # the primary vs backup routers
@@ -124,7 +126,7 @@ class SolaceAPI:
 
         except Exception, e:
             logging.warn("Solace Error %s" %e)
-            raise BaseException("Configuration Error")
+            raise
 
     def __restcall(self, request, primaryOnly=False, backupOnly=False, **kwargs):
         logging.info("%s user requesting: %s" % (self.config['USER'], request))
@@ -183,6 +185,29 @@ class SolaceAPI:
         except Exception, e:
             logging.warn("Solace Error %s" % e )
             raise
+
+    def getUser(self, username=None, vpn_name=None):
+        """ Get a user from the solace appliance(s) and return a SolaceUser instance
+        representing the user.
+
+        Args:
+            username(str): the username to get
+
+        Returns:
+            SolaceUser: instance of SolaceUser
+
+        Example:
+            >>> c = SolaceAPI("dev")
+            >>> c.getUser(username="dev_testvpn", vpn_name="dev_testvpn")
+        """
+        from libsolace.items.SolaceUser import SolaceUser
+        self.x = SolaceXMLBuilder("Getting user %s from appliance" % username, version=self.version)
+        self.x.show.client_username.name = username
+        self.x.show.client_username.detail
+        document = self.rpc(str(self.x), primaryOnly=True)
+        replyObject = SolaceReply(document=document, version=self.version)
+        user = SolaceUser(document=document.pop())
+        return user
 
     def get_redundancy(self):
         """ Return redundancy information """
@@ -387,6 +412,9 @@ class SolaceAPI:
             primaryOnly(Optional(bool)): only execute on primary appliance.
             backupOnly(Optional(bool)): only execute on backup appliance.
 
+        Returns:
+            data response list as from appliances. Json-like data
+
         """
         responses = None
         mywargs = kwargs
@@ -415,3 +443,11 @@ class SolaceAPI:
         except:
             logging.error("responses: %s" % responses)
             raise
+
+if __name__ == "__main__":
+    import doctest
+    import logging
+    import sys
+    logging.basicConfig(format='[%(module)s] %(filename)s:%(lineno)s %(asctime)s %(levelname)s %(message)s',stream=sys.stdout)
+    logging.getLogger().setLevel(logging.INFO)
+    doctest.testmod()

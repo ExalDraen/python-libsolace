@@ -101,9 +101,15 @@ class SolaceProvision:
 
         # prepare the user that owns this vpn
         logging.info("self.vpn_name: %s" % self.vpn_name)
-        self.users = [SolaceUser(self.environment_name, self.vpn_name , self.vpn_dict['password'], self.vpn_name,
-           client_profile=self.client_profile.name, acl_profile=self.acl_profile.name,
-           testmode=self.testmode, shutdown_on_apply=self.shutdown_on_apply, version=self.version)]
+        self.users = [SolaceUser(environment = self.environment_name,
+                                    username = self.vpn_name,
+                                    password = self.vpn_dict['password'],
+                                    vpn_name = self.vpn_name,
+                                    client_profile = self.client_profile.name,
+                                    acl_profile = self.acl_profile.name,
+                                    testmode = self.testmode,
+                                    shutdown_on_apply = self.shutdown_on_apply,
+                                    version = self.version)]
 
         # prepare the queues for the vpn ( if any )
         try:
@@ -126,10 +132,15 @@ class SolaceProvision:
         # create the client users
         for user in users:
             logging.info("Provision user: %s for vpn %s" % (user, self.vpn_name))
-            self.users.append(SolaceUser(self.environment_name, user['username'],
-                user['password'], self.vpn_name, client_profile=self.client_profile.name,
-                testmode=self.testmode, shutdown_on_apply=self.shutdown_on_apply,
-                version=self.version))
+            self.users.append(SolaceUser(environment = self.environment_name,
+                                         username = user['username'],
+                                         password = user['password'],
+                                         vpn_name = self.vpn_name,
+                                         client_profile = self.client_profile.name,
+                                         acl_profile = self.acl_profile.name,
+                                         testmode=self.testmode,
+                                         shutdown_on_apply = self.shutdown_on_apply,
+                                         version=self.version))
 
         logging.info("Create VPN %s" % self.vpn_name)
         for cmd in self.vpn.queue.commands:
