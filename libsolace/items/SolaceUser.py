@@ -1,7 +1,5 @@
 import sys
 import logging
-logging.basicConfig(format='[%(module)s] %(filename)s:%(lineno)s %(asctime)s %(levelname)s %(message)s',stream=sys.stdout)
-logging.getLogger().setLevel(logging.INFO)
 import libsolace
 from libsolace.plugin import Plugin
 from libsolace.SolaceCommandQueue import SolaceCommandQueue
@@ -37,7 +35,8 @@ class SolaceUser(Plugin):
                                     client_profile = "glassfish",
                                     acl_profile = "%s_testvpn",
                                     testmode = True,
-                                    shutdown_on_apply = False)]
+                                    shutdown_on_apply = False
+                                    version = self.version)]
         """
 
         logging.info("SolaceUser: kwargs: %s " % kwargs)
@@ -45,8 +44,8 @@ class SolaceUser(Plugin):
         self.api = kwargs.get("api")
         self.options = None # not implemented
 
-        if kwargs.get("username") == None:
-            logging.info("No username kwarg, assuming query mode api: %s" % self.api)
+        if not "username" in kwargs:
+            logging.info("No username kwarg, assuming query mode api")
         else:
             logging.info("Username specified, assuming provision mode")
             self.commands = SolaceCommandQueue(version = self.api.version)
@@ -287,5 +286,7 @@ class SolaceUser(Plugin):
         return self.api.x
 
 if __name__ == "__main__":
+    logging.basicConfig(format='[%(module)s] %(filename)s:%(lineno)s %(asctime)s %(levelname)s %(message)s',stream=sys.stdout)
+    logging.getLogger().setLevel(logging.INFO)
     import doctest
     doctest.testmod()

@@ -106,3 +106,6 @@ class Plugin(object):
         """
         logging.info("Retrieving self:%s, args:%s, kwargs:%s" % (self, args, kwargs))
         return self.plugins_dict[args[0]]
+
+    # def __getitem__(self, k):
+    #     return self.__dict__[k]

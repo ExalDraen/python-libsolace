@@ -187,29 +187,28 @@ class SolaceAPI:
             logging.warn("Solace Error %s" % e )
             raise
 
-    def getUser(self, username=None, vpn_name=None):
-        """ Get a user from the solace appliance(s) and return a SolaceUser instance
-        representing the user.
-
-        Args:
-            username(str): the username to get
-
-        Returns:
-            dictionary representation of a user
-
-        Example:
-            >>> c = SolaceAPI("dev")
-            >>> c.manage("SolaceUser").get(username="%s_testvpn", vpn_name="%s_testvpn")
-            {'reply': {u'show': {u'client-username': {u'client-usernames': {u'client-username': {u'profile': u'glassfish', u'acl-profile': u'dev_testvpn', u'guaranteed-endpoint-permission-override': u'false', u'client-username': u'dev_testvpn', u'enabled': u'true', u'message-vpn': u'dev_testvpn', u'password-configured': u'true', u'num-clients': u'0', u'num-endpoints': u'2', u'subscription-manager': u'false', u'max-connections': u'500', u'max-endpoints': u'16000'}}}}}}
-        """
-        from libsolace.items.SolaceUser import SolaceUser
-        self.x = SolaceXMLBuilder("Getting user %s from appliance" % username, version=self.version)
-        self.x.show.client_username.name = username
-        self.x.show.client_username.detail
-        document = self.rpc(str(self.x), primaryOnly=True)
-        replyObject = SolaceReply(document=document, version=self.version)
-        user = SolaceUser(document=document.pop())
-        return user
+    # def getUser(self, username=None, vpn_name=None):
+    #     """ Get a user from the solace appliance(s) and return a SolaceUser instance
+    #     representing the user.
+    #
+    #     Args:
+    #         username(str): the username to get
+    #
+    #     Returns:
+    #         dictionary representation of a user
+    #
+    #     Example:
+    #         >>> c = SolaceAPI("dev")
+    #         >>> c.manage("SolaceUser").get(username="%s_testvpn", vpn_name="%s_testvpn")
+    #         {'reply': {u'show': {u'client-username': {u'client-usernames': {u'client-username': {u'profile': u'glassfish', u'acl-profile': u'dev_testvpn', u'guaranteed-endpoint-permission-override': u'false', u'client-username': u'dev_testvpn', u'enabled': u'true', u'message-vpn': u'dev_testvpn', u'password-configured': u'true', u'num-clients': u'0', u'num-endpoints': u'2', u'subscription-manager': u'false', u'max-connections': u'500', u'max-endpoints': u'16000'}}}}}}
+    #     """
+    #     self.x = SolaceXMLBuilder("Getting user %s from appliance" % username, version=self.version)
+    #     self.x.show.client_username.name = username
+    #     self.x.show.client_username.detail
+    #     document = self.rpc(str(self.x), primaryOnly=True)
+    #     replyObject = SolaceReply(document=document, version=self.version)
+    #     user = SolaceUser(document=document.pop())
+    #     return user
 
     def get_redundancy(self):
         """ Return redundancy information """

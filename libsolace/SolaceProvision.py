@@ -13,7 +13,6 @@ from libsolace.SolaceXMLBuilder import SolaceXMLBuilder
 from libsolace.SolaceCommandQueue import SolaceCommandQueue
 from libsolace.items.SolaceClientProfile import SolaceClientProfileFactory
 from libsolace.items.SolaceACLProfile import SolaceACLProfile
-from libsolace.items.SolaceUser import SolaceUser
 from libsolace.items.SolaceVPN import SolaceVPN
 from libsolace.items.SolaceQueue import SolaceQueue
 
@@ -91,8 +90,18 @@ class SolaceProvision:
 
         logging.debug("VPN Data Node: %s" % json.dumps(str(self.vpn_dict), ensure_ascii=False))
         # prepare vpn commands
-        self.vpn = SolaceVPN(self.environment_name, self.vpn_name,
-            max_spool_usage=self.vpn_dict['vpn_config']['spool_size'], version=self.version)
+        self.vpn = self.connection.manage("SolaceVPN", environment=self.environment_name,
+                                vpn_name=self.vpn_name,
+                                max_spool_usage=self.vpn_dict['vpn_config']['spool_size'])
+
+        logging.info("Create VPN %s" % self.vpn_name)
+        for cmd in self.vpn.commands.commands:
+            logging.info(str(cmd))
+            if not self.testmode:
+                self.connection.rpc(str(cmd))
+
+        # self.vpn = SolaceVPN(self.environment_name, self.vpn_name,
+        #     max_spool_usage=self.vpn_dict['vpn_config']['spool_size'], version=self.version)
 
         # prepare the client_profile commands
         self.client_profile = SolaceClientProfileFactory(client_profile, vpn_name=self.vpn_name, version=self.version)
@@ -121,7 +130,8 @@ class SolaceProvision:
                     self.queues = SolaceQueue(self.environment_name, self.vpn, self.queue_dict,
                         shutdown_on_apply=self.shutdown_on_apply, version=self.version)
                 except Exception, e:
-                    raise BaseException("Something bad has happened which was unforseen by developers: %s" % e)
+                    raise
+                    # raise BaseException("Something bad has happened which was unforseen by developers: %s" % e)
             else:
                 logginf.warning("No Queue dictionary was passed, disabling queue creation")
                 self.create_queues = False
@@ -142,11 +152,6 @@ class SolaceProvision:
                                          testmode=self.testmode,
                                          shutdown_on_apply = self.shutdown_on_apply))
 
-        logging.info("Create VPN %s" % self.vpn_name)
-        for cmd in self.vpn.queue.commands:
-            logging.info(str(cmd))
-            if not self.testmode:
-                self.connection.rpc(str(cmd))
 
         logging.info("Create Client Profile")
         # Provision profile now already since we need to link to it.
