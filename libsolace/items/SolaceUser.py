@@ -24,12 +24,13 @@ class SolaceUser:
         :param client_profile: name of client_profile
 
         Example:
-        users = [SolaceUser(environment = "dev",
-                            username = "%s_someproduct",
-                            password = "password",
-                            vpn_name = "%s_MyVPN",
-                            client_profile = "glassfish",
-                            testmode=True,
+            >>> users = [SolaceUser(environment = "dev",\
+                            username = "%s_someproduct",\
+                            password = "password",\
+                            vpn_name = "%s_MyVPN",\
+                            client_profile = "glassfish",\
+                            acl_profile = "%s_MyVPN",\
+                            testmode=True,\
                             shutdown_on_apply = True)]
         """
 
@@ -81,17 +82,17 @@ class SolaceUser:
         self.check_client_profile_exists()
         self.check_acl_profile_exists()
 
-    def _get_kwarg(self, **kwargs):
+    def _setkwargs(self, *args, **kwargs):
         """
         facilitates using default "kwargs" from self variables. returns kwargs
         """
         mykwargs = kwargs
-        mykwargs.set('client_profile', kwargs.get('client_profile', self.client_profile))
-        mykwargs.set('username', kwargs.get('username', self.username))
-        mykwargs.set('vpn_name', kwargs.get('vpn_name', self.vpn_name))
-        mykwargs.set('password', kwargs.get('password', self.password))
-        mykwargs.set('acl_profile', kwargs.get('acl_profile', self.acl_profile))
-        mykwargs.set('shutdown_on_apply', kwargs.get('shutdown_on_apply', self.shutdown_on_apply))
+        mykwargs['client_profile'] = kwargs.get('client_profile', self.client_profile)
+        mykwargs['username'] = kwargs.get('username', self.username)
+        mykwargs['vpn_name'] = kwargs.get('vpn_name', self.vpn_name)
+        mykwargs['password'] = kwargs.get('password', self.password)
+        mykwargs['acl_profile'] = kwargs.get('acl_profile', self.acl_profile)
+        mykwargs['shutdown_on_apply'] = kwargs.get('shutdown_on_apply', self.shutdown_on_apply)
         return kwargs
 
     def check_client_profile_exists(self, **kwargs):
