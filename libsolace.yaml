@@ -1,6 +1,7 @@
 ---
 # the url you might want to serve the site config from if not using local files
 CMDB_URL: "http://someurl/site.xml"
+CMDB_FILE: "tests/resources/site.xml"
 CMDB_USER: ""
 CMDB_PASS: ""
 
@@ -11,6 +12,8 @@ READ_ONLY_PASS: ro
 # list of all plugins to load
 PLUGINS:
   - libsolace.plugins.CMDBClient
+  - libsolace.plugins.XMLAPI
+  - libsolace.items.SolaceUser
 
 # the plugin name as registered in the registry we want to use for solace config
 SOLACE_CMDB_PLUGIN: CMDBClient
@@ -19,32 +22,20 @@ SOLACE_CMDB_PLUGIN: CMDBClient
 SOLACE_CONF:
   dev:
     MGMT:
-      - http://solace1.mydomain.com/SEMP
-      - http://solace2.mydomain.com/SEMP
+      - http://solace1.dc.mycompany.com/SEMP
+      - http://solace2.dc.mycompany.com/SEMP
     PASS: admin
     USER: admin
-  ci1:
+  devdr2:
     MGMT:
-      - https://solace1/SEMP
-      - https://solace2/SEMP
+      - http://solace3.dc.mycompany.com/SEMP
+      - http://solace4.dc.mycompany.com/SEMP
     PASS: password
     USER: admin
-    VERIFY_SSL: True
-  si1:
-    MGMT:
-      - solace3
-      - solace4
-    PASS: password
-    USER: admin
-  pt1:
-    MGMT:
-      - solace5
-      - solace6
-    PASS: password
-    USER: admin
-  qa1:
-    MGMT:
-      - solace5
-      - solace6
-    PASS: password
-    USER: admin
+  devdr:
+      MGMT:
+        - https://solace5.dc.mycompany.com/SEMP
+        - https://solace6.dc.mycompany.com/SEMP
+      PASS: password
+      USER: admin
+      VERIFY_SSL: True

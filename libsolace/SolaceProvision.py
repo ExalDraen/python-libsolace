@@ -6,6 +6,7 @@ solacehelper is a class to construct solace commands and sets of commands.
 
 import logging
 from lxml import etree
+import libsolace
 from libsolace.util import d2x
 from libsolace.SolaceAPI import SolaceAPI
 from libsolace.SolaceXMLBuilder import SolaceXMLBuilder
@@ -101,7 +102,9 @@ class SolaceProvision:
 
         # prepare the user that owns this vpn
         logging.info("self.vpn_name: %s" % self.vpn_name)
-        self.users = [SolaceUser(environment = self.environment_name,
+
+        self.users = [self.connection.manage("SolaceUser",
+                                    environment = self.environment_name,
                                     username = self.vpn_name,
                                     password = self.vpn_dict['password'],
                                     vpn_name = self.vpn_name,
@@ -132,7 +135,8 @@ class SolaceProvision:
         # create the client users
         for user in users:
             logging.info("Provision user: %s for vpn %s" % (user, self.vpn_name))
-            self.users.append(SolaceUser(environment = self.environment_name,
+            self.users.append(self.connection.manage("SolaceUser",
+                                         environment = self.environment_name,
                                          username = user['username'],
                                          password = user['password'],
                                          vpn_name = self.vpn_name,
@@ -162,7 +166,7 @@ class SolaceProvision:
                 self.connection.rpc(str(cmd))
 
         for user in self.users:
-            logging.info("Create user: %s for vpn %s" % (user.username,self.vpn_name))
+            logging.info("Create user: %s for vpn %s" % (user.username, self.vpn_name))
             for cmd in user.commands.commands:
                 logging.info(str(cmd))
                 if not self.testmode:

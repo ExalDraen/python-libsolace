@@ -16,6 +16,7 @@ class SolaceReplyHandler:
         'glassfish'
     """
     def __init__(self, document=None, version="soltr/6_0", **kwargs):
+        # if solace changes the RPC reply keys, we can mape it here
         # if version == "soltr/6_0" or version == "soltr/6_1" or version == "soltr/6_2" or version == "soltr/7_0" or version == "soltr/7_1_1":
         self.reply = SolaceReply(document.pop()['rpc-reply']['rpc'])
 

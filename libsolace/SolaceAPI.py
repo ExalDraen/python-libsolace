@@ -1,6 +1,7 @@
 
 import logging
 import libsolace.settingsloader as settings
+import libsolace
 from libsolace.SolaceXMLBuilder import SolaceXMLBuilder
 from libsolace.SolaceCommandQueue import SolaceCommandQueue
 from libsolace import xml2dict
@@ -52,14 +53,14 @@ class SolaceAPI:
     Examples:
 
         >>> api = SolaceAPI("dev")
-        >>> api.x = :class::SolaceXMLBuilder("My Something something", version=api.version)
+        >>> api.x = SolaceXMLBuilder("My Something something", version=api.version)
         >>> api.x.show.message_spool.detail
         >>> api.cq.enqueueV2(str(api.x))
 
         Set version on primary cluster node only:
 
         >>> api = SolaceAPI("dev", version="soltr/7_1_1")
-        >>> api.x = XMLBuilder("My Something something", version=api.version)
+        >>> api.x = SolaceXMLBuilder("My Something something", version=api.version)
         >>> api.x.show.message_spool
         >>> api.cq.enqueueV2(str(api.x), primaryOnly=True)
 
@@ -194,11 +195,12 @@ class SolaceAPI:
             username(str): the username to get
 
         Returns:
-            SolaceUser: instance of SolaceUser
+            dictionary representation of a user
 
         Example:
             >>> c = SolaceAPI("dev")
-            >>> c.getUser(username="dev_testvpn", vpn_name="dev_testvpn")
+            >>> c.manage("SolaceUser").get(username="%s_testvpn", vpn_name="%s_testvpn")
+            {'reply': {u'show': {u'client-username': {u'client-usernames': {u'client-username': {u'profile': u'glassfish', u'acl-profile': u'dev_testvpn', u'guaranteed-endpoint-permission-override': u'false', u'client-username': u'dev_testvpn', u'enabled': u'true', u'message-vpn': u'dev_testvpn', u'password-configured': u'true', u'num-clients': u'0', u'num-endpoints': u'2', u'subscription-manager': u'false', u'max-connections': u'500', u'max-endpoints': u'16000'}}}}}}
         """
         from libsolace.items.SolaceUser import SolaceUser
         self.x = SolaceXMLBuilder("Getting user %s from appliance" % username, version=self.version)
@@ -443,6 +445,26 @@ class SolaceAPI:
         except:
             logging.error("responses: %s" % responses)
             raise
+
+    def manage(self, name, **kwargs):
+        """
+        Gets a plugin and configures it, then allows direct communication with it.
+
+        Example:
+            >>> api = SolaceAPI("dev")
+            >>> api.manage("SolaceUser").check_client_profile_exists(client_profile="glassfish")
+            True
+            >>> api.manage("SolaceUser", client_profile="glassfish", acl_profile="test", username="foo", password="bar", vpn_name="%s_testvpn").commands.commands
+            [<rpc semp-version="soltr/6_0"><create><client-username><username>foo</username><vpn-name>%s_testvpn</vpn-name></client-username></create></rpc>, <rpc semp-version="soltr/6_0"><client-username><username>foo</username><vpn-name>%s_testvpn</vpn-name><client-profile><name>glassfish</name></client-profile></client-username></rpc>, <rpc semp-version="soltr/6_0"><client-username><username>foo</username><vpn-name>%s_testvpn</vpn-name><acl-profile><name>test</name></acl-profile></client-username></rpc>, <rpc semp-version="soltr/6_0"><client-username><username>foo</username><vpn-name>%s_testvpn</vpn-name><no><guaranteed-endpoint-permission-override/></no></client-username></rpc>, <rpc semp-version="soltr/6_0"><client-username><username>foo</username><vpn-name>%s_testvpn</vpn-name><no><subscription-manager/></no></client-username></rpc>, <rpc semp-version="soltr/6_0"><client-username><username>foo</username><vpn-name>%s_testvpn</vpn-name><password><password>bar</password></password></client-username></rpc>, <rpc semp-version="soltr/6_0"><client-username><username>foo</username><vpn-name>%s_testvpn</vpn-name><no><shutdown/></no></client-username></rpc>]
+            >>> api.manage("SolaceUser").get(username="%s_testvpn", vpn_name="%s_testvpn")
+            {'reply': {u'show': {u'client-username': {u'client-usernames': {u'client-username': {u'profile': u'glassfish', u'acl-profile': u'dev_testvpn', u'guaranteed-endpoint-permission-override': u'false', u'client-username': u'dev_testvpn', u'enabled': u'true', u'message-vpn': u'dev_testvpn', u'password-configured': u'true', u'num-clients': u'0', u'num-endpoints': u'2', u'subscription-manager': u'false', u'max-connections': u'500', u'max-endpoints': u'16000'}}}}}}
+
+        """
+
+        plugin = libsolace.plugin_registry(name, **kwargs)
+        plugin.init(api=self, **kwargs)
+        return plugin
+
 
 if __name__ == "__main__":
     import doctest
