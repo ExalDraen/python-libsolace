@@ -13,6 +13,9 @@ class SolaceQueue(Plugin):
     def init(self, **kwargs):
         """ Manage Queues
 
+        This plugin manages SolaceQueue's within the VPN scope. It needs to be
+        instantiated from a plugin manager.
+
         Query mode when initialized with only the "api" kwarg.
         Create mode if initialized with vpn_name and queues dictionary.
 
@@ -22,11 +25,9 @@ class SolaceQueue(Plugin):
         :type testmode: bool
         :type shutdown_on_apply: bool / char b / chart q
 
-        queues = [
-            {
-
-            }
-
+        Example:
+            >>> connection = SolaceAPI("dev")
+            >>> q = connection.manager("SolaceQueue")
 
         ]
 

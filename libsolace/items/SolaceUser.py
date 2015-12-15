@@ -98,7 +98,6 @@ class SolaceUser(Plugin):
                 self.set_password(**kwargs)
                 self.no_shutdown_user(**kwargs)
 
-
     def _tests(self, **kwargs):
         """
         Call the tests before create is attempted, checks for profiles in this case

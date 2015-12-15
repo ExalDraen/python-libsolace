@@ -22,11 +22,11 @@ from libsolace.util import httpRequest, generateRequestHeaders, generateBasicAut
 
 class SolaceAPI:
     """
-    Connects to a Solace cluster *primary* and *backup* appliance
+    Connects to a Solace cluster's *primary* and *backup* appliance(s)
 
-    a SolaceAPI instance provides a SolaceXMLBuilder and a SolaceCommandQueue to
-    in order to facilitate the generation of SEMP XML requests, queing those
-    requests, and sending them to the appliance(s).
+    a SolaceAPI instance contains a SolaceXMLBuilder and a SolaceCommandQueue
+    in order to facilitate the generation of SEMP XML requests, enqueuing the XML
+    requests, and sending them to the appliance(s) through the rpc(str) method.
 
     SolaceAPI connects to **both** appliances in a redundant pair setup and gets
     the the *primary* and *backup* node states. Typically you issue the same SEMP
@@ -55,6 +55,7 @@ class SolaceAPI:
         >>> api = SolaceAPI("dev")
         >>> api.x = SolaceXMLBuilder("My Something something", version=api.version)
         >>> api.x.show.message_spool.detail
+        OrderedDict()
         >>> api.cq.enqueueV2(str(api.x))
 
         Set version on primary cluster node only:
@@ -62,14 +63,36 @@ class SolaceAPI:
         >>> api = SolaceAPI("dev", version="soltr/7_1_1")
         >>> api.x = SolaceXMLBuilder("My Something something", version=api.version)
         >>> api.x.show.message_spool
+        OrderedDict()
         >>> api.cq.enqueueV2(str(api.x), primaryOnly=True)
+        >>> api.rpc(str(api.cq.commands[0]))
 
         Backup cluster node only:
 
         >>> api = SolaceAPI("dev")
         >>> api.x = SolaceXMLBuilder("My Something something", version=api.version)
         >>> api.x.show.version
+        OrderedDict()
         >>> api.cq.enqueueV2(str(api.x), backupOnly=True)
+
+        Get a instance of SolaceQueue from the plugin manager
+
+        >>> api = SolaceAPI("dev")
+        >>> api.manager("SolaceQueue")
+
+        Solace User plugin, check if a profile exists
+
+        >>> api = SolaceAPI("dev")
+        >>> api.manage("SolaceUser").check_client_profile_exists(client_profile="glassfish")
+        True
+
+        Create a Solace User via plugin
+
+        >>> api.manage("SolaceUser", client_profile="glassfish", acl_profile="test", username="foo", password="bar", vpn_name="%s_testvpn").commands.commands # doctest:+ELLIPSIS
+        [<rpc semp-version=...</client-username></rpc>]
+        >>> api.manage("SolaceUser").get(username="%s_testvpn", vpn_name="%s_testvpn") # doctest:+ELLIPSIS
+        {'reply': {u'show': {u'client-username'...}}}}}}
+
     """
 
     def __init__(self, environment, version=None, testmode=False, **kwargs):
@@ -211,9 +234,8 @@ class SolaceAPI:
     #     return user
 
     def get_redundancy(self):
-        """ Return redundancy information """
+        """ Return redundancy status """
         try:
-            #request = '<rpc semp-version="soltr/6_0"><show><redundancy></redundancy></show></rpc>'
             request = SolaceXMLBuilder(version=self.version)
             request.show.redundancy
             return self.rpc(str(request))
@@ -221,23 +243,24 @@ class SolaceAPI:
             raise
 
     def get_memory(self):
-        """ Returns the Memory Usage """
-        try:
-            #request ='<rpc semp-version="soltr/6_0"><show><memory></memory></show></rpc>'
-            request = SolaceXMLBuilder(version=self.version)
-            request.show.memory
-            return self.rpc(str(request))
-        except:
-            raise
+        """ Returns the Memory Usage
+
+        Example of request XML
+        <rpc semp-version="soltr/6_0">
+            <show>
+                <memory></memory>
+            </show>
+        </rpc>
+        """
+        request = SolaceXMLBuilder(version=self.version)
+        request.show.memory
+        return self.rpc(str(request))
 
     def get_message_spool(self):
-        """ Returns the Message Spool """
-        try:
-            request = SolaceXMLBuilder(version="soltr/6_0")
-            request.show.message_spool
-            return self.rpc(str(request))
-        except:
-            raise
+        """ show message spool """
+        request = SolaceXMLBuilder(version="soltr/6_0")
+        request.show.message_spool
+        return self.rpc(str(request))
 
     def get_queue(self, queue, vpn, detail=False, **kwargs):
         """ Return Queue details """
@@ -355,17 +378,26 @@ class SolaceAPI:
     def get_client_username(self, clientusername, vpn, detail=False, **kwargs):
         """
         Get client username details
-        """
-        try:
-            request = SolaceXMLBuilder(version = self.version)
-            request.show.client_username.name = clientusername
-            request.show.client_username.vpn_name = vpn
-            if detail:
-                request.show.client_username.detail
 
-            return self.rpc(str(request))
-        except:
-            raise
+        Example:
+            >>> c = SolaceAPI("dev")
+            >>> c.get_client_username("%s_testvpn", "%s_testvpn")
+            {'reply': {u'show': {u'client-username': {u'client-usernames': {u'client-username': {u'profile': u'glassfish', u'acl-profile': u'dev_testvpn', u'guaranteed-endpoint-permission-override': u'false', u'client-username': u'dev_testvpn', u'enabled': u'true', u'message-vpn': u'dev_testvpn', u'password-configured': u'true', u'num-clients': u'0', u'num-endpoints': u'2', u'subscription-manager': u'false', u'max-connections': u'500', u'max-endpoints': u'16000'}}}}}}
+
+        """
+
+        return self.manage("SolaceUser").get(username = clientusername, vpn_name = vpn)
+
+        # try:
+        #     request = SolaceXMLBuilder(version = self.version)
+        #     request.show.client_username.name = clientusername
+        #     request.show.client_username.vpn_name = vpn
+        #     if detail:
+        #         request.show.client_username.detail
+        #
+        #     return self.rpc(str(request))
+        # except:
+        #     raise
 
     def get_client(self, client, vpn, detail=False, **kwargs):
         """ Get Client details """
@@ -404,7 +436,8 @@ class SolaceAPI:
 
     def rpc(self, xml, allowfail=False, primaryOnly=False, backupOnly=False, **kwargs):
         """
-        Execute a SEMP command on the appliance(s)
+        Execute a SEMP command on the appliance(s), call with a string representation
+        of a SolaceXMLBuilder instance.
 
         Args:
             xml(str): string representation of a SolaceXMLBuilder instance.
@@ -415,6 +448,14 @@ class SolaceAPI:
 
         Returns:
             data response list as from appliances. Json-like data
+
+        Example:
+            >>> conn = SolaceAPI("dev")
+            >>> xb = SolaceXMLBuilder(version = conn.version)
+            >>> xb.show.version
+            OrderedDict()
+            >>> type(conn.rpc(str(xb)))
+            <type 'list'>
 
         """
         responses = None
@@ -447,7 +488,9 @@ class SolaceAPI:
 
     def manage(self, name, **kwargs):
         """
-        Gets a plugin and configures it, then allows direct communication with it.
+        Gets a plugin, configures it, then allows direct communication with it.
+
+        Plugins are passed the kwargs directly if any are specified.
 
         Example:
             >>> api = SolaceAPI("dev")
@@ -470,5 +513,5 @@ if __name__ == "__main__":
     import logging
     import sys
     logging.basicConfig(format='[%(module)s] %(filename)s:%(lineno)s %(asctime)s %(levelname)s %(message)s',stream=sys.stdout)
-    logging.getLogger().setLevel(logging.INFO)
+    # logging.getLogger().setLevel(logging.INFO)
     doctest.testmod()
