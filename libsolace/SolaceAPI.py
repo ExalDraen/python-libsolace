@@ -38,11 +38,14 @@ class SolaceAPI:
     can be overridden with the `version` kwarg.
 
     Args:
-        environment (str): the environment name to connect to as defined in
-            libsolace.yaml. The environment is used to read the cluster nodes
-            and credentials.
+        environment (str): The environment name to connect to as defined in
+            libsolace.yaml.
         version (Optional(str)): set the version to disable version detection
             example of version: "soltr/6_0"
+        detect_status (Optional(bool)): detect the primary/backup appliance through
+            querying the message-spool state, default: True
+        version (Optional(str)): set the solOS-TR version, if None the version will
+            be retrieved from the appliances.
         testmode (Optional(bool)): Uses readonly user from config
             Communication with the appliance(s) will use the READ_ONLY_USER
             and READ_ONLY_PASS as defined in libsolace.yaml
@@ -95,51 +98,63 @@ class SolaceAPI:
 
     """
 
-    def __init__(self, environment, version=None, testmode=False, **kwargs):
+    def __init__(self, environment, version=None, **kwargs):
         try:
-            logging.debug("Solace Client initializing version: %s" % version)
+            logging.debug("Solace Client version: %s" % version)
+
+            logging.info("Connecting to appliances in %s" % environment)
+            self.environment = environment
+
             self.config = settings.SOLACE_CONF[environment]
             logging.debug("Loaded Config: %s" % self.config)
-            self.testmode = testmode
-            if 'VERIFY_SSL' not in self.config:
-                self.config['VERIFY_SSL'] = True
-            if testmode:
+
+            # testmode sets the user to the RO user
+            self.testmode = kwargs.get("testmode", False)
+            if self.testmode:
                 self.config['USER'] = settings.READ_ONLY_USER
                 self.config['PASS'] = settings.READ_ONLY_PASS
                 logging.info('READONLY mode')
-            logging.debug("Final Config: %s" % self.config)
 
-            self.environment = environment
+            # for SSL / TLS
+            if 'VERIFY_SSL' not in self.config:
+                self.config['VERIFY_SSL'] = True
 
-            # get the spool statuses since its a fairly reliable way to determin
-            # the primary vs backup routers
-            self.status = self.get_message_spool()
+            # detect primary / backup node instance states or assume
+            # 1st node is primary and second is backup
+            self.detect_status = kwargs.get("detect_status", True)
+            if self.detect_status:
+                logging.debug("Detecting primary and backup node states")
+                self.status = self.get_message_spool(**kwargs)
+                self.primaryRouter = None
+                self.backupRouter = None
 
-            self.primaryRouter = None
-            self.backupRouter = None
+                for node in self.status:
+                    spoolStatus = node['rpc-reply']['rpc']['show']['message-spool']['message-spool-info']['operational-status']
+                    logging.info(spoolStatus)
+                    if spoolStatus == 'AD-Active' and self.primaryRouter == None:
+                        self.primaryRouter = node['HOST']
+                    elif self.backupRouter == None and self.primaryRouter != None:
+                        self.backupRouter = node['HOST']
+                    else:
+                        logging.warn("More than one backup router?")
+                        self.primaryRouter = node['HOST']
+            else:
+                logging.debug("Not detecting statuses, using config")
+                self.primaryRouter = self.config['MGMT'][0]
+                self.backupRouter = self.config['MGMT'][1]
 
-            for node in self.status:
-                spoolStatus = node['rpc-reply']['rpc']['show']['message-spool']['message-spool-info']['operational-status']
-                logging.info(spoolStatus)
-                if spoolStatus == 'AD-Active' and self.primaryRouter == None:
-                    self.primaryRouter = node['HOST']
-                elif self.backupRouter == None and self.primaryRouter != None:
-                    self.backupRouter = node['HOST']
-                else:
-                    logging.warn("More than one backup router?")
-                    self.primaryRouter = node['HOST']
-                    #raise BaseException("Appliance State(s) Error")
-
+            # if the version is NOT specified, query appliance versions
+            # assumes that backup and primary are SAME firmware version.s
             if version == None:
                 logging.info("Detecting Version")
                 self.xmlbuilder = SolaceXMLBuilder("Getting Version")
                 self.xmlbuilder.show.version
-                result = self.rpc(str(self.xmlbuilder))
+                result = self.rpc(str(self.xmlbuilder), **kwargs)
                 self.version = result[0]['rpc-reply']['@semp-version']
             else:
                 logging.info("Setting Version %s" % version)
                 self.version = version
-            logging.info("Detected version: %s" % self.version)
+            logging.info("Detected solOS-TR version: %s" % self.version)
 
             # backwards compatibility
             self.xmlbuilder = SolaceXMLBuilder(version = self.version)
@@ -153,7 +168,7 @@ class SolaceAPI:
             raise
 
     def __restcall(self, request, primaryOnly=False, backupOnly=False, **kwargs):
-        logging.info("%s user requesting: %s" % (self.config['USER'], request))
+        logging.info("%s user requesting: %s kwargs:%s" % (self.config['USER'], request, kwargs))
         self.kwargs = kwargs
 
         # appliances in the query
@@ -256,11 +271,11 @@ class SolaceAPI:
         request.show.memory
         return self.rpc(str(request))
 
-    def get_message_spool(self):
+    def get_message_spool(self, **kwargs):
         """ show message spool """
         request = SolaceXMLBuilder(version="soltr/6_0")
         request.show.message_spool
-        return self.rpc(str(request))
+        return self.rpc(str(request), **kwargs)
 
     def get_queue(self, queue, vpn, detail=False, **kwargs):
         """ Return Queue details """
@@ -513,5 +528,5 @@ if __name__ == "__main__":
     import logging
     import sys
     logging.basicConfig(format='[%(module)s] %(filename)s:%(lineno)s %(asctime)s %(levelname)s %(message)s',stream=sys.stdout)
-    # logging.getLogger().setLevel(logging.INFO)
+    logging.getLogger().setLevel(logging.INFO)
     doctest.testmod()

@@ -15,10 +15,12 @@ import importlib
 import yaml
 import os
 import logging
+import sys
+logging.basicConfig(format='[%(module)s] %(filename)s:%(lineno)s %(asctime)s %(levelname)s %(message)s',stream=sys.stdout)
+logging.getLogger().setLevel(logging.INFO)
 
 log = logging.getLogger(__name__)
 yaml_loaded = False
-
 
 for yaml_file in __yamlfiles__:
     if not os.path.exists(yaml_file):

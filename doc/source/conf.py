@@ -22,6 +22,23 @@ import shlex
 sys.path.insert(0, os.path.abspath('../../'))
 print(sys.path)
 
+# documenter helper for decorated classes
+import libsolace.settingsloader as settings
+import libsolace
+from libsolace.plugin import Plugin
+from sphinx.ext.autodoc import ClassDocumenter
+
+class MyClassDocumenter(ClassDocumenter):
+    objtype = 'Plugin'
+    directivetype = 'class'
+
+    @classmethod
+    def can_document_member(cls, member, membername, isattr, parent):
+        return isinstance(member, Plugin)
+
+def setup(app):
+    app.add_autodocumenter(MyClassDocumenter)
+
 # -- General configuration ------------------------------------------------
 
 # If your documentation needs a minimal Sphinx version, state it here.

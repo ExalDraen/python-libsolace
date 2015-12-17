@@ -27,6 +27,12 @@ Classes
   :members:
   :special-members:
 
+.. autoclass:: libsolace.items.SolaceUser.SolaceUser
+  :special-members:
+  :members:
+  :undoc-members:
+  :show-inheritance:
+
 Indices and tables
 ==================
 

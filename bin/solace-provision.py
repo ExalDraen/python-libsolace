@@ -110,6 +110,11 @@ if __name__ == '__main__':
         default="default", help="client acl profile to associate")
     parser.add_option("-c", "--clientprofile", action="store", type="string", dest="clientprofile",
         default="glassfish", help="client profile to associate, must exist")
+    parser.add_option("--no-create-queues", action="store_false", dest="create_queues",
+        default=True, help="prevent queue creation")
+    parser.add_option("--no-detect-status", action="store_false", dest="detect_status",
+        default=True, help="disable detection of primary and backup statuses")
+
     parser.add_option("-d", "--debug", action="store_true", dest="debugmode",
         default=False, help="enable debug mode logging")
 
@@ -179,8 +184,10 @@ if __name__ == '__main__':
             queue_dict = queues,
             environment = options.env,
             client_profile = options.clientprofile,
-            users = users,
-            testmode=options.testmode,
+            users_dict = users,
+            testmode = options.testmode,
             shutdown_on_apply = options.shutdown_on_apply,
-            version = options.soltr_version
+            version = options.soltr_version,
+            detect_status = options.detect_status,
+            create_queues = options.create_queues
         )

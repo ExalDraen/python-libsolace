@@ -6,9 +6,17 @@ from libsolace.SolaceXMLBuilder import SolaceXMLBuilder
 
 @libsolace.plugin_registry.register
 class SolaceQueue(Plugin):
-    """ Construct Queues """
 
     plugin_name = "SolaceQueue"
+
+    queue_defaults = {
+        "retries": 0,
+        "exclusive": "true",
+        "queue_size": 1024,
+        "consume": "all",
+        "max_bind_count": 1000,
+        "owner": "%lsVPN"
+    }
 
     def init(self, **kwargs):
         """ Manage Queues
@@ -19,17 +27,16 @@ class SolaceQueue(Plugin):
         Query mode when initialized with only the "api" kwarg.
         Create mode if initialized with vpn_name and queues dictionary.
 
-        :type api: SolaceAPI
-        :type vpn_name: str
-        :type queues: dict
-        :type testmode: bool
-        :type shutdown_on_apply: bool / char b / chart q
+        :parameter api: SolaceAPI
+        :parameter vpn_name: str
+        :parameter queues: dict as from CMDBClient
+        :parameter testmode: bool
+        :parameter shutdown_on_apply: bool / char b / chart q
 
         Example:
             >>> connection = SolaceAPI("dev")
             >>> q = connection.manager("SolaceQueue")
 
-        ]
 
         """
 
@@ -38,7 +45,6 @@ class SolaceQueue(Plugin):
 
         if not "vpn_name" in kwargs:
             logging.info("Query mode because vpn_name not in kwargs")
-
         else:
             self.vpn_name = kwargs.get("vpn_name")
             self.testmode = kwargs.get("testmode")
@@ -52,27 +58,44 @@ class SolaceQueue(Plugin):
                 logging.warning("No options passed, assuming you meant 'add', please update usage of this class to pass a OptionParser instance")
 
                 for queue in self.queues:
+
+                    queueName = queue['name']
+
                     queue_config = self.get_queue_config(queue, **kwargs)
-                    self.create_queue(queue_name = queue['name'], **kwargs)
-                    self.shutdown_egress(queue_name = queue['name'], **kwargs)
+                    self.create_queue(queue_name = queueName, **kwargs)
+                    self.shutdown_egress(queue_name = queueName, **kwargs)
                     if queue_config['exclusive'].lower() == "true":
-                        self.exclusive(queue_name = queue['name'], exclusive=True, **kwargs)
+                        self.exclusive(queue_name = queueName, exclusive=True, **kwargs)
                     else:
-                        self.exclusive(queue_name = queue['name'], exclusive=False, **kwargs)
-                    self.owner(queue_name = queue['name'], owner_username = queue_config['owner'], **kwargs)
-                    self.max_bind_count(queue_name = queue['name'], max_bind_count = queue_config['max_bind_count'], **kwargs)
-                    self.consume(queue_name = queue['name'], consume = queue_config['consume'], **kwargs)
-                    self.spool_size(queue_name = queue['name'], queue_size = queue_config['queue_size'], **kwargs)
-                    self.retries(queue_name = queue['name'], retries = queue_config['retries'], **kwargs)
-                    self.reject_on_discard(queue_name = queue['name'], **kwargs)
-                    self.enable(queue_name = queue['name'], **kwargs)
+                        self.exclusive(queue_name = queueName, exclusive=False, **kwargs)
+                    self.owner(queue_name = queueName, owner_username = queue_config['owner'], **kwargs)
+                    self.max_bind_count(queue_name = queueName, max_bind_count = queue_config['max_bind_count'], **kwargs)
+                    self.consume(queue_name = queueName, consume = queue_config['consume'], **kwargs)
+                    self.spool_size(queue_name = queueName, queue_size = queue_config['queue_size'], **kwargs)
+                    self.retries(queue_name = queueName, retries = queue_config['retries'], **kwargs)
+                    self.reject_on_discard(queue_name = queueName, **kwargs)
+                    self.enable(queue_name = queueName, **kwargs)
 
 
     def get_queue_config(self, queue, **kwargs):
         """ Returns a queue config for the queue and overrides where neccesary
 
-        :type queue: libsolace.gfmisc.DataNode
-        :param queue: single queue datanode object
+        :param queue: single queue dictionary e.g.
+            {
+                "name": "foo",
+                "env": [
+                    "qa1": {
+                        "queue_config": {
+                            "retries": 0,
+                            "exclusive": "false",
+                            "queue_size": 1024,
+                            "consume": "all",
+                            "max_bind_count": 1000,
+                            "owner": "%slsVPN"
+                        }
+                    }
+                ]
+            }
 
         """
 
@@ -83,15 +106,32 @@ class SolaceQueue(Plugin):
             for e in queue['env']:
                 if e['name'] == self.api.environment:
                     logging.info('setting queue_config to environment %s values' % e['name'] )
-                    return e['queue_config']
+                    return self.apply_default_config(e['queue_config'], self.queue_defaults)
         except:
             logging.warn("No environment overides for queue %s" % queue_name)
             pass
         try:
-            return queue['queue_config']
+            return self.apply_default_config(queue['queue_config'], self.queue_defaults)
         except:
             logging.warning("No queue_config for queue: %s found, please check site-config" % queue_name)
             raise
+
+    def apply_default_config(self, config, default):
+        """ copys keys from default dict to config dict when not present """
+
+        logging.info("Applying default config after config")
+
+        final_config = {}
+
+        for k,v in default.items():
+            if k in config:
+                logging.info("Config key: %s to %s" % (k,v))
+                final_config[k] = config[k]
+            else:
+                logging.info("Default config key: %s to %s" % (k,v))
+                final_config[k] = v
+        return final_config
+
 
     def create_queue(self, **kwargs):
         queue_name = kwargs.get("gueue_name")

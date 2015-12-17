@@ -54,6 +54,10 @@ class Plugin(object):
 
     def __init__(self, *args, **kwargs):
         logging.debug("Plugin Init: %s, %s" % (args, kwargs))
+        # self.cls = cls
+        # self.__doc__ = cls.__doc__
+        # self.__name__ = cls.__name__
+        # self.__bases__ = cls.__bases__
 
     def register(self, object_class, *args, **kwargs):
         """
@@ -64,9 +68,24 @@ class Plugin(object):
         """
 
         logging.info("Registering Plugin: %s from class: %s " % (object_class.plugin_name, object_class) )
+        #
+        #
+        # self.cls = object_class
+        # self.__doc__ = object_class.__doc__
+        # self.__name__ = object_class.__name__
+        # self.__bases__ = object_class.__bases__
+        #
+        # setattr(self, '__doc__', getattr(object_class, 'plugin_name').__doc__)
 
-        # # TODO FIXME constructor kwargs and args if needed.
+
+        # setattr(self, '__doc__', getattr(object_class, '__doc__'))
+
+        # TODO FIXME constructor kwargs and args if needed.
         # for name in dir(object_class):
+        #     if not name.startswith('_'):
+        #         logging.info("Copying doc from %s.%s onto self" % (object_class, name))
+        #         setattr(self, '__doc__', getattr(object_class, name).__doc__)
+
         #   if name.startswith('complete_'):
         #     # completion function required a little more renaming magic
         #     new_name = 'complete_%s_%s' % (object_class.plugin_name, re.sub('complete_', '' ,name))
@@ -82,8 +101,11 @@ class Plugin(object):
         #     setattr(object_class, new_name, new_handler)
         #     setattr(new_handler, '__doc__', getattr(object_class, name).__doc__)
 
-        self.plugins.append(object_class(*args, **kwargs))
-        self.plugins_dict[object_class.plugin_name] = object_class(*args, **kwargs)
+
+        o = object_class(*args, **kwargs)
+
+        self.plugins.append(o)
+        self.plugins_dict[object_class.plugin_name] = o
 
     # @staticmethod
     # def _make_cmd(plugin, name):
