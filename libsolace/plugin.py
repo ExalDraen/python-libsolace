@@ -54,10 +54,6 @@ class Plugin(object):
 
     def __init__(self, *args, **kwargs):
         logging.debug("Plugin Init: %s, %s" % (args, kwargs))
-        # self.cls = cls
-        # self.__doc__ = cls.__doc__
-        # self.__name__ = cls.__name__
-        # self.__bases__ = cls.__bases__
 
     def register(self, object_class, *args, **kwargs):
         """
@@ -66,55 +62,10 @@ class Plugin(object):
         :param object_class: object to register, should be a class
         :return:
         """
-
         logging.info("Registering Plugin: %s from class: %s " % (object_class.plugin_name, object_class) )
-        #
-        #
-        # self.cls = object_class
-        # self.__doc__ = object_class.__doc__
-        # self.__name__ = object_class.__name__
-        # self.__bases__ = object_class.__bases__
-        #
-        # setattr(self, '__doc__', getattr(object_class, 'plugin_name').__doc__)
-
-
-        # setattr(self, '__doc__', getattr(object_class, '__doc__'))
-
-        # TODO FIXME constructor kwargs and args if needed.
-        # for name in dir(object_class):
-        #     if not name.startswith('_'):
-        #         logging.info("Copying doc from %s.%s onto self" % (object_class, name))
-        #         setattr(self, '__doc__', getattr(object_class, name).__doc__)
-
-        #   if name.startswith('complete_'):
-        #     # completion function required a little more renaming magic
-        #     new_name = 'complete_%s_%s' % (object_class.plugin_name, re.sub('complete_', '' ,name))
-        #     logging.debug("registering alias for %s as: %s" % (name, new_name))
-        #     new_handler = self._make_cmd(object_class, name)
-        #     setattr(object_class, new_name, new_handler)
-        #     setattr(new_handler, '__doc__', getattr(object_class, name).__doc__)
-        #   if not name.startswith('_'):
-        #     # every other method that is not private gets an alias
-        #     new_name = '%s_%s' % (object_class.plugin_name, name) # eg: verify_pools -> lb_verify_pools
-        #     logging.debug("registering alias for %s as: %s" % (name, new_name))
-        #     new_handler = self._make_cmd(object_class, name)
-        #     setattr(object_class, new_name, new_handler)
-        #     setattr(new_handler, '__doc__', getattr(object_class, name).__doc__)
-
-
         o = object_class(*args, **kwargs)
-
         self.plugins.append(o)
         self.plugins_dict[object_class.plugin_name] = o
-
-    # @staticmethod
-    # def _make_cmd(plugin, name):
-    #   def handler(self, *args, **kwargs):
-    #     logging.debug("handler for %s and func %s. self: %s" % (plugin, name, self))
-    #     # return the function matching the requested name from self
-    #     return getattr(self, name, None)(*args, **kwargs)
-    #   return handler
-
 
     def __call__(self, *args, **kwargs):
         """
@@ -133,6 +84,3 @@ class Plugin(object):
             logging.warn("No plugin named: %s found" % args[0])
             logging.warn("Please check the plugin is listed in the yaml config and that you have @libsolace.plugin_registry.register in the class")
             raise
-
-    # def __getitem__(self, k):
-    #     return self.__dict__[k]

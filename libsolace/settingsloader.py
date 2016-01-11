@@ -34,7 +34,10 @@ for yaml_file in __yamlfiles__:
     log.info("Yaml loaded successful")
 
     log.info("Loading plugins")
-    modules = map(__import__, globals()['PLUGINS'])
+    try:
+        modules = map(__import__, globals()['PLUGINS'])
+    except Exception, e:
+        pass
 
     break
 

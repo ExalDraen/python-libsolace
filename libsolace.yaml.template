@@ -14,6 +14,11 @@ PLUGINS:
   - libsolace.plugins.CMDBClient
   - libsolace.plugins.XMLAPI
   - libsolace.items.SolaceUser
+  - libsolace.plugins.NamingStandard
+  - libsolace.plugins.CustomNaming
+
+# the naming standard to use, default is <env>_<name> from NamingStandard
+NAMEHOOK: DefaultNaming
 
 # the plugin name as registered in the registry we want to use for solace config
 SOLACE_CMDB_PLUGIN: CMDBClient
