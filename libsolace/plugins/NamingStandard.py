@@ -6,6 +6,15 @@ appliance cluster.
 import libsolace
 from libsolace.plugin import Plugin
 
+"""
+This method is responsible for returning strings in the namingstandard.
+
+example:
+>>> from libsolace.plugins.NamingStandard import name
+>>> name("something", "dev")
+'dev_something'
+
+"""
 def name(name, environment):
     import libsolace.settingsloader as settings
     try:
@@ -13,6 +22,10 @@ def name(name, environment):
     except Exception, e:
         raise
 
+
+"""
+The default naming plugin
+"""
 @libsolace.plugin_registry.register
 class DefaultNaming(Plugin):
     plugin_name = "DefaultNaming"

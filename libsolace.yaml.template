@@ -15,7 +15,7 @@ PLUGINS:
   - libsolace.plugins.XMLAPI
   - libsolace.items.SolaceUser
   - libsolace.plugins.NamingStandard
-  - libsolace.plugins.CustomNaming
+  - mycompany.myplugins.OtherPluginClassFileName
 
 # the naming standard to use, default is <env>_<name> from NamingStandard
 NAMEHOOK: DefaultNaming
