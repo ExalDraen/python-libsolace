@@ -3,7 +3,7 @@ import libsolace
 from libsolace.plugin import Plugin
 from libsolace.SolaceCommandQueue import SolaceCommandQueue
 from libsolace.SolaceXMLBuilder import SolaceXMLBuilder
-
+from libsolace.Naming import name
 
 @libsolace.plugin_registry.register
 class SolaceVPN(Plugin):

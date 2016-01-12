@@ -5,7 +5,7 @@ from libsolace.plugin import Plugin
 from libsolace.SolaceCommandQueue import SolaceCommandQueue
 from libsolace.SolaceXMLBuilder import SolaceXMLBuilder
 from libsolace.SolaceReply import SolaceReplyHandler
-
+from libsolace.Naming import name
 
 @libsolace.plugin_registry.register
 class SolaceUser(Plugin):
@@ -50,23 +50,14 @@ class SolaceUser(Plugin):
             logging.info("Username specified, assuming provision mode")
             self.commands = SolaceCommandQueue(version = self.api.version)
 
-            # try sub-in the env-name, fallback on TypeError
-            try:
-                self.username = kwargs.get("username") % self.api.environment
-            except TypeError, e:
-                self.username = kwargs.get("username")
-
+            self.username = name(kwargs.get("username"), self.api.environment)
             self.password = kwargs.get("password")
 
-            # try sub-in the env-name, fallback on TypeError
+            self.vpn_name = name(kwargs.get("vpn_name"), self.api.environment)
             try:
-                self.vpn_name = kwargs.get("vpn_name") % self.api.environment
-            except TypeError, e:
-                self.vpn_name = kwargs.get("vpn_name")
-
-            try:
-                self.acl_profile = kwargs.get("acl_profile") % self.api.environment
-            except TypeError, e:
+                self.acl_profile = name(kwargs.get("acl_profile"), self.api.environment)
+            except TypeError:
+                logging.warning("TODO fixme string substitution already occured for acl_profile")
                 self.acl_profile = kwargs.get("acl_profile")
 
             self.client_profile = kwargs.get("client_profile")
@@ -110,17 +101,8 @@ class SolaceUser(Plugin):
     def get(self, **kwargs):
         """ Get a username from solace, return a dict """
 
-        # try sub-in the env-name, fallback on TypeError
-        try:
-            username = kwargs.get("username") % self.api.environment
-        except:
-            username = kwargs.get("username")
-
-        # try sub-in the env-name, fallback on TypeError
-        try:
-            vpn_name = kwargs.get("vpn_name")  % self.api.environment
-        except:
-            vpn_name = kwargs.get("vpn_name")
+        username = name(kwargs.get("username"), self.api.environment)
+        vpn_name = name(kwargs.get("vpn_name"), self.api.environment)
 
         self.api.x = SolaceXMLBuilder("Getting user %s" % username, version=self.api.version)
         self.api.x.show.client_username.name = username
