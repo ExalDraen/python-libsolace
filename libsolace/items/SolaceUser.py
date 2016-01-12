@@ -5,7 +5,6 @@ from libsolace.plugin import Plugin
 from libsolace.SolaceCommandQueue import SolaceCommandQueue
 from libsolace.SolaceXMLBuilder import SolaceXMLBuilder
 from libsolace.SolaceReply import SolaceReplyHandler
-from libsolace.Naming import name
 
 @libsolace.plugin_registry.register
 class SolaceUser(Plugin):
@@ -76,6 +75,11 @@ class SolaceUser(Plugin):
             # backwards compatibility for None options passed to still execute "add" code
             if self.options == None:
                 logging.warning("No options passed, assuming you meant 'add', please update usage of this class to pass a OptionParser instance")
+                try:
+                    # Check if user already exists, if not then shutdown immediately after creating the user
+                    self.get(**kwargs)['reply'].show.client_username.client_usernames.client_username
+                except KeyError:
+                    kwargs['shutdown_on_apply'] = True
                 self.new_user(**kwargs)
                 self.disable_user(**kwargs)
                 self.set_client_profile(**kwargs)
@@ -97,8 +101,8 @@ class SolaceUser(Plugin):
     def get(self, **kwargs):
         """ Get a username from solace, return a dict """
 
-        username = name(kwargs.get("username"), self.api.environment)
-        vpn_name = name(kwargs.get("vpn_name"), self.api.environment)
+        username = kwargs.get("username")
+        vpn_name = kwargs.get("vpn_name")
 
         self.api.x = SolaceXMLBuilder("Getting user %s" % username, version=self.api.version)
         self.api.x.show.client_username.name = username
