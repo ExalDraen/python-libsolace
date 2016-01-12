@@ -172,12 +172,12 @@ if __name__ == '__main__':
 
     # Call main with environment from comand line
     for vpn in vpns:
-        users = cmdbapi.get_users_of_vpn(vpn['name'], environment=options.env)
-        queues = cmdbapi.get_queues_of_vpn(vpn['name'], environment=options.env)
+        users = cmdbapi.get_users_of_vpn(vpn['id'], environment=options.env)
+        queues = cmdbapi.get_queues_of_vpn(vpn['id'], environment=options.env)
         logging.info('Found vpn %s' % json.dumps(str(vpn), ensure_ascii=False))
         logging.info('Found users %s' % users)
         logging.info('Found queues %s' % queues)
-        logging.info("Provisioning %s" % vpn['name'])
+        logging.info("Provisioning %s" % vpn['id'])
 
         result = SolaceProvision(
             vpn_dict = vpn,

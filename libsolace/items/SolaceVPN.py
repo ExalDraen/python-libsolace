@@ -39,8 +39,8 @@ class SolaceVPN(Plugin):
         if not "vpn_name" in kwargs:
             logging.info("No vpn_name kwarg, assuming query mode")
         else:
-            self.vpn_name = name(kwargs.get("vpn_name"), self.api.environment)
-            self.owner_username = name(kwargs.get("vpn_name"), self.api.environment)
+            self.vpn_name = kwargs.get("vpn_name")
+            self.owner_username = kwargs.get("vpn_name")
             self.environment = kwargs.get("environment")
             self.acl_profile = self.vpn_name
             self.options = None

@@ -50,15 +50,11 @@ class SolaceUser(Plugin):
             logging.info("Username specified, assuming provision mode")
             self.commands = SolaceCommandQueue(version = self.api.version)
 
-            self.username = name(kwargs.get("username"), self.api.environment)
+            self.username = kwargs.get("username")
             self.password = kwargs.get("password")
 
-            self.vpn_name = name(kwargs.get("vpn_name"), self.api.environment)
-            try:
-                self.acl_profile = name(kwargs.get("acl_profile"), self.api.environment)
-            except TypeError:
-                logging.warning("TODO fixme string substitution already occured for acl_profile")
-                self.acl_profile = kwargs.get("acl_profile")
+            self.vpn_name = kwargs.get("vpn_name")
+            self.acl_profile = kwargs.get("acl_profile")
 
             self.client_profile = kwargs.get("client_profile")
             self.testmode = kwargs.get("testmode")

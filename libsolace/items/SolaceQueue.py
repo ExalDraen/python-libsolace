@@ -134,7 +134,7 @@ class SolaceQueue(Plugin):
 
 
     def create_queue(self, **kwargs):
-        queue_name = kwargs.get("gueue_name")
+        queue_name = kwargs.get("queue_name")
         vpn_name = kwargs.get("vpn_name")
 
         # Create a queue

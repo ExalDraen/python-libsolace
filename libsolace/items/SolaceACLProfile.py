@@ -20,7 +20,7 @@ class SolaceACLProfile:
         self.version = version
         self.queue = SolaceCommandQueue(version=self.version)
         self.environment = environment
-        self.name = name % environment
+        self.name = name
         self.vpn_name = vpn_name
 
         logging.info("Queue: %s, Environment: %s, Name: %s, VPN: %s"

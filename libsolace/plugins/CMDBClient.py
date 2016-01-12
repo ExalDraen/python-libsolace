@@ -9,6 +9,7 @@ files if that is what you want.
 import logging
 import libsolace
 from libsolace.plugin import Plugin
+from libsolace.plugins.NamingStandard import name
 
 @libsolace.plugin_registry.register
 class CMDBClient(Plugin):
@@ -33,7 +34,8 @@ class CMDBClient(Plugin):
         vpn1['vpn_config'] = {}
         vpn1['vpn_config']['spool_size'] = '1024'
         vpn1['password'] = 'd0nt_u5e_th1s'
-        vpn1['name'] = '%s_testvpn'
+        vpn1['id'] = '%s_testvpn'
+        vpn1['name'] = name(vpn1['id'], environment)
 
         vpns.append(vpn1)
         return vpns
@@ -45,7 +47,7 @@ class CMDBClient(Plugin):
         users = []
 
         user1 = {}
-        user1['username'] = '%s_testproductA'
+        user1['username'] = name('%s_testproductA', environment)
         user1['password'] = 'somepassword'
 
         users.append(user1)

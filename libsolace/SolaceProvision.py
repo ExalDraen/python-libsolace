@@ -30,7 +30,7 @@ class SolaceProvision:
         """ Init the provisioning
 
         :type vpn_dict: dictionary
-            eg: {'owner': u'SolaceTest', 'spool_size': u'4096', 'password': u'd0nt_u5se_thIs', 'name': u'%s_testvpn'}
+            eg: {'owner': u'SolaceTest', 'spool_size': u'4096', 'password': u'd0nt_u5se_thIs', 'name': u'dev_testvpn'}
         :type queue_dict: list
             eg: [
                   {"exclusive": u"true", "type": "", "name": u"testqueue1", "queue_size": u"4096"},
@@ -48,7 +48,7 @@ class SolaceProvision:
         :param environment: name of environment
         :param client_profile: name of client_profile, default='glassfish'
         :param users: list of user dictionaries to provision
-            eg: [{'username': u'%s_marcom3', 'password': u'%s_marcompass'}]
+            eg: [{'username': u'dev_marcom3', 'password': u'dev_marcompass'}]
         :param testmode: only test, dont apply changes
         :param create_queues: disable queue creation, default = True
         :param shutdown_on_apply: force shutdown Queue and User for config change, default = False
