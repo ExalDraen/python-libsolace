@@ -156,14 +156,15 @@ if __name__ == '__main__':
 
 
     # load the cmdb API client
-    cmdbapi = libsolace.plugin_registry(settings.SOLACE_CMDB_PLUGIN, settings=settings)
+    cmdbapi_class = libsolace.plugin_registry(settings.SOLACE_CMDB_PLUGIN, settings=settings)
 
     # configure the client ( what init would normally do, but the plugin system
     # lacks the ability to implement stuff in init )
-    cmdbapi().configure(settings=settings, environment=options.env)
+    cmdbapi = cmdbapi_class()
+    cmdbapi.configure(settings=settings, environment=options.env)
 
     # get the list of vpns to provision
-    vpns = cmdbapi().get_vpns_by_owner(options.product, environment=options.env)
+    vpns = cmdbapi.get_vpns_by_owner(options.product, environment=options.env)
 
     logging.info('VPNs: %s' % json.dumps(str(vpns), ensure_ascii=False))
     if vpns == []:
@@ -172,8 +173,8 @@ if __name__ == '__main__':
 
     # Call main with environment from comand line
     for vpn in vpns:
-        users = cmdbapi().get_users_of_vpn(vpn['id'])
-        queues = cmdbapi().get_queues_of_vpn(vpn['id'])
+        users = cmdbapi.get_users_of_vpn(vpn['id'])
+        queues = cmdbapi.get_queues_of_vpn(vpn['id'])
 
         logging.info('Found vpn %s' % json.dumps(str(vpn), ensure_ascii=False))
         logging.info('Found users %s' % users)
