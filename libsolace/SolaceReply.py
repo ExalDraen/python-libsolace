@@ -1,5 +1,7 @@
 import logging
 import re
+import simplejson as json
+import ast
 
 class SolaceReplyHandler:
     """
@@ -20,16 +22,22 @@ class SolaceReplyHandler:
         # if version == "soltr/6_0" or version == "soltr/6_1" or version == "soltr/6_2" or version == "soltr/7_0" or version == "soltr/7_1_1":
         self.reply = SolaceReply(document.pop()['rpc-reply']['rpc'])
 
+    def __repr__(self):
+        """
+        Replace u' with u" and ' with "
+        """
+        return str(json.loads(str(self.__dict__).replace("'", '"').replace('u"', '"')))
+
 class SolaceReply:
     """ Create a "dot-name-space" navigable object from a dictionary """
 
     def __init__(self, document):
         for k in document:
-            logging.info("%s: %s" % (k, document[k]))
+            logging.debug("%s: %s" % (k, document[k]))
             try:
                 self.__dict__[k] = SolaceReply(document[k])
             except:
-                logging.info("Final value %s" % document[k])
+                logging.debug("Final value %s" % document[k])
                 self.__dict__[k] = document[k]
 
     # cant have `-` in the key names, rewrite em.

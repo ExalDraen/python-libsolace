@@ -12,8 +12,9 @@ class SolaceUsers(Plugin):
     """ Manage dict of client-users within Solace """
 
     plugin_name = "SolaceUsers"
-
-    def init(self, **kwargs):
+    api = "None"
+    
+    def __init__(self, **kwargs):
         """ Init user object
 
         :type users: dict
@@ -37,7 +38,7 @@ class SolaceUsers(Plugin):
                                     version = self.version)]
         """
 
-        logging.info("SolaceUser: kwargs: %s " % kwargs)
+        logging.info("SolaceUsers: kwargs: %s " % kwargs)
 
         self.api = kwargs.get("api")
         self.options = None # not implemented

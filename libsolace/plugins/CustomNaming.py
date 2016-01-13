@@ -21,6 +21,6 @@ class ZoinksNamingStandard(Plugin):
     plugin_name = "ZoinksNamingStandard"
     def solve(self, name, environment):
         try:
-            return "zoinks_%s_%s" % ( environment, name)
+            return name % environment
         except TypeError, e:
             return name

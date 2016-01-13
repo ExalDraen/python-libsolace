@@ -3,37 +3,45 @@ import libsolace
 from libsolace.plugin import Plugin
 from libsolace.SolaceCommandQueue import SolaceCommandQueue
 from libsolace.SolaceXMLBuilder import SolaceXMLBuilder
-from libsolace.Naming import name
 
 @libsolace.plugin_registry.register
 class SolaceVPN(Plugin):
     """
 
-    Creates a VPN enforcing with basic contracts.
-
-    vpn_name = <environment>_name
-    owner_name = vpn_name
-
-
+    Creates a VPN
 
     """
 
     plugin_name = "SolaceVPN"
+    api = "None"
 
     default_settings = {'max_spool_usage': 4096,
                         'large_message_threshold': 4096}
 
-    def init(self, **kwargs):
+    def __init__(self, **kwargs):
+        """
+        Creates a VPN
+
+        Parameters
+        ----------
+        vpn_name : str
+            The name of the VPN to create
+        max_spool_usage : int
+            The optional max spool size, default in default_settings
+        large_message_threshold: int
+            The optional large message threshold, default in default_settings
+        acl_profile: str
+            The optional acl_profile to associate with, default is `vpn_name`
+
         """
 
-        :type vpn_name: str
-        :type owner_name: str
-        :type max_spool_usage: int
-        :type large_message_threshold: int
+        if kwargs == {}:
+            return
 
-        """
-
+        # get the connection SolaceAPI instance
         self.api = kwargs.get("api")
+
+        # create a commandqueue instance for queuing up XML and validating
         self.commands = SolaceCommandQueue(version = self.api.version)
 
         if not "vpn_name" in kwargs:
@@ -42,7 +50,7 @@ class SolaceVPN(Plugin):
             self.vpn_name = kwargs.get("vpn_name")
             self.owner_username = kwargs.get("vpn_name")
             self.environment = kwargs.get("environment")
-            self.acl_profile = self.vpn_name
+            self.acl_profile = kwargs.get("vpn_name", self.vpn_name)
             self.options = None
 
             logging.debug("Creating vpn in env: %s vpn: %s, kwargs: %s" % ( self.api.environment, self.vpn_name, kwargs ))
@@ -113,7 +121,7 @@ class SolaceVPN(Plugin):
     def set_spool_size(self, **kwargs):
 
         vpn_name = kwargs.get("vpn_name")
-        max_spool_usage = kwargs.get("max_spool_usage")
+        max_spool_usage = kwargs.get("max_spool_usage", getattr(self, "max_spool_usage"))
 
         logging.debug("Setting spool size to %s" % getattr(self, 'max_spool_usage'))
         # Set the Spool Size

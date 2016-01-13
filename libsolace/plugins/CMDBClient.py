@@ -9,7 +9,7 @@ files if that is what you want.
 import logging
 import libsolace
 from libsolace.plugin import Plugin
-from libsolace.plugins.NamingStandard import name
+from libsolace.Naming import name
 
 @libsolace.plugin_registry.register
 class CMDBClient(Plugin):

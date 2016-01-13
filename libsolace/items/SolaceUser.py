@@ -11,8 +11,9 @@ class SolaceUser(Plugin):
     """ Manage client-user within Solace """
 
     plugin_name = "SolaceUser"
+    api = "None"
 
-    def init(self, **kwargs):
+    def __init__(self, **kwargs):
         """ Init user object
 
         :type username: str
@@ -39,6 +40,8 @@ class SolaceUser(Plugin):
         """
 
         logging.info("SolaceUser: kwargs: %s " % kwargs)
+        if kwargs == {}:
+            return
 
         self.api = kwargs.get("api")
         self.options = None # not implemented
