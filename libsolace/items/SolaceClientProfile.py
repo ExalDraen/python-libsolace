@@ -1,6 +1,94 @@
 import logging
+import libsolace
+from libsolace.plugin import Plugin
 from libsolace.SolaceCommandQueue import SolaceCommandQueue
 from libsolace.SolaceXMLBuilder import SolaceXMLBuilder
+from libsolace.util import version_equal_or_greater_than
+
+@libsolace.plugin_registry.register
+class SolaceClientProfile(Plugin):
+
+    plugin_name = "SolaceClientProfile"
+
+    def init(*args, **kwargs):
+        self.api = kwargs.get("api")
+        self.commands = SolaceCommandQueue(version=self.api.version)
+        self.name = kwargs.get('name')
+        self.vpn_name = kwargs.get('vpn_name')
+        self.max_clients = kwargs.get('max_clients')
+
+        if kwargs.get('options', None) is None:
+            logging.warning("No options passed, assuming you meant 'add', please update usage of this class to pass a OptionParser instance")
+            self._new_client_profile()
+            self._allow_consume()
+            self._allow_send()
+            self._allow_endpoint_create()
+            self._allow_transacted_sessions()
+            if bridging:
+                self._bridging()
+
+    def _new_client_profile(self):
+        # Create client_profile
+        cmd = SolaceXMLBuilder("Create Client Profile", version=self.version)
+        cmd.create.client_profile.name = self.name
+        if version_equal_or_greater_than(self.version, 'soltr/6_2'):
+            cmd.create.client_profile.vpn_name = self.vpn_name
+        self.queue.enqueue(cmd)
+
+    def _allow_send(self):
+        # Allow send
+        cmd = SolaceXMLBuilder("Allow profile send", version=self.version)
+        cmd.client_profile.name = self.name
+        if version_equal_or_greater_than(self.version, 'soltr/6_2'):
+            cmd.create.client_profile.vpn_name = self.vpn_name
+        cmd.client_profile.message_spool.allow_guaranteed_message_send
+        self.queue.enqueue(cmd)
+
+    def _allow_consume(self):
+        # allow consume
+        cmd = SolaceXMLBuilder("Allow profile consume", version=self.version)
+        cmd.client_profile.name = self.name
+        if version_equal_or_greater_than(self.version, 'soltr/6_2'):
+            cmd.create.client_profile.vpn_name = self.vpn_name
+        cmd.client_profile.message_spool.allow_guaranteed_message_receive
+        self.queue.enqueue(cmd)
+
+    def _allow_endpoint_create(self):
+        # allow consume
+        cmd = SolaceXMLBuilder("Allow profile endpoint create", version=self.version)
+        cmd.client_profile.name = self.name
+        if version_equal_or_greater_than(self.version, 'soltr/6_2'):
+            cmd.create.client_profile.vpn_name = self.vpn_name
+        cmd.client_profile.message_spool.allow_guaranteed_endpoint_create
+        self.queue.enqueue(cmd)
+
+    def _allow_transacted_sessions(self):
+        # allow TS
+        cmd = SolaceXMLBuilder("Allow profile transacted sessions", version=self.version)
+        cmd.client_profile.name = self.name
+        if version_equal_or_greater_than(self.version, 'soltr/6_2'):
+            cmd.create.client_profile.vpn_name = self.vpn_name
+        cmd.client_profile.message_spool.allow_transacted_sessions
+        self.queue.enqueue(cmd)
+
+    def _set_max_clients(self):
+        cmd = SolaceXMLBuilder("Setting Max Clients", version=self.version)
+        cmd.client_profile.name = self.name
+        if version_equal_or_greater_than(self.version, 'soltr/6_2'):
+            cmd.create.client_profile.vpn_name = self.vpn_name
+        cmd.client_profile.max_connections_per_client_username.value = self.max_clients
+        self.queue.enqueue(cmd)
+
+    def _bridging(self):
+        cmd = SolaceXMLBuilder("Setting Bridging", version=self.version)
+        cmd.client_profile.name = self.name
+        if version_equal_or_greater_than(self.version, 'soltr/6_2'):
+            cmd.create.client_profile.vpn_name = self.vpn_name
+        cmd.client_profile.allow_bridge_connections
+        self.queue.enqueue(cmd)
+
+
+
 
 
 def SolaceClientProfileFactory(name, options=None, version="soltr/6_0", vpn_name=None, **kwargs):
