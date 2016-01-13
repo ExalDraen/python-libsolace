@@ -160,10 +160,10 @@ if __name__ == '__main__':
 
     # configure the client ( what init would normally do, but the plugin system
     # lacks the ability to implement stuff in init )
-    cmdbapi.configure(settings=settings)
+    cmdbapi.configure(settings=settings, environment=options.env)
 
     # get the list of vpns to provision
-    vpns = cmdbapi.get_vpns_by_owner(options.product, environment=options.env)
+    vpns = cmdbapi.get_vpns_by_owner(options.product)
 
     logging.info('VPNs: %s' % json.dumps(str(vpns), ensure_ascii=False))
     if vpns == []:
@@ -172,8 +172,8 @@ if __name__ == '__main__':
 
     # Call main with environment from comand line
     for vpn in vpns:
-        users = cmdbapi.get_users_of_vpn(vpn['id'], environment=options.env)
-        queues = cmdbapi.get_queues_of_vpn(vpn['id'], environment=options.env)
+        users = cmdbapi.get_users_of_vpn(vpn['id'])
+        queues = cmdbapi.get_queues_of_vpn(vpn['id'])
         logging.info('Found vpn %s' % json.dumps(str(vpn), ensure_ascii=False))
         logging.info('Found users %s' % users)
         logging.info('Found queues %s' % queues)
