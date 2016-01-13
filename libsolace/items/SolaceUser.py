@@ -8,7 +8,7 @@ from libsolace.SolaceReply import SolaceReplyHandler
 
 @libsolace.plugin_registry.register
 class SolaceUser(Plugin):
-    """ Manage client-users within Solace """
+    """ Manage client-user within Solace """
 
     plugin_name = "SolaceUser"
 
@@ -79,6 +79,8 @@ class SolaceUser(Plugin):
                     # Check if user already exists, if not then shutdown immediately after creating the user
                     self.get(**kwargs)['reply'].show.client_username.client_usernames.client_username
                 except KeyError:
+                    kwargs['shutdown_on_apply'] = True
+                except AttributeError:
                     kwargs['shutdown_on_apply'] = True
                 self.new_user(**kwargs)
                 self.disable_user(**kwargs)
