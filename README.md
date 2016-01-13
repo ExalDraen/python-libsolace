@@ -3,8 +3,8 @@
 ## Changelog
 
 * Customizable CMDB API supporting XML / JSON / Custom backends
-* Plugable CMDB API loading
-* Separated classes for each Configurable Item 
+* Pluggable CMDB API loading
+* Separated pluggable classes for each Configurable Item
 	* SolaceClientProfile
 	* SolaceACLProfile
 	* SolaceQueue
@@ -13,53 +13,84 @@
 
 ## Intro
 
-This is a set of python helpers for managing Solace Messaging Appliances. The design is to be flexible and aimed at managing multiple clusters in multiple environments. 
+This is a set of python helpers for managing Solace Messaging Appliances. The
+design is to be flexible and aimed at managing multiple clusters in multiple
+environments.
 
-### Design Patterns
+### CMDB Configuration data and Naming Patterns
 
-In my requirements, each Solace cluster could potentially host multiple 'environments', so ALL objects are created with environment specific names. 
+In my use case, each Solace cluster could potentially host multiple 'environments',
+so ALL objects are created with a environment specific name to allow multi-homing.
 
 e.g.:
-* development_MyVPN
-* development_MyUsername
-* development_MyProfile
-* development_MyACL
+* dev_MyVPN
+* qa1_MyUsername
+* prod1_MyProfile
+* dev_MyACL
 
-This means that any cluster can host any number of environments combined without conflicting resources. Therefore, whenever you see '%s' in the name of a VPN, User or Profile, it will be substituted with the environment name at provision time. 
+This means that any cluster can host any number of environments combined without
+conflicting resources. Therefore, whenever you see '%s' in the name of a VPN,
+User or Profile in the CMDB data, the CMDBClient should string substitute the
+environment name into the string. e.g. '%s_myVpn' % environmentName.
+
+See libsolace/plugins/CMDBClient.py
 
 ### XML Generator
 
-The core of this provisioning system is the SolaceXMLBuilder class which can conjur up any XML code through recursive instantation of a speclial object. So if you want to create a new user within solace, you can do it with:
+The core of this provisioning system is the SolaceXMLBuilder class which can conjur
+up any XML code through recursive instantiation of a dictionary like object.
+So if you want to create a new user XML example:
 
 ```python
->>> document=SolaceXMLBuilder(version="soltr/6_2")
+>>> document = SolaceXMLBuilder(version="soltr/6_2")
 >>> document.create.client_username.username = "myUserName"
 >>> document.create.client_username.vpn_name = "dev_MyVPN"
 >>> str(document)
 '<rpc semp-version="soltr/6_2"><create><client-username><username>myUserName</username><vpn-name>dev_MyVPN</vpn-name></client-username></create></rpc>'
 ```
 
-If you want to create a new user and set the password, acl profile and client profile, you can use the SolaceUser class:
+If you want to create a new user and set the password, ACL Profile and Client Profile,
+you can use the SolaceUser class:
 
 ```python
 >>> from libsolace.items.SolaceUser import SolaceUser
->>> documents = SolaceUser('dev', '%s_myUser', 'myPassword', '%s_MyVPN', acl_profile='%s_MyVPN', client_profile='%s_glassfish')
+>>> documents = SolaceUser('dev', 'dev_myUser', 'myPassword', 'dev_MyVPN',
+				acl_profile='dev_MyVPN',
+				client_profile='%s_glassfish')
 >>> documents.commands.commands
 [ list of XML documents to POST to `dev` appliances ]
 ```
 
+The SolaceXMLBuilder is typically used through the SolaceAPI, which will take
+care to detect the appliance OS version for you. e.g.
+
+```python
+>>> from libsolace.SolaceAPI import SolaceAPI
+>>> conn = SolaceAPI("dev")
+>>> conn.manage("SolaceUser").get(username="dev_testvpn", vpn_name="dev_testvpn")
+{'reply': {u'show': {u'client-username': {u'client-usernames': {u'client-username': {u'profile': u'glassfish', u'acl-profile': u'dev_testvpn', u'guaranteed-endpoint-permission-override': u'false', u'client-username': u'dev_testvpn', u'enabled': u'true', u'message-vpn': u'dev_testvpn', u'password-configured': u'true', u'num-clients': u'0', u'num-endpoints': u'2', u'subscription-manager': u'false', u'max-connections': u'500', u'max-endpoints': u'16000'}}}}}}
+```
+
 
 ## TODO FIXME
+Open:
+* SolOS 7 Config Sync
+* Plugins not instantiated only once, make them safe by moving work to separated classes for User,Queue,Vpn,...
 
-* optional environment name substitusion
-* Item's are plugins ( version aware )
+Completed:
+* ~~optional environment name substitution~~
+* ~~Item's are plugins and SolOS version aware~~
 
+Abandoned:
 
 ## Limitations
 
 * XML can only be validated if it passes through a SolaceCommandQueue instance.
-* appliance responses are difficult to validate since the "slave" appliance will almost always return errors when NOT "active", and already existing CI's will throw a error on create events and so forth.
-* since python dictionaries cannot contain `-` use `_`, the SolaceNode class will substitute a `-` as needed
+* Appliance responses are difficult to validate since the "slave" appliance will
+almost always return errors when NOT "active", and already existing CI's will
+throw a error on create events and so forth.
+* Since python dictionaries cannot contain `-` use `_`, the SolaceNode class
+will substitute a `-` for a `_` and vice-versa as needed on keyNames
 
 ## Install
 
@@ -71,30 +102,125 @@ python setup.py install
 
 ## Configuration
 
-libSolace requires a `libsolace.yaml` file in order to know what environments exist and what appliances are part of those environments. A single appliance can be part of multiple environments.
+libsolace requires a `libsolace.yaml` file in order to know what environments
+exist and what appliances are part of those environments. A single appliance can
+be part of multiple environments.
 
-the `libsolace.yaml` file is searched for in:
+The `libsolace.yaml` file is searched for in:
 
 * 'libsolace.yaml'
 *  '/etc/libsolace/libsolace.yaml'
 * '/opt/libsolace/libsolace.yaml'
 
-see `libsolace.yaml` for specifics.
+The configuration loader is also responsible for loading all plugins as specified
+in the PLUGINS key.
+
+See `libsolace.yaml` for more info.
+
+## Plugins
+
+libsolace is pluggable, in that you can register your own classes to customize
+the appliance management. You need to implement your own CMDBClient which should
+integrate with whatever configuration system you desire to populate solace.
+
+See libsolace/plugins/CMDBClient.py
+See libsolace/plugins/*
+See libsolace/items/*
 
 ## bin
 
-see the `bin` directory for examples of various activities.
+See the `bin` directory for examples of various activities.
 
 ## Classes
 
-### SolaceAPI
+### SolaceACLProfile
 
-Connects to an appliance *cluster* on the *environment* key.
+### SolaceClientProfile
+
+### SolaceQueue
+
+Plugin which can query and manages the creation of queues.
+
+Plugin Manage Identifier: "SolaceQueue"
+
+Get Queue Usage Example:
+
+```python
+connection = SolaceAPI('dev')
+connection.manage("SolaceQueue").get(queue_name="testqueue1", vpn_name="dev_testvpn")
+```
+
+Create Queue Example:
+
+```python
+# list of queues we want to create
+qlist = []
+# a queue we will place in the list
+queue1 = {}
+queue1['queue_config'] = {}
+queue1['queue_config']["exclusive"] = "true"
+queue1['queue_config']["queue_size"] = "4096"
+queue1['queue_config']["retries"] = 0
+queue1['queue_config']['max_bind_count'] = 1000
+queue1['queue_config']['owner'] = "dev_myUsername"
+queue1['queue_config']["consume"] = "all"
+queue1["name"] = "testqueue1"
+# add the queue to the list
+qlist.append(queue1)
+# connect to the appliance
+connection = SolaceAPI('dev')
+qcreate = connection.manage("SolaceQueue", vpn_name="dev_testvpn", queues = qlist)
+for cmd in qcreate.commands.commands:
+	connection.rpc(str(cmd))
 
 ```
+
+
+### SolaceUsers
+
+User management plugin creates multiple users at once.
+
+Plugin Manage Identifier: "SolaceUsers"
+
+
+
+### SolaceVPN
+
+Plugin which manages the creation of a VPN.
+
+Plugin Manage Identifier: "SolaceVPN"
+
+Usage Example:
+
+```python
+connection = SolaceAPI('dev')
+vpn = conn.manage("SolaceVPN", vpn_name="foo", max_spool_usage=1024)
+for cmd in vpn.commands.commands:
+	connection.rpc(str(cmd))
+```
+
+
+
+### SolaceAPI
+
+Connects to an appliance *cluster* on the *environment* key. Upon connection the
+SolOS-TR version is detected and the appropriate language level is set.
+
+```python
 import libsolace.settingsloader as settings
 from libsolace.SolaceAPI import SolaceAPI
 connection = SolaceAPI('dev')
+```
+
+#### manage
+
+Returns a plugin instance
+
+```python
+conn = SolaceAPI('dev')
+vpn = conn.manage("SolaceVPN", vpn_name="foo", owner_name="Someguy", max_spool_usage=1024)
+for cmd in vpn.commands.commands:
+	conn.rpc(str(cmd))
 ```
 
 #### get_redundancy
@@ -231,7 +357,7 @@ Any CMDB implementation must implement the following methods as part of the cont
 
 Returns all VPNS owned by a specific "owner".
 
-See CMDBClient for example. 
+See CMDBClient for example.
 
 #### get_users_of_vpn(vpn_name, environment='dev', **kwargs)
 

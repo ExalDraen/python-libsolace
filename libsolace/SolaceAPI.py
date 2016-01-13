@@ -130,7 +130,7 @@ class SolaceAPI:
 
                 for node in self.status:
                     spoolStatus = node['rpc-reply']['rpc']['show']['message-spool']['message-spool-info']['operational-status']
-                    logging.info(spoolStatus)
+                    logging.debug(spoolStatus)
                     if spoolStatus == 'AD-Active' and self.primaryRouter == None:
                         self.primaryRouter = node['HOST']
                     elif self.backupRouter == None and self.primaryRouter != None:
@@ -138,6 +138,9 @@ class SolaceAPI:
                     else:
                         logging.warn("More than one backup router?")
                         self.primaryRouter = node['HOST']
+                    logging.info("Primary Router: %s" % self.primaryRouter)
+                    logging.info("Backup Router: %s" % self.backupRouter)
+
             else:
                 logging.debug("Not detecting statuses, using config")
                 self.primaryRouter = self.config['MGMT'][0]
@@ -168,7 +171,8 @@ class SolaceAPI:
             raise
 
     def __restcall(self, request, primaryOnly=False, backupOnly=False, **kwargs):
-        logging.info("%s user requesting: %s kwargs:%s" % (self.config['USER'], request, kwargs))
+        logging.info("%s user requesting: %s kwargs:%s primaryOnly:%s backupOnly:%s"
+            % (self.config['USER'], request, kwargs, primaryOnly, backupOnly))
         self.kwargs = kwargs
 
         # appliances in the query
@@ -225,28 +229,7 @@ class SolaceAPI:
             logging.warn("Solace Error %s" % e )
             raise
 
-    # def getUser(self, username=None, vpn_name=None):
-    #     """ Get a user from the solace appliance(s) and return a SolaceUser instance
-    #     representing the user.
-    #
-    #     Args:
-    #         username(str): the username to get
-    #
-    #     Returns:
-    #         dictionary representation of a user
-    #
-    #     Example:
-    #         >>> c = SolaceAPI("dev")
-    #         >>> c.manage("SolaceUser").get(username="%s_testvpn", vpn_name="%s_testvpn")
-    #         {'reply': {u'show': {u'client-username': {u'client-usernames': {u'client-username': {u'profile': u'glassfish', u'acl-profile': u'dev_testvpn', u'guaranteed-endpoint-permission-override': u'false', u'client-username': u'dev_testvpn', u'enabled': u'true', u'message-vpn': u'dev_testvpn', u'password-configured': u'true', u'num-clients': u'0', u'num-endpoints': u'2', u'subscription-manager': u'false', u'max-connections': u'500', u'max-endpoints': u'16000'}}}}}}
-    #     """
-    #     self.x = SolaceXMLBuilder("Getting user %s from appliance" % username, version=self.version)
-    #     self.x.show.client_username.name = username
-    #     self.x.show.client_username.detail
-    #     document = self.rpc(str(self.x), primaryOnly=True)
-    #     replyObject = SolaceReply(document=document, version=self.version)
-    #     user = SolaceUser(document=document.pop())
-    #     return user
+
 
     def get_redundancy(self):
         """ Return redundancy status """
@@ -403,16 +386,6 @@ class SolaceAPI:
 
         return self.manage("SolaceUser").get(username = clientusername, vpn_name = vpn)
 
-        # try:
-        #     request = SolaceXMLBuilder(version = self.version)
-        #     request.show.client_username.name = clientusername
-        #     request.show.client_username.vpn_name = vpn
-        #     if detail:
-        #         request.show.client_username.detail
-        #
-        #     return self.rpc(str(request))
-        # except:
-        #     raise
 
     def get_client(self, client, vpn, detail=False, **kwargs):
         """ Get Client details """
@@ -475,10 +448,10 @@ class SolaceAPI:
         """
         responses = None
         mywargs = kwargs
-        logging.info("Kwargs: %s" % mywargs)
+        logging.debug("Kwargs: %s" % mywargs)
         try:
             data = []
-            responses, codes = self.__restcall(xml, **mywargs)
+            responses, codes = self.__restcall(xml, primaryOnly=primaryOnly, backupOnly=backupOnly, **mywargs)
             for k in responses:
                 response = xml2dict.parse(responses[k])
                 logging.debug(response)
@@ -519,8 +492,8 @@ class SolaceAPI:
         """
 
         plugin = libsolace.plugin_registry(name, **kwargs)
-        plugin.init(api=self, **kwargs)
-        return plugin
+        logging.info("Setting up the plugin instance with api and kwargs")
+        return plugin(api=self, **kwargs)
 
 
 if __name__ == "__main__":

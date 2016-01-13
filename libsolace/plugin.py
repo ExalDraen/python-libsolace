@@ -79,8 +79,9 @@ class Plugin(object):
         """
         logging.info("Retrieving self:%s, args:%s, kwargs:%s" % (self, args, kwargs))
         try:
-            return self.plugins_dict[args[0]]
+            logging.info("Class: %s" % self.plugins_dict[args[0]].__class__)
+            return self.plugins_dict[args[0]].__class__
         except:
-            logging.warn("No plugin named: %s found" % args[0])
+            logging.warn("No plugin named: %s found, available plugins are: %s" % (args[0],self.plugins_dict))
             logging.warn("Please check the plugin is listed in the yaml config and that you have @libsolace.plugin_registry.register in the class")
             raise

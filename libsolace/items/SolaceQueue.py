@@ -3,11 +3,13 @@ import libsolace
 from libsolace.plugin import Plugin
 from libsolace.SolaceCommandQueue import SolaceCommandQueue
 from libsolace.SolaceXMLBuilder import SolaceXMLBuilder
+from libsolace.SolaceReply import SolaceReplyHandler
 
 @libsolace.plugin_registry.register
 class SolaceQueue(Plugin):
 
     plugin_name = "SolaceQueue"
+    api = "None"
 
     queue_defaults = {
         "retries": 0,
@@ -18,7 +20,7 @@ class SolaceQueue(Plugin):
         "owner": "%lsVPN"
     }
 
-    def init(self, **kwargs):
+    def __init__(self, **kwargs):
         """ Manage Queues
 
         This plugin manages SolaceQueue's within the VPN scope. It needs to be
@@ -40,8 +42,13 @@ class SolaceQueue(Plugin):
 
         """
 
+        if kwargs == {}:
+            return
+
         self.api = kwargs.get("api")
         self.commands = SolaceCommandQueue(version = self.api.version)
+
+        logging.info("API is set: %s" % self.api)
 
         if not "vpn_name" in kwargs:
             logging.info("Query mode because vpn_name not in kwargs")
@@ -76,6 +83,18 @@ class SolaceQueue(Plugin):
                     self.reject_on_discard(queue_name = queueName, **kwargs)
                     self.enable(queue_name = queueName, **kwargs)
 
+    def get(self, api=api, **kwargs):
+        """
+        return a queue and its details
+        """
+        queue_name = kwargs.get("queue_name")
+        vpn_name = kwargs.get("vpn_name")
+        
+        self.api.x = SolaceXMLBuilder("Querying Queue %s" % queue_name)
+        self.api.x.show.queue.name = queue_name
+        self.api.x.show.queue.vpn_name = vpn_name
+        self.api.x.show.queue.detail
+        return SolaceReplyHandler(self.api.rpc(str(self.api.x), primaryOnly=True))
 
     def get_queue_config(self, queue, **kwargs):
         """ Returns a queue config for the queue and overrides where neccesary

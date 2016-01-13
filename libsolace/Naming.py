@@ -13,6 +13,6 @@ example:
 def name(name, environment):
     import libsolace.settingsloader as settings
     try:
-        return libsolace.plugin_registry(settings.NAMEHOOK).solve(name, environment)
+        return libsolace.plugin_registry(settings.NAMEHOOK)().solve(name, environment)
     except Exception, e:
         raise
