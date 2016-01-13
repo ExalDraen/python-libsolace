@@ -114,14 +114,31 @@ class SolaceProvision:
         # prepare the user that owns this vpn
         logging.info("self.vpn_name: %s" % self.vpn_name)
 
-        self.users = [self.connection.manage("SolaceUser",
-                                    username = self.vpn_name,
-                                    password = self.vpn_dict['password'],
+        vpn_owner_user = [
+            {
+                'username': self.vpn_name,
+                'password': self.vpn_dict['password']
+            }
+        ]
+        self.users_dict.extend(vpn_owner_user)
+        self.userMgr = self.connection.manage("SolaceUsers",
+                                    users = self.users_dict,
                                     vpn_name = self.vpn_name,
                                     client_profile = self.client_profile.name,
                                     acl_profile = self.acl_profile.name,
                                     testmode = self.testmode,
-                                    shutdown_on_apply = self.shutdown_on_apply)]
+                                    shutdown_on_apply = self.shutdown_on_apply)
+
+        # self.users = [self.connection.manage("SolaceUser",
+        #                             username = self.vpn_name,
+        #                             password = self.vpn_dict['password'],
+        #                             vpn_name = self.vpn_name,
+        #                             client_profile = self.client_profile.name,
+        #                             acl_profile = self.acl_profile.name,
+        #                             testmode = self.testmode,
+        #                             shutdown_on_apply = self.shutdown_on_apply)]
+        #
+        # logging.info("self.users: %s" % self.users)
 
         # prepare the queues for the vpn ( if any )
         try:
@@ -145,17 +162,18 @@ class SolaceProvision:
             raise
 
         # create the client users
-        for user in self.users_dict:
-            logging.info("Provision user: %s for vpn %s" % (user, self.vpn_name))
-            self.users.append(self.connection.manage("SolaceUser",
-                                         username = user['username'],
-                                         password = user['password'],
-                                         vpn_name = self.vpn_name,
-                                         client_profile = self.client_profile.name,
-                                         acl_profile = self.acl_profile.name,
-                                         testmode=self.testmode,
-                                         shutdown_on_apply = self.shutdown_on_apply))
-
+        # for user in self.users_dict:
+        #     logging.info("Provision user: %s for vpn %s" % (user, self.vpn_name))
+        #     self.users.append(self.connection.manage("SolaceUser",
+        #                                  username = user['username'],
+        #                                  password = user['password'],
+        #                                  vpn_name = self.vpn_name,
+        #                                  client_profile = self.client_profile.name,
+        #                                  acl_profile = self.acl_profile.name,
+        #                                  testmode=self.testmode,
+        #                                  shutdown_on_apply = self.shutdown_on_apply))
+        #
+        # logging.info("self.users: %s" % self.users)
 
         logging.info("Create Client Profile")
         # Provision profile now already since we need to link to it.
@@ -170,12 +188,18 @@ class SolaceProvision:
             if not self.testmode:
                 self.connection.rpc(str(cmd))
 
-        for user in self.users:
-            logging.info("Create user: %s for vpn %s" % (user.username, self.vpn_name))
-            for cmd in user.commands.commands:
-                logging.info(str(cmd))
-                if not self.testmode:
-                    self.connection.rpc(str(cmd))
+        # for user in self.users:
+        #     logging.info("Create user: %s for vpn %s" % (user.username, self.vpn_name))
+        #     for cmd in user.commands.commands:
+        #         logging.info(str(cmd))
+        #         if not self.testmode:
+        #             self.connection.rpc(str(cmd))
+
+        logging.info("Creating users for vpn %s" % self.vpn_name)
+        for cmd in self.userMgr.commands.commands:
+            logging.info(cmd)
+            if not self.testmode:
+                self.connection.rpc(str(cmd))
 
         logging.info("Create Queues Bool?: %s in %s" % (self.create_queues, self.vpn_name))
         if self.create_queues:
