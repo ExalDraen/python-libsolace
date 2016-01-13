@@ -69,13 +69,13 @@ class Plugin(object):
 
     def __call__(self, *args, **kwargs):
         """
-        When you call this with the name of a plugin eg: 'PipelineClientPlugin', this returns the instance
+        When you call this with the name of a plugin eg: 'PipelineClientPlugin', this returns the class
         from the plugin_registry. You might need to call sub methods on that to get it into the state you need,
         for example the reconfigure(settings) method in PipelineClientPlugin.
 
         :param args: name of Plugin to return
         :param kwargs:
-        :return: object
+        :return: class
         """
         logging.info("Retrieving self:%s, args:%s, kwargs:%s" % (self, args, kwargs))
         try:

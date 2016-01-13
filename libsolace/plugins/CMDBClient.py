@@ -19,7 +19,7 @@ class CMDBClient(Plugin):
 
     # since we instantiate instances early on, call configure before use to
     # "init" the instance object of the Plugin
-    def configure(self, settings=None, **kwargs):
+    def __init__(self, settings=None, **kwargs):
         logging.info("Configuring with settings: %s" % settings)
 
     def get_vpns_by_owner(self, owner_name, environment='dev', **kwargs):
