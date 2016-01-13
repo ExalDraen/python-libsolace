@@ -11,6 +11,7 @@ import xml.sax.handler
 import pkg_resources
 import base64
 from xml.dom.minidom import Document
+from distutils.version import StrictVersion
 
 try:
     from collections import OrderedDict
@@ -253,3 +254,30 @@ def generateRequestHeaders(**kwargs):
       if type(kwargs[key]) is dict: request_headers.update(kwargs[key])
     logger.debug("Headers generated: %s" % request_headers )
     return request_headers
+
+
+def version_equal_or_greater_than(left, right):
+    """
+    Checks if right is equals or greater than left
+
+    :param left: soltr_version string
+    :type left: str
+    :param right: soltr_version string
+    :type right: str
+    :return: result of comparison
+    :rtype: bool
+
+    >>> version_equal_or_greater_than('soltr/6_0', 'soltr/6_2')
+    True
+
+    """
+    def _extract_version(soltr_version):
+        try:
+            return re.sub(u'_', '.', soltr_version.split("/")[1])
+        except:
+            msg = "Failed to parse version %s" % soltr_version
+            logger.error(msg)
+            raise Exception(msg)
+    left = _extract_version(left)
+    right = _extract_version(right)
+    return StrictVersion(right) >= StrictVersion(left)
