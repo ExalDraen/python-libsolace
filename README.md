@@ -75,11 +75,12 @@ care to detect the appliance OS version for you. e.g.
 ## TODO FIXME
 Open:
 * SolOS 7 Config Sync
-* Plugins not instantiated only once, make them safe by moving work to separated classes for User,Queue,Vpn,...
+
 
 Completed:
 * ~~optional environment name substitution~~
 * ~~Item's are plugins and SolOS version aware~~
+* ~~Plugins not instantiated only once, make them safe by moving work to separated classes for User,Queue,Vpn,...~~
 
 Abandoned:
 
