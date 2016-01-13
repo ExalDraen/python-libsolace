@@ -87,8 +87,8 @@ class SolaceVPN(Plugin):
         self.api.x = SolaceXMLBuilder("VPN %s Clearing Radius" % vpn_name, version=self.api.version)
         self.api.x.message_vpn.vpn_name = self.vpn_name
         self.api.x.message_vpn.authentication.user_class.client
-        if self.api.version == "soltr/7_1_1" or self.api.version == "soltr/7_0":
-            self.api.x.message_vpn.authentication.user_class.basic
+        if self.api.version == "soltr/7_1_1" or self.api.version == "soltr/7_0" or self.api.version == "soltr/6_2":
+            self.api.x.message_vpn.authentication.user_class.basic.radius_domain.radius_domain
         else:
             self.api.x.message_vpn.authentication.user_class.radius_domain.radius_domain
         self.commands.enqueue(self.api.x)
@@ -98,15 +98,17 @@ class SolaceVPN(Plugin):
         vpn_name = kwargs.get("vpn_name")
 
         # Switch to Internal Auth
-        if self.api.version == "soltr/7_1_1" or self.api.version == "soltr/7_0":
-            logging.warn("disabled, possibly not supported in soltr/7+")
-            return None
+        if self.api.version == "soltr/7_1_1" or self.api.version == "soltr/7_0" or self.api.version == "soltr/6_2":
+            self.api.x = SolaceXMLBuilder("VPN %s Enable Internal Auth" % vpn_name, version=self.api.version)
+            self.api.x.message_vpn.vpn_name = vpn_name
+            self.api.x.message_vpn.authentication.user_class.client
+            self.api.x.message_vpn.authentication.user_class.basic.auth_type.internal
         else:
             self.api.x = SolaceXMLBuilder("VPN %s Enable Internal Auth" % vpn_name, version=self.api.version)
             self.api.x.message_vpn.vpn_name = vpn_name
             self.api.x.message_vpn.authentication.user_class.client
             self.api.x.message_vpn.authentication.user_class.auth_type.internal
-            self.commands.enqueue(self.api.x)
+        self.commands.enqueue(self.api.x)
 
     def set_spool_size(self, **kwargs):
 
