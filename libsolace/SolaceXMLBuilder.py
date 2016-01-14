@@ -17,7 +17,7 @@ class SolaceXMLBuilder(object):
 
     Any dot-name-space calling of a instance of SolaceXMLBuilder will create
     nested dictionary named the same. These are converted to XML when the instance
-    is represented as str.
+    is represented serialized or represented as a string.
 
     >>> a=SolaceXMLBuilder(version="soltr/6_2")
     >>> a.foo.bar.baz=2

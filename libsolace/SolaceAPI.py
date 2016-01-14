@@ -474,7 +474,7 @@ class SolaceAPI:
             logging.error("responses: %s" % responses)
             raise
 
-    def manage(self, name, **kwargs):
+    def manage(self, plugin_name, **kwargs):
         """
         Gets a plugin, configures it, then allows direct communication with it.
 
@@ -491,7 +491,7 @@ class SolaceAPI:
 
         """
 
-        plugin = libsolace.plugin_registry(name, **kwargs)
+        plugin = libsolace.plugin_registry(plugin_name, **kwargs)
         logging.info("Setting up the plugin instance with api and kwargs")
         return plugin(api=self, **kwargs)
 

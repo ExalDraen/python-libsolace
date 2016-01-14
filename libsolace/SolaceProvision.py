@@ -11,7 +11,7 @@ from libsolace.util import d2x
 from libsolace.SolaceAPI import SolaceAPI
 from libsolace.SolaceXMLBuilder import SolaceXMLBuilder
 from libsolace.SolaceCommandQueue import SolaceCommandQueue
-from libsolace.items.SolaceClientProfile import SolaceClientProfileFactory
+#from libsolace.items.SolaceClientProfile import SolaceClientProfileFactory
 from libsolace.items.SolaceACLProfile import SolaceACLProfile
 from libsolace.items.SolaceVPN import SolaceVPN
 
@@ -106,7 +106,7 @@ class SolaceProvision:
                 self.connection.rpc(str(cmd))
 
         # prepare the client_profile commands
-        self.client_profile = SolaceClientProfileFactory(self.client_profile_name, vpn_name=self.vpn_name, version=self.version)
+        self.client_profile = self.connection.manage("SolaceClientProfile", name=self.client_profile_name, vpn_name=self.vpn_name, version=self.version)
 
         # prepare acl_profile commands, we create a profile named the same as the VPN for simplicity
         self.acl_profile = SolaceACLProfile(self.environment_name, self.vpn_name, self.vpn_name, version=self.version)
@@ -177,7 +177,7 @@ class SolaceProvision:
 
         logging.info("Create Client Profile")
         # Provision profile now already since we need to link to it.
-        for cmd in self.client_profile.queue.commands:
+        for cmd in self.client_profile.commands.commands:
             logging.info(str(cmd))
             if not self.testmode:
                 self.connection.rpc(str(cmd))
