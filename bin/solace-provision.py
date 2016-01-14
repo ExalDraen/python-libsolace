@@ -154,14 +154,13 @@ if __name__ == '__main__':
 
     logging.info('CMDB_URL: %s' % settings.CMDB_URL)
 
-
     # load the cmdb API client
     cmdbapi_class = libsolace.plugin_registry(settings.SOLACE_CMDB_PLUGIN, settings=settings)
 
     # configure the client ( what init would normally do, but the plugin system
     # lacks the ability to implement stuff in init )
-    cmdbapi = cmdbapi_class()
-    cmdbapi.configure(settings=settings, environment=options.env)
+    cmdbapi = cmdbapi_class(settings=settings, environment=options.env)
+    #cmdbapi.configure(settings=settings, environment=options.env)
 
     # get the list of vpns to provision
     vpns = cmdbapi.get_vpns_by_owner(options.product, environment=options.env)

@@ -11,6 +11,7 @@ import libsolace
 from libsolace.plugin import Plugin
 from libsolace.Naming import name
 
+
 @libsolace.plugin_registry.register
 class CMDBClient(Plugin):
 
@@ -21,6 +22,7 @@ class CMDBClient(Plugin):
     # "init" the instance object of the Plugin
     def __init__(self, settings=None, **kwargs):
         logging.info("Configuring with settings: %s" % settings)
+        #url = settings.MY_CMDB_REST_BACKEND
 
     def get_vpns_by_owner(self, owner_name, environment='dev', **kwargs):
         """

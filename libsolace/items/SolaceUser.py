@@ -114,8 +114,12 @@ class SolaceUser(Plugin):
         self.api.x.show.client_username.vpn_name = vpn_name
         self.api.x.show.client_username.detail
 
-        return SolaceReplyHandler(self.api.rpc(str(self.api.x), primaryOnly=True)).__dict__
-
+        response = SolaceReplyHandler(self.api.rpc(str(self.api.x), primaryOnly=True))
+        logging.info(response.reply.show.client_username.client_usernames)
+        if response.reply.show.client_username.client_usernames == 'None':
+            raise Exception("No such user")
+        else:
+            return response
 
     def check_client_profile_exists(self, **kwargs):
         """

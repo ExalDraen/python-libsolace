@@ -13,7 +13,7 @@ class SolaceUsers(Plugin):
 
     plugin_name = "SolaceUsers"
     api = "None"
-    
+
     def __init__(self, **kwargs):
         """ Init user object
 
@@ -79,7 +79,7 @@ class SolaceUsers(Plugin):
                     user_kwargs['password'] = user['password']
                     try:
                         # Check if user already exists, if not then shutdown immediately after creating the user
-                        self.get(**user_kwargs)['reply'].show.client_username.client_usernames.client_username
+                        self.get(**user_kwargs).reply.show.client_username.client_usernames.client_username
                     except KeyError:
                         user_kwargs['shutdown_on_apply'] = True
                     except AttributeError:
@@ -117,7 +117,12 @@ class SolaceUsers(Plugin):
         self.api.x.show.client_username.vpn_name = vpn_name
         self.api.x.show.client_username.detail
 
-        return SolaceReplyHandler(self.api.rpc(str(self.api.x), primaryOnly=True)).__dict__
+        response = SolaceReplyHandler(self.api.rpc(str(self.api.x), primaryOnly=True))
+        logging.info(response.reply.show.client_username.client_usernames)
+        if response.reply.show.client_username.client_usernames == 'None':
+            raise Exception("No such user")
+        else:
+            return response
 
 
     def check_client_profile_exists(self, **kwargs):

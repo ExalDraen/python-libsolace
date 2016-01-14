@@ -1,9 +1,9 @@
 import logging
 import re
 import simplejson as json
-import ast
+import re
 
-class SolaceReplyHandler:
+class SolaceReplyHandler(object):
     """
     Solace reply handler, pass a SolaceAPI replies into this for easier handling
     of the dict structures.
@@ -26,9 +26,15 @@ class SolaceReplyHandler:
         """
         Replace u' with u" and ' with "
         """
-        return str(json.loads(str(self.__dict__).replace("'", '"').replace('u"', '"')))
+        try:
+            logging.debug("Reply Dict: %s " % self.__dict__)
+            return str(json.loads(str(self.__dict__).replace("'", '"').replace('u"', '"')))
+        except:
+            logging.warn("Unable to decode json %s" % str(self.__dict__))
+            raise
+            # raise Exception("Unable to decode JSON")
 
-class SolaceReply:
+class SolaceReply(object):
     """ Create a "dot-name-space" navigable object from a dictionary """
 
     def __init__(self, document):
@@ -38,15 +44,20 @@ class SolaceReply:
                 self.__dict__[k] = SolaceReply(document[k])
             except:
                 logging.debug("Final value %s" % document[k])
-                self.__dict__[k] = document[k]
+                if document[k] == None:
+                    self.__dict__[k] = str(document[k])
+                else:
+                    self.__dict__[k] = document[k]
 
     # cant have `-` in the key names, rewrite em.
     def __getattr__(self, name):
-        logging.info(self.__dict__)
+        logging.debug("getattr: name: %s from %s " % (name, self.__dict__))
         name = re.sub("_", "-", name)
+
         try:
             return self.__dict__[name]
         except:
+            logging.error("Unable to retrieve key: %s" % name)
             raise
 
     def __str__(self):
@@ -60,8 +71,11 @@ class SolaceReply:
 
     def __setattr__(self, name, value):
         # name = re.sub("_", "-", name)
-        logging.info("Setting key %s" % name)
-        self.__dict__[name] = value
+        logging.debug("Setting key %s" % name)
+        if value == None:
+            self.__dict__[name] = str(value)
+        else:
+            self.__dict__[name] = value
 
 
 if __name__ == "__main__":
