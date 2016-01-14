@@ -44,13 +44,13 @@ class SolaceUser(Plugin):
             return
 
         self.api = kwargs.get("api")
+        self.commands = SolaceCommandQueue(version = self.api.version)
         self.options = None # not implemented
 
         if not "username" in kwargs:
             logging.info("No username kwarg, assuming query mode api")
         else:
             logging.info("Username specified, assuming provision mode")
-            self.commands = SolaceCommandQueue(version = self.api.version)
 
             self.username = kwargs.get("username")
             self.password = kwargs.get("password")
@@ -83,15 +83,15 @@ class SolaceUser(Plugin):
                     self.get(**kwargs)['reply'].show.client_username.client_usernames.client_username
                 except:
                     kwargs['shutdown_on_apply'] = True
-                    
+
                 self.new_user(**kwargs)
-                self.disable_user(**kwargs)
+                self.shutdown(**kwargs)
                 self.set_client_profile(**kwargs)
                 self.set_acl_profile(**kwargs)
                 self.no_guarenteed_endpoint(**kwargs)
                 self.no_subscription_manager(**kwargs)
                 self.set_password(**kwargs)
-                self.no_shutdown_user(**kwargs)
+                self.no_shutdown(**kwargs)
 
     def _tests(self, **kwargs):
         """
@@ -103,7 +103,15 @@ class SolaceUser(Plugin):
 
 
     def get(self, **kwargs):
-        """ Get a username from solace, return a dict """
+        """
+        Get a username from solace, return a dict
+
+        Example
+        >>> connection = SolaceAPI("dev")
+        >>> connection.manage("SolaceUser").get(username="dev_testvpn", vpn_name="dev_testvpn")
+        {'reply': {'show': {'client-username': {'client-usernames': {'client-username': {'profile': 'glassfish', 'acl-profile': 'dev_testvpn', 'max-endpoints': '16000', 'client-username': 'dev_testvpn', 'enabled': 'true', 'message-vpn': 'dev_testvpn', 'password-configured': 'true', 'num-clients': '0', 'num-endpoints': '5', 'subscription-manager': 'false', 'max-connections': '500', 'guaranteed-endpoint-permission-override': 'false'}}}}}}
+
+        """
 
         username = kwargs.get("username")
         vpn_name = kwargs.get("vpn_name")
@@ -162,6 +170,15 @@ class SolaceUser(Plugin):
         return True
 
     def new_user(self, **kwargs):
+        """
+        Create user XML / enqueue command on connection instance
+
+        Example
+        >>> connection = SolaceAPI("dev")
+        >>> xml = connection.manage("SolaceUser").new_user(username="foo", vpn_name="bar")
+        <rpc semp-version="soltr/6_0"><create><client-username><username>foo</username><vpn-name>bar</vpn-name></client-username></create></rpc>
+
+        """
         username = kwargs.get('username')
         vpn_name = kwargs.get('vpn_name')
 
@@ -171,18 +188,21 @@ class SolaceUser(Plugin):
         self.commands.enqueue(self.api.x)
         return self.api.x;
 
-    def disable_user(self, **kwargs):
+    def shutdown(self, **kwargs):
         """
-        Disable the user ( suspending pub/sub )
+        Disable the user
 
+        Example
+        >>> connection.manage("SolaceUser").shutdown(username="foo", vpn_name="bar", shutdown_on_apply=True)
+        <rpc semp-version="soltr/6_0"><client-username><username>foo</username><vpn-name>bar</vpn-name><shutdown/></client-username></rpc>
         """
 
         username = kwargs.get('username')
         vpn_name = kwargs.get('vpn_name')
         shutdown_on_apply = kwargs.get('shutdown_on_apply')
 
+        # b = both, u = user, True = forced
         if ( shutdown_on_apply=='b' ) or ( shutdown_on_apply == 'u' ) or ( shutdown_on_apply == True ):
-            # Disable / Shutdown User ( else we cant change profiles )
             self.api.x = SolaceXMLBuilder("Disabling User %s" % username, version=self.api.version)
             self.api.x.client_username.username = username
             self.api.x.client_username.vpn_name = vpn_name
@@ -194,7 +214,18 @@ class SolaceUser(Plugin):
             return None
 
     def set_client_profile(self, **kwargs):
+        """
+        Set the ClientProfile
 
+        Example
+        >>> connection = SolaceAPI("dev")
+        >>> xml = []
+        >>> xml.append(connection.manage("SolaceUser").shutdown(username="foo", vpn_name="bar", shutdown_on_apply=True))
+        >>> xml.append(connection.manage("SolaceUser").set_client_profile(username="foo", vpn_name="bar", client_profile="jboss"))
+        >>> xml.append(connection.manage("SolaceUser").no_shutdown(username="foo", vpn_name="bar", shutdown_on_apply=True))
+        >>> for x in xml:
+        >>>     connection.rpc(str(x))
+        """
         username = kwargs.get('username')
         vpn_name = kwargs.get('vpn_name')
         client_profile = kwargs.get('client_profile')
@@ -261,7 +292,7 @@ class SolaceUser(Plugin):
         self.commands.enqueue(self.api.x)
         return self.api.x
 
-    def no_shutdown_user(self, **kwargs):
+    def no_shutdown(self, **kwargs):
 
         username = kwargs.get('username')
         vpn_name = kwargs.get('vpn_name')
