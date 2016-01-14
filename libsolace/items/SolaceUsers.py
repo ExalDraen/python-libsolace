@@ -84,6 +84,8 @@ class SolaceUsers(Plugin):
                         user_kwargs['shutdown_on_apply'] = True
                     except AttributeError:
                         user_kwargs['shutdown_on_apply'] = True
+                    except:
+                        user_kwargs['shutdown_on_apply'] = True
                     self.new_user(**user_kwargs)
                     self.disable_user(**user_kwargs)
                     self.set_client_profile(**user_kwargs)
