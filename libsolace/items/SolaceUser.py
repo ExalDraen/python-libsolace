@@ -81,10 +81,9 @@ class SolaceUser(Plugin):
                 try:
                     # Check if user already exists, if not then shutdown immediately after creating the user
                     self.get(**kwargs)['reply'].show.client_username.client_usernames.client_username
-                except KeyError:
+                except:
                     kwargs['shutdown_on_apply'] = True
-                except AttributeError:
-                    kwargs['shutdown_on_apply'] = True
+                    
                 self.new_user(**kwargs)
                 self.disable_user(**kwargs)
                 self.set_client_profile(**kwargs)

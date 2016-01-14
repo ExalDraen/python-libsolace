@@ -30,8 +30,8 @@ e.g.:
 
 This means that any cluster can host any number of environments combined without
 conflicting resources. Therefore, whenever you see '%s' in the name of a VPN,
-User or Profile in the CMDB data, the CMDBClient should string substitute the
-environment name into the string. e.g. '%s_myVpn' % environmentName.
+User, Profile or any other CI in the CMDB data, the CMDBClient will resolve the
+final name by substituting the environment name into the string. e.g. '%s_myVpn' % environmentName.
 
 See libsolace/plugins/CMDBClient.py
 
@@ -54,10 +54,13 @@ you can use the SolaceUser class:
 
 ```python
 >>> from libsolace.items.SolaceUser import SolaceUser
->>> documents = SolaceUser('dev', 'dev_myUser', 'myPassword', 'dev_MyVPN',
+>>> connection = SolaceAPI("dev")
+>>> xmlList = connection.manage("SolaceUser",
+		    username='dev_myUser',
+			  password='myPassword',
+				vpn_name='dev_MyVPN',
 				acl_profile='dev_MyVPN',
-				client_profile='%s_glassfish')
->>> documents.commands.commands
+				client_profile='glassfish').commands.commands
 [ list of XML documents to POST to `dev` appliances ]
 ```
 
