@@ -266,7 +266,7 @@ class SolaceQueue(Plugin):
 
         vpn_name = get_key_from_kwargs("vpn_name", kwargs)
         queue_name = get_key_from_kwargs("queue_name", kwargs)
-        retries = get_key_from_kwargs("retries", kwargs, 0)
+        retries = get_key_from_kwargs("retries", kwargs, default=0)
 
         self.api.x = SolaceXMLBuilder("Tuning max-redelivery retries for %s to %s" % (queue_name, retries), version=self.api.version)
         self.api.x.message_spool.vpn_name = vpn_name
