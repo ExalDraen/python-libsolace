@@ -109,8 +109,8 @@ class SolaceUser(Plugin):
 
         """
 
-        username = kwargs.get("username")
-        vpn_name = kwargs.get("vpn_name")
+        username = get_key_from_kwargs("username", kwargs)
+        vpn_name = get_key_from_kwargs("vpn_name", kwargs)
 
         self.api.x = SolaceXMLBuilder("Getting user %s" % username, version=self.api.version)
         self.api.x.show.client_username.name = username
