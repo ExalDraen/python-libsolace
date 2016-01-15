@@ -286,6 +286,22 @@ def version_equal_or_greater_than(left, right):
 def get_key_from_kwargs(key, kwargs, default=None):
     """
     Returns a key from kwargs or raises exception is no key is present
+
+    Example:
+
+    >>> get_key_from_kwargs("vpn_name", kwargs)
+    'dev_testvpn'
+
+    >>> get_key_from_kwargs("missing_key", other_dict, default=True)
+    True
+
+    >>> get_key_from_kwargs("missin_key", kwargs)
+    Traceback (most recent call last):
+      File "<stdin>", line 1, in <module>
+      File "/Users/keghol/Development/libsolace/libsolace/util.py", line 303, in get_key_from_kwargs
+        raise(MissingProperty(key))
+    libsolace.Exceptions.MissingProperty: missing_key
+
     """
     if key in kwargs:
         return kwargs.get(key)
