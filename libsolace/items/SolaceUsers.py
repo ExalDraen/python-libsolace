@@ -6,6 +6,7 @@ from libsolace.SolaceCommandQueue import SolaceCommandQueue
 from libsolace.SolaceXMLBuilder import SolaceXMLBuilder
 from libsolace.SolaceReply import SolaceReplyHandler
 from libsolace.items.SolaceUser import SolaceUser
+from libsolace.util import get_key_from_kwargs
 
 @libsolace.plugin_registry.register
 class SolaceUsers(Plugin):
@@ -40,24 +41,22 @@ class SolaceUsers(Plugin):
 
         logging.info("SolaceUsers: kwargs: %s " % kwargs)
 
-        self.api = kwargs.get("api")
-        self.options = None # not implemented
-
-        if not "users" in kwargs:
-            logging.info("No users kwarg, assuming query mode api")
+        if kwargs == {}:
+            logging.info("No kwargs, factory mode")
         else:
-            logging.info("Users specified, assuming provision mode")
+            logging.info("kwargs: %s" % kwargs)
+            self.api = get_key_from_kwargs('api', kwargs)
             self.commands = SolaceCommandQueue(version = self.api.version)
+            self.options = None # not implemented
+            self.users = get_key_from_kwargs("users", kwargs)
+            self.vpn_name = get_key_from_kwargs("vpn_name", kwargs)
+            self.acl_profile = get_key_from_kwargs("acl_profile", kwargs)
 
-            self.users = kwargs.get("users")
-            self.vpn_name = kwargs.get("vpn_name")
-            self.acl_profile = kwargs.get("acl_profile")
+            self.client_profile = get_key_from_kwargs("client_profile", kwargs)
+            self.testmode = get_key_from_kwargs("testmode", kwargs)
+            self.shutdown_on_apply = get_key_from_kwargs("shutdown_on_apply", kwargs)
 
-            self.client_profile = kwargs.get("client_profile")
-            self.testmode = kwargs.get("testmode")
-            self.shutdown_on_apply = kwargs.get("shutdown_on_apply")
-
-            logging.info("""Commands: %s, Environment: %s, Users: %s, vpn_name: %s,
+            logging.info("""UsersCommands: %s, Environment: %s, Users: %s, vpn_name: %s,
                 acl_profile: %s, client_profile: %s, testmode: %s, shutdown_on_apply: %s""" % (self.commands,
                     self.api.environment, self.users, self.vpn_name, self.acl_profile, self.client_profile,
                     self.testmode, self.shutdown_on_apply))

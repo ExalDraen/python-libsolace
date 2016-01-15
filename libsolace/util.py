@@ -12,6 +12,7 @@ import pkg_resources
 import base64
 from xml.dom.minidom import Document
 from distutils.version import StrictVersion
+from libsolace.Exceptions import MissingProperty
 
 try:
     from collections import OrderedDict
@@ -281,3 +282,14 @@ def version_equal_or_greater_than(left, right):
     left = _extract_version(left)
     right = _extract_version(right)
     return StrictVersion(right) >= StrictVersion(left)
+
+def get_key_from_kwargs(key, kwargs, default=None):
+    """
+    Returns a key from kwargs or raises exception is no key is present
+    """
+    if key in kwargs:
+        return kwargs.get(key)
+    elif default!=None:
+        return default
+    else:
+        raise(MissingProperty(key))

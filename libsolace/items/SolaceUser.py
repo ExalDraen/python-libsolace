@@ -5,6 +5,7 @@ from libsolace.plugin import Plugin
 from libsolace.SolaceCommandQueue import SolaceCommandQueue
 from libsolace.SolaceXMLBuilder import SolaceXMLBuilder
 from libsolace.SolaceReply import SolaceReplyHandler
+from libsolace.util import get_key_from_kwargs
 
 @libsolace.plugin_registry.register
 class SolaceUser(Plugin):
@@ -43,55 +44,50 @@ class SolaceUser(Plugin):
         if kwargs == {}:
             return
 
-        self.api = kwargs.get("api")
+        self.api = get_key_from_kwargs('api', kwargs)
         self.commands = SolaceCommandQueue(version = self.api.version)
         self.options = None # not implemented
 
-        if not "username" in kwargs:
-            logging.info("No username kwarg, assuming query mode api")
-        else:
-            logging.info("Username specified, assuming provision mode")
+        self.username = get_key_from_kwargs("username", kwargs)
+        self.password = get_key_from_kwargs("password", kwargs)
 
-            self.username = kwargs.get("username")
-            self.password = kwargs.get("password")
+        self.vpn_name = get_key_from_kwargs("vpn_name", kwargs)
+        self.acl_profile = get_key_from_kwargs("acl_profile", kwargs)
 
-            self.vpn_name = kwargs.get("vpn_name")
-            self.acl_profile = kwargs.get("acl_profile")
+        self.client_profile = get_key_from_kwargs("client_profile", kwargs)
+        self.testmode = get_key_from_kwargs("testmode", kwargs)
+        self.shutdown_on_apply = get_key_from_kwargs("shutdown_on_apply", kwargs)
 
-            self.client_profile = kwargs.get("client_profile")
-            self.testmode = kwargs.get("testmode")
-            self.shutdown_on_apply = kwargs.get("shutdown_on_apply")
+        logging.info("""UserCommands: %s, Environment: %s, Username: %s, Password: %s, vpn_name: %s,
+            acl_profile: %s, client_profile: %s, testmode: %s, shutdown_on_apply: %s""" % (self.commands,
+                self.api.environment, self.username, self.password, self.vpn_name, self.acl_profile, self.client_profile,
+                self.testmode, self.shutdown_on_apply))
 
-            logging.info("""Commands: %s, Environment: %s, Username: %s, Password: %s, vpn_name: %s,
-                acl_profile: %s, client_profile: %s, testmode: %s, shutdown_on_apply: %s""" % (self.commands,
-                    self.api.environment, self.username, self.password, self.vpn_name, self.acl_profile, self.client_profile,
-                    self.testmode, self.shutdown_on_apply))
+        if self.testmode:
+            logging.info('TESTMODE ACTIVE')
+            try:
+                self._tests(**kwargs)
+            except Exception, e:
+                logging.error("Tests Failed %s" % e)
+                raise BaseException("Tests Failed")
 
-            if self.testmode:
-                logging.info('TESTMODE ACTIVE')
-                try:
-                    self._tests(**kwargs)
-                except Exception, e:
-                    logging.error("Tests Failed %s" % e)
-                    raise BaseException("Tests Failed")
+        # backwards compatibility for None options passed to still execute "add" code
+        if self.options == None:
+            logging.warning("No options passed, assuming you meant 'add', please update usage of this class to pass a OptionParser instance")
+            try:
+                # Check if user already exists, if not then shutdown immediately after creating the user
+                self.get(**kwargs)['reply'].show.client_username.client_usernames.client_username
+            except:
+                kwargs['shutdown_on_apply'] = True
 
-            # backwards compatibility for None options passed to still execute "add" code
-            if self.options == None:
-                logging.warning("No options passed, assuming you meant 'add', please update usage of this class to pass a OptionParser instance")
-                try:
-                    # Check if user already exists, if not then shutdown immediately after creating the user
-                    self.get(**kwargs)['reply'].show.client_username.client_usernames.client_username
-                except:
-                    kwargs['shutdown_on_apply'] = True
-
-                self.new_user(**kwargs)
-                self.shutdown(**kwargs)
-                self.set_client_profile(**kwargs)
-                self.set_acl_profile(**kwargs)
-                self.no_guarenteed_endpoint(**kwargs)
-                self.no_subscription_manager(**kwargs)
-                self.set_password(**kwargs)
-                self.no_shutdown(**kwargs)
+            self.new_user(**kwargs)
+            self.shutdown(**kwargs)
+            self.set_client_profile(**kwargs)
+            self.set_acl_profile(**kwargs)
+            self.no_guarenteed_endpoint(**kwargs)
+            self.no_subscription_manager(**kwargs)
+            self.set_password(**kwargs)
+            self.no_shutdown(**kwargs)
 
     def _tests(self, **kwargs):
         """

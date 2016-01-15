@@ -4,6 +4,7 @@ from libsolace.plugin import Plugin
 from libsolace.SolaceCommandQueue import SolaceCommandQueue
 from libsolace.SolaceXMLBuilder import SolaceXMLBuilder
 from libsolace.SolaceReply import SolaceReplyHandler
+from libsolace.util import get_key_from_kwargs
 
 @libsolace.plugin_registry.register
 class SolaceQueue(Plugin):
@@ -45,7 +46,7 @@ class SolaceQueue(Plugin):
         if kwargs == {}:
             return
 
-        self.api = kwargs.get("api")
+        self.api = get_key_from_kwargs("api", kwargs)
         self.commands = SolaceCommandQueue(version = self.api.version)
 
         logging.info("API is set: %s" % self.api)
@@ -53,10 +54,10 @@ class SolaceQueue(Plugin):
         if not "vpn_name" in kwargs:
             logging.info("Query mode because vpn_name not in kwargs")
         else:
-            self.vpn_name = kwargs.get("vpn_name")
-            self.testmode = kwargs.get("testmode")
-            self.queues = kwargs.get("queues")
-            self.shutdown_on_apply = kwargs.get("shutdown_on_apply")
+            self.vpn_name = get_key_from_kwargs("vpn_name", kwargs)
+            self.testmode = get_key_from_kwargs("testmode", kwargs, default=False)
+            self.queues = get_key_from_kwargs("queues", kwargs)
+            self.shutdown_on_apply = get_key_from_kwargs("shutdown_on_apply", kwargs)
             self.options = None
             logging.info("Queues: %s" % self.queues)
 
@@ -87,9 +88,9 @@ class SolaceQueue(Plugin):
         """
         return a queue and its details
         """
-        queue_name = kwargs.get("queue_name")
-        vpn_name = kwargs.get("vpn_name")
-        
+        queue_name = get_key_from_kwargs("queue_name", kwargs)
+        vpn_name = get_key_from_kwargs("vpn_name", kwargs)
+
         self.api.x = SolaceXMLBuilder("Querying Queue %s" % queue_name)
         self.api.x.show.queue.name = queue_name
         self.api.x.show.queue.vpn_name = vpn_name
@@ -118,7 +119,8 @@ class SolaceQueue(Plugin):
 
         """
 
-        queue_name = kwargs.get("queue_name")
+        # get the queue name from the queue dictionary as passed to this method
+        queue_name = get_key_from_kwargs("name", queue)
 
         try:
             logging.debug("Checking env overrides for queue %s" % queue['env'])
@@ -153,8 +155,8 @@ class SolaceQueue(Plugin):
 
 
     def create_queue(self, **kwargs):
-        queue_name = kwargs.get("queue_name")
-        vpn_name = kwargs.get("vpn_name")
+        queue_name = get_key_from_kwargs("queue_name", kwargs)
+        vpn_name = get_key_from_kwargs("vpn_name", kwargs)
 
         # Create a queue
         self.api.x = SolaceXMLBuilder("Creating Queue %s in vpn: %s" % (queue_name, vpn_name), version=self.api.version)
@@ -165,9 +167,9 @@ class SolaceQueue(Plugin):
 
     def shutdown_egress(self, **kwargs):
 
-        shutdown_on_apply = kwargs.get("shutdown_on_apply")
-        vpn_name = kwargs.get("vpn_name")
-        queue_name = kwargs.get("queue_name")
+        shutdown_on_apply = get_key_from_kwargs("shutdown_on_apply", kwargs)
+        vpn_name = get_key_from_kwargs("vpn_name", kwargs)
+        queue_name = get_key_from_kwargs("queue_name", kwargs)
 
         if ( shutdown_on_apply=='b' ) or ( shutdown_on_apply == 'q' ) or ( shutdown_on_apply == True):
             # Lets only shutdown the egress of the queue
@@ -184,9 +186,9 @@ class SolaceQueue(Plugin):
         type: exclusive bool
         """
 
-        vpn_name = kwargs.get("vpn_name")
-        queue_name = kwargs.get("queue_name")
-        exclusive = kwargs.get("exclusive")
+        vpn_name = get_key_from_kwargs("vpn_name", kwargs)
+        queue_name = get_key_from_kwargs("queue_name", kwargs)
+        exclusive = get_key_from_kwargs("exclusive", kwargs)
 
         # Default to NON Exclusive queue
         if not exclusive:
@@ -205,9 +207,9 @@ class SolaceQueue(Plugin):
 
     def owner(self, **kwargs):
 
-        vpn_name = kwargs.get("vpn_name")
-        queue_name = kwargs.get("queue_name")
-        owner = kwargs.get("owner_username")
+        vpn_name = get_key_from_kwargs("vpn_name", kwargs)
+        queue_name = get_key_from_kwargs("queue_name", kwargs)
+        owner = get_key_from_kwargs("owner_username", kwargs)
 
         if owner == "%lsVPN":
             logging.info("Owner being set to VPN")
@@ -222,9 +224,9 @@ class SolaceQueue(Plugin):
 
     def max_bind_count(self, **kwargs):
 
-        vpn_name = kwargs.get("vpn_name")
-        queue_name = kwargs.get("queue_name")
-        max_bind_count = kwargs.get("max_bind_count")
+        vpn_name = get_key_from_kwargs("vpn_name", kwargs)
+        queue_name = get_key_from_kwargs("queue_name", kwargs)
+        max_bind_count = get_key_from_kwargs("max_bind_count", kwargs)
 
         self.api.x = SolaceXMLBuilder("Settings Queue %s max bind count to %s" % (queue_name, str(max_bind_count)), version=self.api.version)
         self.api.x.message_spool.vpn_name = vpn_name
@@ -234,9 +236,9 @@ class SolaceQueue(Plugin):
 
     def consume(self, **kwargs):
 
-        vpn_name = kwargs.get("vpn_name")
-        queue_name = kwargs.get("queue_name")
-        consume = kwargs.get("consume")
+        vpn_name = get_key_from_kwargs("vpn_name", kwargs)
+        queue_name = get_key_from_kwargs("queue_name", kwargs)
+        consume = get_key_from_kwargs("consume", kwargs)
 
         # Open Access
         self.api.x = SolaceXMLBuilder("Settings Queue %s Permission to Consume" % queue_name, version=self.api.version)
@@ -249,9 +251,9 @@ class SolaceQueue(Plugin):
 
     def spool_size(self, **kwargs):
 
-        vpn_name = kwargs.get("vpn_name")
-        queue_name = kwargs.get("queue_name")
-        queue_size = kwargs.get("queue_size")
+        vpn_name = get_key_from_kwargs("vpn_name", kwargs)
+        queue_name = get_key_from_kwargs("queue_name", kwargs)
+        queue_size = get_key_from_kwargs("queue_size", kwargs)
 
         # Configure Queue Spool Usage
         self.api.x = SolaceXMLBuilder("Set Queue %s spool size: %s" % (queue_name, queue_size), version=self.api.version)
@@ -262,9 +264,9 @@ class SolaceQueue(Plugin):
 
     def retries(self, **kwargs):
 
-        vpn_name = kwargs.get("vpn_name")
-        queue_name = kwargs.get("queue_name")
-        retries = kwargs.get("retries", 0)
+        vpn_name = get_key_from_kwargs("vpn_name", kwargs)
+        queue_name = get_key_from_kwargs("queue_name", kwargs)
+        retries = get_key_from_kwargs("retries", kwargs, 0)
 
         self.api.x = SolaceXMLBuilder("Tuning max-redelivery retries for %s to %s" % (queue_name, retries), version=self.api.version)
         self.api.x.message_spool.vpn_name = vpn_name
@@ -274,8 +276,8 @@ class SolaceQueue(Plugin):
 
     def enable(self, **kwargs):
 
-        vpn_name = kwargs.get("vpn_name")
-        queue_name = kwargs.get("queue_name")
+        vpn_name = get_key_from_kwargs("vpn_name", kwargs)
+        queue_name = get_key_from_kwargs("queue_name", kwargs)
 
         # Enable the Queue
         self.api.x = SolaceXMLBuilder("Enabling Queue %s" % queue_name, version=self.api.version)
@@ -286,8 +288,8 @@ class SolaceQueue(Plugin):
 
     def reject_on_discard(self, **kwargs):
 
-        vpn_name = kwargs.get("vpn_name")
-        queue_name = kwargs.get("queue_name")
+        vpn_name = get_key_from_kwargs("vpn_name", kwargs)
+        queue_name = get_key_from_kwargs("queue_name", kwargs)
 
         self.api.x = SolaceXMLBuilder("Setting Queue to Reject Drops", version=self.api.version)
         self.api.x.message_spool.vpn_name = vpn_name

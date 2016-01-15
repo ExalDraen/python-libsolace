@@ -4,11 +4,16 @@ from libsolace.plugin import Plugin
 from libsolace.SolaceCommandQueue import SolaceCommandQueue
 from libsolace.SolaceXMLBuilder import SolaceXMLBuilder
 from libsolace.util import version_equal_or_greater_than
+from libsolace.util import get_key_from_kwargs
 
 @libsolace.plugin_registry.register
 class SolaceClientProfile(Plugin):
 
     plugin_name = "SolaceClientProfile"
+
+    defaults = {
+        "max_clients": 1000
+    }
 
     def __init__(self, *args, **kwargs):
 
@@ -17,11 +22,11 @@ class SolaceClientProfile(Plugin):
             logging.debug("Plugin Mode")
             return
 
-        self.api = kwargs.get("api")
+        self.api = get_key_from_kwargs("api", kwargs)
         self.commands = SolaceCommandQueue(version=self.api.version)
-        self.name = kwargs.get('name')
-        self.vpn_name = kwargs.get('vpn_name')
-        self.max_clients = kwargs.get('max_clients')
+        self.name = get_key_from_kwargs('name', kwargs)
+        self.vpn_name = get_key_from_kwargs('vpn_name', kwargs)
+        self.max_clients = get_key_from_kwargs('max_clients', kwargs, default=self.defaults.get("max_clients"))
 
         if kwargs.get('options', None) is None:
             logging.warning("No options passed, assuming you meant 'add', please update usage of this class to pass a OptionParser instance")
@@ -43,8 +48,8 @@ class SolaceClientProfile(Plugin):
             - `vpn_name` (`string`) - VPN Name for SolOS 6.2+
         :return: (`SolaceXMLBuilder`) The xml builder
         """
-        name = kwargs.get("name")
-        vpn_name = kwargs.get("vpn_name")
+        name = get_key_from_kwargs("name", kwargs)
+        vpn_name = get_key_from_kwargs("vpn_name", kwargs)
 
         self.api.x = SolaceXMLBuilder("Create Client Profile", version=self.api.version)
         self.api.x.create.client_profile.name = name
@@ -66,8 +71,8 @@ class SolaceClientProfile(Plugin):
             - `vpn_name` (`string`) - VPN Name for SolOS 6.2+
         :return: (`SolaceXMLBuilder`) The xml builder
         """
-        name = kwargs.get("name")
-        vpn_name = kwargs.get("vpn_name")
+        name = get_key_from_kwargs("name", kwargs)
+        vpn_name = get_key_from_kwargs("vpn_name", kwargs)
 
         self.api.x = SolaceXMLBuilder("Allow profile consume", version=self.api.version)
         self.api.x.client_profile.name = name
@@ -88,8 +93,8 @@ class SolaceClientProfile(Plugin):
             - `name` (`string`) - Name of the Client Profile
             - `vpn_name` (`string`) - VPN Name for SolOS 6.2+
         """
-        name = kwargs.get("name")
-        vpn_name = kwargs.get("vpn_name")
+        name = get_key_from_kwargs("name", kwargs)
+        vpn_name = get_key_from_kwargs("vpn_name", kwargs)
 
         self.api.x = SolaceXMLBuilder("Allow profile send", version=self.api.version)
         self.api.x.client_profile.name = name
@@ -110,8 +115,8 @@ class SolaceClientProfile(Plugin):
             - `name` (`string`) - Name of the Client Profile
             - `vpn_name` (`string`) - VPN Name for SolOS 6.2+
         """
-        name = kwargs.get("name")
-        vpn_name = kwargs.get("vpn_name")
+        name = get_key_from_kwargs("name", kwargs)
+        vpn_name = get_key_from_kwargs("vpn_name", kwargs)
 
         self.api.x = SolaceXMLBuilder("Allow profile endpoint create", version=self.api.version)
         self.api.x.client_profile.name = name
@@ -132,8 +137,8 @@ class SolaceClientProfile(Plugin):
             - `name` (`string`) - Name of the Client Profile
             - `vpn_name` (`string`) - VPN Name for SolOS 6.2+
         """
-        name = kwargs.get("name")
-        vpn_name = kwargs.get("vpn_name")
+        name = get_key_from_kwargs("name", kwargs)
+        vpn_name = get_key_from_kwargs("vpn_name", kwargs)
 
         self.api.x = SolaceXMLBuilder("Allow profile transacted sessions", version=self.api.version)
         self.api.x.client_profile.name = name
@@ -155,9 +160,9 @@ class SolaceClientProfile(Plugin):
             - `vpn_name` (`string`) - VPN Name for SolOS 6.2+
             - `max_clients` (`integer`) - Max number of clients
         """
-        name = kwargs.get("name")
-        vpn_name = kwargs.get("vpn_name")
-        max_clients = kwargs.get("max_clients")
+        name = get_key_from_kwargs("name", kwargs)
+        vpn_name = get_key_from_kwargs("vpn_name", kwargs)
+        max_clients = get_key_from_kwargs("max_clients", kwargs)
 
         self.api.x = SolaceXMLBuilder("Setting Max Clients", version=self.api.version)
         self.api.x.client_profile.name = name
@@ -178,8 +183,8 @@ class SolaceClientProfile(Plugin):
             - `name` (`string`) - Name of the Client Profile
             - `vpn_name` (`string`) - VPN Name for SolOS 6.2+
         """
-        name = kwargs.get("name")
-        vpn_name = kwargs.get("vpn_name")
+        name = get_key_from_kwargs("name", kwargs)
+        vpn_name = get_key_from_kwargs("vpn_name", kwargs)
 
         self.api.x = SolaceXMLBuilder("Setting Bridging", version=self.api.version)
         self.api.x.client_profile.name = name

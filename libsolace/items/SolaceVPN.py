@@ -3,6 +3,7 @@ import libsolace
 from libsolace.plugin import Plugin
 from libsolace.SolaceCommandQueue import SolaceCommandQueue
 from libsolace.SolaceXMLBuilder import SolaceXMLBuilder
+from libsolace.util import get_key_from_kwargs
 
 @libsolace.plugin_registry.register
 class SolaceVPN(Plugin):
@@ -39,7 +40,7 @@ class SolaceVPN(Plugin):
             return
 
         # get the connection SolaceAPI instance
-        self.api = kwargs.get("api")
+        self.api = get_key_from_kwargs("api", kwargs)
 
         # create a commandqueue instance for queuing up XML and validating
         self.commands = SolaceCommandQueue(version = self.api.version)
@@ -47,10 +48,10 @@ class SolaceVPN(Plugin):
         if not "vpn_name" in kwargs:
             logging.info("No vpn_name kwarg, assuming query mode")
         else:
-            self.vpn_name = kwargs.get("vpn_name")
-            self.owner_username = kwargs.get("vpn_name")
-            self.environment = kwargs.get("environment")
-            self.acl_profile = kwargs.get("vpn_name", self.vpn_name)
+            self.vpn_name = get_key_from_kwargs("vpn_name", kwargs)
+            self.owner_username = get_key_from_kwargs("vpn_name", kwargs)
+            self.environment = get_key_from_kwargs("environment", kwargs, default=self.api.environment)
+            self.acl_profile = get_key_from_kwargs("vpn_name", kwargs, default=self.vpn_name)
             self.options = None
 
             logging.debug("Creating vpn in env: %s vpn: %s, kwargs: %s" % ( self.api.environment, self.vpn_name, kwargs ))
@@ -80,7 +81,7 @@ class SolaceVPN(Plugin):
 
     def create_vpn(self, **kwargs):
 
-        vpn_name = kwargs.get("vpn_name")
+        vpn_name = get_key_from_kwargs("vpn_name", kwargs)
 
         # Create domain-event VPN, this can fail if VPN exists, but thats ok.
         self.api.x = SolaceXMLBuilder('VPN Create new VPN %s' % vpn_name, version=self.api.version)
@@ -89,7 +90,7 @@ class SolaceVPN(Plugin):
 
     def clear_radius(self, **kwargs):
 
-        vpn_name = kwargs.get("vpn_name")
+        vpn_name = get_key_from_kwargs("vpn_name", kwargs)
 
         # Switch Radius Domain to nothing
         self.api.x = SolaceXMLBuilder("VPN %s Clearing Radius" % vpn_name, version=self.api.version)
@@ -103,7 +104,7 @@ class SolaceVPN(Plugin):
 
     def set_internal_auth(self, **kwargs):
 
-        vpn_name = kwargs.get("vpn_name")
+        vpn_name = get_key_from_kwargs("vpn_name", kwargs)
 
         # Switch to Internal Auth
         if self.api.version == "soltr/7_1_1" or self.api.version == "soltr/7_0" or self.api.version == "soltr/6_2":
@@ -120,8 +121,8 @@ class SolaceVPN(Plugin):
 
     def set_spool_size(self, **kwargs):
 
-        vpn_name = kwargs.get("vpn_name")
-        max_spool_usage = kwargs.get("max_spool_usage", getattr(self, "max_spool_usage"))
+        vpn_name = get_key_from_kwargs("vpn_name", kwargs)
+        max_spool_usage = get_key_from_kwargs("max_spool_usage", kwargs, getattr(self, "max_spool_usage"))
 
         logging.debug("Setting spool size to %s" % getattr(self, 'max_spool_usage'))
         # Set the Spool Size
@@ -132,8 +133,8 @@ class SolaceVPN(Plugin):
 
     def set_large_message_threshold(self, **kwargs):
 
-        vpn_name = kwargs.get("vpn_name")
-        large_message_threshold = kwargs.get("large_message_threshold", getattr(self, "large_message_threshold"))
+        vpn_name = get_key_from_kwargs("vpn_name", kwargs)
+        large_message_threshold = get_key_from_kwargs("large_message_threshold", kwargs, getattr(self, "large_message_threshold"))
 
         # Large Message Threshold
         self.api.x = SolaceXMLBuilder("VPN %s Settings large message threshold event to %s" % (vpn_name, large_message_threshold), version=self.api.version)
@@ -143,7 +144,7 @@ class SolaceVPN(Plugin):
 
     def set_logging_tag(self, **kwargs):
 
-        vpn_name = kwargs.get("vpn_name")
+        vpn_name = get_key_from_kwargs("vpn_name", kwargs)
 
         # Logging Tag for this VPN
         self.api.x = SolaceXMLBuilder("VPN %s Setting logging tag to %s" % (vpn_name, vpn_name), version=self.api.version)
@@ -153,7 +154,7 @@ class SolaceVPN(Plugin):
 
     def enable_vpn(self, **kwargs):
 
-        vpn_name = kwargs.get("vpn_name")
+        vpn_name = get_key_from_kwargs("vpn_name", kwargs)
 
         # Enable the VPN
         self.api.x = SolaceXMLBuilder("VPN %s Enabling the vpn" % vpn_name, version=self.api.version)

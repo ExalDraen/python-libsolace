@@ -55,6 +55,8 @@ you can use the SolaceUser class:
 ```python
 >>> from libsolace.items.SolaceUser import SolaceUser
 >>> connection = SolaceAPI("dev")
+>>> xml = connection.manage("SolaceUser").new_user(username="foo", vpn_name="bar")
+<rpc semp-version="soltr/6_0"><create><client-username><username>foo</username><vpn-name>bar</vpn-name></client-username></create></rpc>
 >>> xmlList = connection.manage("SolaceUser",
 		    username='dev_myUser',
 			  password='myPassword',
