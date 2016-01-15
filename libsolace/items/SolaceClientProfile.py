@@ -23,10 +23,10 @@ class SolaceClientProfile(Plugin):
             return
 
         self.api = get_key_from_kwargs("api", kwargs)
-        self.commands = SolaceCommandQueue(version=self.api.version)
+        self.commands = SolaceCommandQueue(version = self.api.version)
         self.name = get_key_from_kwargs('name', kwargs)
         self.vpn_name = get_key_from_kwargs('vpn_name', kwargs)
-        self.max_clients = get_key_from_kwargs('max_clients', kwargs, default=self.defaults.get("max_clients"))
+        self.max_clients = get_key_from_kwargs('max_clients', kwargs, default = self.defaults.get("max_clients"))
 
         if kwargs.get('options', None) is None:
             logging.warning("No options passed, assuming you meant 'add', please update usage of this class to pass a OptionParser instance")

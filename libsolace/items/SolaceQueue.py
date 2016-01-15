@@ -10,9 +10,10 @@ from libsolace.util import get_key_from_kwargs
 class SolaceQueue(Plugin):
 
     plugin_name = "SolaceQueue"
-    api = "None"
+    api = None
 
-    queue_defaults = {
+    # defaults should be provided from the settings instance
+    defaults = {
         "retries": 0,
         "exclusive": "true",
         "queue_size": 1024,
@@ -25,16 +26,20 @@ class SolaceQueue(Plugin):
         """ Manage Queues
 
         This plugin manages SolaceQueue's within the VPN scope. It needs to be
-        instantiated from a plugin manager.
+        instantiated from the SolaceAPI.manage method. See examples
 
         Query mode when initialized with only the "api" kwarg.
         Create mode if initialized with vpn_name and queues dictionary.
 
-        :parameter api: SolaceAPI
-        :parameter vpn_name: str
-        :parameter queues: dict as from CMDBClient
-        :parameter testmode: bool
-        :parameter shutdown_on_apply: bool / char b / chart q
+        :Parameters:
+            - `api` (`SolaceAPI`) - instance with connection to appliances
+            - `vpn_name` (`string`) - VPN Name
+            - `queues` (`dict`) - queues to create as from CMDBClient
+            - `testmode` (`boolean`) - testmode
+            - `shutdown_on_apply` (`boolean` | `char`) - shutdown 'u' = users,
+                'q' = queues, 'b' = both, True = force
+            - `settings` (`libsolace.settingsloader`) - the settings object for
+                optionally setting the defaults to something else.
 
         Example:
             >>> connection = SolaceAPI("dev")
@@ -47,49 +52,61 @@ class SolaceQueue(Plugin):
             return
 
         self.api = get_key_from_kwargs("api", kwargs)
+        logging.debug("API is set: %s" % self.api)
+
         self.commands = SolaceCommandQueue(version = self.api.version)
 
-        logging.info("API is set: %s" % self.api)
+        self.vpn_name = get_key_from_kwargs("vpn_name", kwargs)
+        self.testmode = get_key_from_kwargs("testmode", kwargs, default=False)
+        self.queues = get_key_from_kwargs("queues", kwargs)
+        self.shutdown_on_apply = get_key_from_kwargs("shutdown_on_apply", kwargs)
+        self.options = None
+        logging.info("Queues: %s" % self.queues)
 
-        if not "vpn_name" in kwargs:
-            logging.info("Query mode because vpn_name not in kwargs")
-        else:
-            self.vpn_name = get_key_from_kwargs("vpn_name", kwargs)
-            self.testmode = get_key_from_kwargs("testmode", kwargs, default=False)
-            self.queues = get_key_from_kwargs("queues", kwargs)
-            self.shutdown_on_apply = get_key_from_kwargs("shutdown_on_apply", kwargs)
-            self.options = None
-            logging.info("Queues: %s" % self.queues)
+        # backwards compatibility for None options passed to still execute "add" code
+        if self.options == None:
+            logging.warning("No options passed, assuming you meant 'add', please update usage of this class to pass a OptionParser instance")
 
-            # backwards compatibility for None options passed to still execute "add" code
-            if self.options == None:
-                logging.warning("No options passed, assuming you meant 'add', please update usage of this class to pass a OptionParser instance")
+            for queue in self.queues:
 
-                for queue in self.queues:
+                queueName = queue['name']
 
-                    queueName = queue['name']
-
-                    queue_config = self.get_queue_config(queue, **kwargs)
-                    self.create_queue(queue_name = queueName, **kwargs)
-                    self.shutdown_egress(queue_name = queueName, **kwargs)
-                    if queue_config['exclusive'].lower() == "true":
-                        self.exclusive(queue_name = queueName, exclusive=True, **kwargs)
-                    else:
-                        self.exclusive(queue_name = queueName, exclusive=False, **kwargs)
-                    self.owner(queue_name = queueName, owner_username = queue_config['owner'], **kwargs)
-                    self.max_bind_count(queue_name = queueName, max_bind_count = queue_config['max_bind_count'], **kwargs)
-                    self.consume(queue_name = queueName, consume = queue_config['consume'], **kwargs)
-                    self.spool_size(queue_name = queueName, queue_size = queue_config['queue_size'], **kwargs)
-                    self.retries(queue_name = queueName, retries = queue_config['retries'], **kwargs)
-                    self.reject_on_discard(queue_name = queueName, **kwargs)
-                    self.enable(queue_name = queueName, **kwargs)
+                queue_config = self.get_queue_config(queue, **kwargs)
+                self.create_queue(queue_name = queueName, **kwargs)
+                self.shutdown_egress(queue_name = queueName, **kwargs)
+                if queue_config['exclusive'].lower() == "true":
+                    self.exclusive(queue_name = queueName, exclusive=True, **kwargs)
+                else:
+                    self.exclusive(queue_name = queueName, exclusive=False, **kwargs)
+                self.owner(queue_name = queueName, owner_username = queue_config['owner'], **kwargs)
+                self.max_bind_count(queue_name = queueName, max_bind_count = queue_config['max_bind_count'], **kwargs)
+                self.consume(queue_name = queueName, consume = queue_config['consume'], **kwargs)
+                self.spool_size(queue_name = queueName, queue_size = queue_config['queue_size'], **kwargs)
+                self.retries(queue_name = queueName, retries = queue_config['retries'], **kwargs)
+                self.reject_on_discard(queue_name = queueName, **kwargs)
+                self.enable(queue_name = queueName, **kwargs)
 
     def get(self, api=api, **kwargs):
         """
-        return a queue and its details
+        Return queue config from an appliance
+
+        Parameters
+        ----------
+            api : SolaceAPI, optional
+                `SolaceAPI` instance which is connected to the cluster
+            vpn_name : string
+                VPN Name
+            queue_name : string
+                Queue name
+
+        Examples:
+            >>> connection = SolaceAPI("dev")
+            >>> q = connection.manager("SolaceQueue").get(queue_name='*', vpn_name='dev_testvpn')
+
         """
         queue_name = get_key_from_kwargs("queue_name", kwargs)
         vpn_name = get_key_from_kwargs("vpn_name", kwargs)
+        api = get_key_from_kwargs("api", kwargs)
 
         self.api.x = SolaceXMLBuilder("Querying Queue %s" % queue_name)
         self.api.x.show.queue.name = queue_name
@@ -111,7 +128,7 @@ class SolaceQueue(Plugin):
                             "queue_size": 1024,
                             "consume": "all",
                             "max_bind_count": 1000,
-                            "owner": "%slsVPN"
+                            "owner": "dev_testuser"
                         }
                     }
                 ]
@@ -127,12 +144,12 @@ class SolaceQueue(Plugin):
             for e in queue['env']:
                 if e['name'] == self.api.environment:
                     logging.info('setting queue_config to environment %s values' % e['name'] )
-                    return self.apply_default_config(e['queue_config'], self.queue_defaults)
+                    return self.apply_default_config(e['queue_config'], self.defaults)
         except:
             logging.warn("No environment overides for queue %s" % queue_name)
             pass
         try:
-            return self.apply_default_config(queue['queue_config'], self.queue_defaults)
+            return self.apply_default_config(queue['queue_config'], self.defaults)
         except:
             logging.warning("No queue_config for queue: %s found, please check site-config" % queue_name)
             raise
