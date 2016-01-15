@@ -63,7 +63,8 @@ class Plugin(object):
         :return:
         """
         logging.info("Registering Plugin: %s from class: %s " % (object_class.plugin_name, object_class) )
-        o = object_class(*args, **kwargs)
+        # o = object_class(*args, **kwargs)
+        o = object_class
         self.plugins.append(o)
         self.plugins_dict[object_class.plugin_name] = o
 
@@ -77,10 +78,13 @@ class Plugin(object):
         :param kwargs:
         :return: class
         """
+        logging.info(self.plugins_dict)
         logging.info("Retrieving self:%s, args:%s, kwargs:%s" % (self, args, kwargs))
         try:
-            logging.info("Class: %s" % self.plugins_dict[args[0]].__class__)
-            return self.plugins_dict[args[0]].__class__
+            # logging.info("Class: %s" % self.plugins_dict[args[0]].__class__)
+            # return self.plugins_dict[args[0]].__class__
+            logging.info("Class: %s" % self.plugins_dict[args[0]])
+            return self.plugins_dict[args[0]]
         except:
             logging.warn("No plugin named: %s found, available plugins are: %s" % (args[0],self.plugins_dict))
             logging.warn("Please check the plugin is listed in the yaml config and that you have @libsolace.plugin_registry.register in the class")
