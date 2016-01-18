@@ -73,7 +73,7 @@ class SolaceClientProfile(Plugin):
         self.api.x = SolaceXMLBuilder("Allow profile consume", version=self.api.version)
         self.api.x.client_profile.name = name
         if version_equal_or_greater_than('soltr/6_2', self.api.version):
-            self.api.x.create.client_profile.vpn_name = vpn_name
+            self.api.x.client_profile.vpn_name = vpn_name
         self.api.x.client_profile.message_spool.allow_guaranteed_message_receive
         self.commands.enqueue(self.api.x)
         return self.api.x
@@ -95,7 +95,7 @@ class SolaceClientProfile(Plugin):
         self.api.x = SolaceXMLBuilder("Allow profile send", version=self.api.version)
         self.api.x.client_profile.name = name
         if version_equal_or_greater_than('soltr/6_2', self.api.version):
-            self.api.x.create.client_profile.vpn_name = vpn_name
+            self.api.x.client_profile.vpn_name = vpn_name
         self.api.x.client_profile.message_spool.allow_guaranteed_message_send
         self.commands.enqueue(self.api.x)
         return self.api.x
@@ -117,7 +117,7 @@ class SolaceClientProfile(Plugin):
         self.api.x = SolaceXMLBuilder("Allow profile endpoint create", version=self.api.version)
         self.api.x.client_profile.name = name
         if version_equal_or_greater_than('soltr/6_2', self.api.version):
-            self.api.x.create.client_profile.vpn_name = vpn_name
+            self.api.x.client_profile.vpn_name = vpn_name
         self.api.x.client_profile.message_spool.allow_guaranteed_endpoint_create
         self.commands.enqueue(self.api.x)
         return self.api.x
@@ -139,7 +139,7 @@ class SolaceClientProfile(Plugin):
         self.api.x = SolaceXMLBuilder("Allow profile transacted sessions", version=self.api.version)
         self.api.x.client_profile.name = name
         if version_equal_or_greater_than('soltr/6_2', self.api.version):
-            self.api.x.create.client_profile.vpn_name = vpn_name
+            self.api.x.client_profile.vpn_name = vpn_name
         self.api.x.client_profile.message_spool.allow_transacted_sessions
         self.commands.enqueue(self.api.x)
         return self.api.x
