@@ -48,3 +48,6 @@ SOLACE_CONF:
       PASS: password
       USER: admin
       VERIFY_SSL: True
+
+SOLACE_CLIENT_PROFILE_DEFAULTS:
+  max_clients: 1000
