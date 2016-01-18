@@ -62,7 +62,7 @@ class Plugin(object):
         :param object_class: object to register, should be a class
         :return:
         """
-        logging.info("Registering Plugin: %s from class: %s " % (object_class.plugin_name, object_class) )
+        logging.info("Registering Plugin id: %s from: %s " % (object_class.plugin_name, object_class) )
         # o = object_class(*args, **kwargs)
         o = object_class
         self.plugins.append(o)

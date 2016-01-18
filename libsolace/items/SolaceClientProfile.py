@@ -17,15 +17,11 @@ class SolaceClientProfile(Plugin):
 
     def __init__(self, *args, **kwargs):
 
-        # if kwargs is not passed, then its a plugin load, return fast
-        if kwargs == {}:
-            logging.debug("Plugin Mode")
-            return
-
         self.api = get_key_from_kwargs("api", kwargs)
         self.commands = SolaceCommandQueue(version = self.api.version)
         self.name = get_key_from_kwargs('name', kwargs)
         self.vpn_name = get_key_from_kwargs('vpn_name', kwargs)
+        self.defaults = get_key_from_kwargs('defaults', kwargs, default = self.defaults)
         self.max_clients = get_key_from_kwargs('max_clients', kwargs, default = self.defaults.get("max_clients"))
 
         if kwargs.get('options', None) is None:

@@ -1,11 +1,9 @@
-
 import logging
 import libsolace.settingsloader as settings
 import libsolace
 from libsolace.SolaceXMLBuilder import SolaceXMLBuilder
 from libsolace.SolaceCommandQueue import SolaceCommandQueue
 from libsolace import xml2dict
-import pprint
 
 try:
     from collections import OrderedDict
@@ -18,7 +16,6 @@ except:
     from json import simplejson
 
 from libsolace.util import httpRequest, generateRequestHeaders, generateBasicAuthHeader
-
 
 class SolaceAPI:
     """
@@ -171,7 +168,7 @@ class SolaceAPI:
             raise
 
     def __restcall(self, request, primaryOnly=False, backupOnly=False, **kwargs):
-        logging.info("%s user requesting: %s kwargs:%s primaryOnly:%s backupOnly:%s"
+        logging.debug("%s user requesting: %s kwargs:%s primaryOnly:%s backupOnly:%s"
             % (self.config['USER'], request, kwargs, primaryOnly, backupOnly))
         self.kwargs = kwargs
 
@@ -180,10 +177,10 @@ class SolaceAPI:
 
         # change appliances based on boolean conditions
         if primaryOnly:
-            logging.info("Primary appliance ONLY")
+            logging.debug("Primary appliance ONLY")
             appliances=[self.primaryRouter]
         if backupOnly:
-            logging.info("Backup appliance ONLY")
+            logging.debug("Backup appliance ONLY")
             appliances=[self.backupRouter]
 
         try:
@@ -214,7 +211,7 @@ class SolaceAPI:
                             logging.warn("Device: %s: %s: %s" % (k, thisreply['rpc-reply']['execute-result']['@code'],
                                                                         "Reply from appliance: %s" % thisreply['rpc-reply']['execute-result']['@reason']))
                         else:
-                            logging.info("Device: %s: %s" % (k, thisreply['rpc-reply']['execute-result']['@code']))
+                            logging.debug("Device: %s: %s" % (k, thisreply['rpc-reply']['execute-result']['@code']))
                         logging.debug("Device: %s: %s" % (k, thisreply))
                     else:
                         logging.debug("no execute-result in response. Device: %s" % k)
@@ -449,6 +446,8 @@ class SolaceAPI:
         responses = None
         mywargs = kwargs
         logging.debug("Kwargs: %s" % mywargs)
+        logging.info("SEMP: %s" % xml)
+
         try:
             data = []
             responses, codes = self.__restcall(xml, primaryOnly=primaryOnly, backupOnly=backupOnly, **mywargs)

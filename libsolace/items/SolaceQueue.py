@@ -10,16 +10,15 @@ from libsolace.util import get_key_from_kwargs
 class SolaceQueue(Plugin):
 
     plugin_name = "SolaceQueue"
-    api = None
 
-    # defaults should be provided from the settings instance
+    # defaults should be provided from the settingsloader key
     defaults = {
         "retries": 0,
         "exclusive": "true",
         "queue_size": 1024,
         "consume": "all",
         "max_bind_count": 1000,
-        "owner": "%lsVPN"
+        "owner": "default"
     }
 
     def __init__(self, **kwargs):
@@ -38,7 +37,7 @@ class SolaceQueue(Plugin):
             - `testmode` (`boolean`) - testmode
             - `shutdown_on_apply` (`boolean` | `char`) - shutdown 'u' = users,
                 'q' = queues, 'b' = both, True = force
-            - `settings` (`libsolace.settingsloader`) - the settings object for
+            - `defaults` (`libsolace.settingsloader` key) - the key for
                 optionally setting the defaults to something else.
 
         Example:
@@ -52,14 +51,12 @@ class SolaceQueue(Plugin):
             return
 
         self.api = get_key_from_kwargs("api", kwargs)
-        logging.debug("API is set: %s" % self.api)
-
         self.commands = SolaceCommandQueue(version = self.api.version)
-
         self.vpn_name = get_key_from_kwargs("vpn_name", kwargs)
         self.testmode = get_key_from_kwargs("testmode", kwargs, default=False)
         self.queues = get_key_from_kwargs("queues", kwargs)
         self.shutdown_on_apply = get_key_from_kwargs("shutdown_on_apply", kwargs)
+        self.defaults = get_key_from_kwargs('defaults', kwargs, default = self.defaults)
         self.options = None
         logging.info("Queues: %s" % self.queues)
 
@@ -86,14 +83,12 @@ class SolaceQueue(Plugin):
                 self.reject_on_discard(queue_name = queueName, **kwargs)
                 self.enable(queue_name = queueName, **kwargs)
 
-    def get(self, api=api, **kwargs):
+    def get(self, **kwargs):
         """
         Return queue config from an appliance
 
         Parameters
         ----------
-            api : SolaceAPI, optional
-                `SolaceAPI` instance which is connected to the cluster
             vpn_name : string
                 VPN Name
             queue_name : string
@@ -106,7 +101,7 @@ class SolaceQueue(Plugin):
         """
         queue_name = get_key_from_kwargs("queue_name", kwargs)
         vpn_name = get_key_from_kwargs("vpn_name", kwargs)
-        api = get_key_from_kwargs("api", kwargs)
+        #api = get_key_from_kwargs("api", kwargs)
 
         self.api.x = SolaceXMLBuilder("Querying Queue %s" % queue_name)
         self.api.x.show.queue.name = queue_name
@@ -196,7 +191,7 @@ class SolaceQueue(Plugin):
             self.api.x.message_spool.queue.shutdown.egress
             self.commands.enqueue(self.api.x)
         else:
-            logging.warning("Not disabling Queue, commands could fail since shutdown_on_apply = %s" % self.shutdown_on_apply)
+            logging.warning("Not disabling Queue, commands could fail since shutdown_on_apply = %s" % shutdown_on_apply)
 
     def exclusive(self, **kwargs):
         """
@@ -229,8 +224,8 @@ class SolaceQueue(Plugin):
         owner = get_key_from_kwargs("owner_username", kwargs)
 
         if owner == "%lsVPN":
-            logging.info("Owner being set to VPN")
             owner = vpn_name
+            logging.info("Owner being set to VPN itself: %s" % owner)
 
         # Queue Owner
         self.api.x = SolaceXMLBuilder("Set Queue %s owner to %s" % (queue_name, vpn_name), version=self.api.version)

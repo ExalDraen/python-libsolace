@@ -178,13 +178,13 @@ class SolaceProvision:
         logging.info("Create Client Profile")
         # Provision profile now already since we need to link to it.
         for cmd in self.client_profile.commands.commands:
-            logging.info(str(cmd))
+            logging.debug(str(cmd))
             if not self.testmode:
                 self.connection.rpc(str(cmd))
 
         logging.info("Create ACL Profile for vpn %s" % self.vpn_name)
         for cmd in self.acl_profile.queue.commands:
-            logging.info(str(cmd))
+            logging.debug(str(cmd))
             if not self.testmode:
                 self.connection.rpc(str(cmd))
 
@@ -197,7 +197,7 @@ class SolaceProvision:
 
         logging.info("Creating users for vpn %s" % self.vpn_name)
         for cmd in self.userMgr.commands.commands:
-            logging.info(cmd)
+            logging.debug(cmd)
             if not self.testmode:
                 self.connection.rpc(str(cmd))
 
@@ -205,9 +205,9 @@ class SolaceProvision:
         if self.create_queues:
             logging.info("Create Queues for vpn %s" % self.vpn_name)
             for cmd in self.queueMgr.commands.commands:
-                logging.info(cmd)
+                logging.debug(cmd)
                 if not self.testmode:
-                    self.connection.rpc(str(cmd))
+                    self.connection.rpc(str(cmd), primaryOnly=True)
 
     def _get_version_from_appliance(self):
         self.xmlbuilder = SolaceXMLBuilder()
