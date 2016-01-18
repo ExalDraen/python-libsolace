@@ -163,9 +163,14 @@ class d2x:
     def display(self, version="soltr/6_0"):
         # I render from the root instead of doc to get rid of the XML header
         #return self.root.toprettyxml(indent="  ")
-        complete_xml = str('\n<rpc semp-version="%s">\n%s</rpc>' % (version, self.root.toprettyxml(indent="  ")))
-        logging.debug(complete_xml)
-        return self.root.toxml()
+        try:
+            complete_xml = str('\n<rpc semp-version="%s">\n%s</rpc>' % (version, self.root.toprettyxml(indent="  ")))
+            logging.debug(complete_xml)
+            return self.root.toxml()
+            # return self.root.toprettyxml(indent="  ")
+        except AttributeError, e:
+            logging.error("the root leaf node was not found, maybe you registered two roots!")
+            raise
 
 
 def httpRequest(url, fields=None, headers=None, method='GET', timeout=3, protocol="http", verifySsl=False, **kwargs):
