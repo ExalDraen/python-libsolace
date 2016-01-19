@@ -80,7 +80,7 @@ class SolaceUser(Plugin):
             except:
                 kwargs['shutdown_on_apply'] = True
 
-            self.new_user(**kwargs)
+            self.create_user(**kwargs)
             self.shutdown(**kwargs)
             self.set_client_profile(**kwargs)
             self.set_acl_profile(**kwargs)
@@ -165,13 +165,13 @@ class SolaceUser(Plugin):
                 return False
         return True
 
-    def new_user(self, **kwargs):
+    def create_user(self, **kwargs):
         """
         Create user XML / enqueue command on connection instance
 
         Example
         >>> connection = SolaceAPI("dev")
-        >>> xml = connection.manage("SolaceUser").new_user(username="foo", vpn_name="bar")
+        >>> xml = connection.manage("SolaceUser").create_user(username="foo", vpn_name="bar")
         <rpc semp-version="soltr/6_0"><create><client-username><username>foo</username><vpn-name>bar</vpn-name></client-username></create></rpc>
 
         """

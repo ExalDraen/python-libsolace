@@ -10,7 +10,7 @@ READ_ONLY_USER: ro
 READ_ONLY_PASS: ro
 
 # the naming standard to use, default is <env>_<name>
-NAMEHOOK: ZoinksNamingStandard
+NAMEHOOK: NamingStandard
 
 # list of all plugins to load
 PLUGINS:

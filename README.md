@@ -1,45 +1,14 @@
 # libSolace
 
-## Changelog
+## Overview
 
-* Customizable CMDB API supporting XML / JSON / Custom backends
-* Pluggable CMDB API loading
-* Separated pluggable classes for each Configurable Item
-	* SolaceClientProfile
-	* SolaceACLProfile
-	* SolaceQueue
-	* SolaceUser
-	* SolaceVPN
-
-## Intro
-
-This is a set of python helpers for managing Solace Messaging Appliances. The
-design is to be flexible and aimed at managing multiple clusters in multiple
-environments.
-
-### CMDB Configuration data and Naming Patterns
-
-In my use case, each Solace cluster could potentially host multiple 'environments',
-so ALL objects are created with a environment specific name to allow multi-homing.
-
-e.g.:
-* dev_MyVPN
-* qa1_MyUsername
-* prod1_MyProfile
-* dev_MyACL
-
-This means that any cluster can host any number of environments combined without
-conflicting resources. Therefore, whenever you see '%s' in the name of a VPN,
-User, Profile or any other CI in the CMDB data, the CMDBClient will resolve the
-final name by substituting the environment name into the string. e.g. '%s_myVpn' % environmentName.
-
-See libsolace/plugins/CMDBClient.py
+This is a set of python helpers for managing and provisioning Solace Messaging Appliances. The design is to be flexible
+and aimed at managing multiple clusters in multiple environments.
 
 ### XML Generator
 
-The core of this provisioning system is the SolaceXMLBuilder class which can conjur
-up any XML code through recursive instantiation of a dictionary like object.
-So if you want to create a new user XML example:
+The core of this provisioning system is the SolaceXMLBuilder class which can generate XML through recursive instantiation
+of a dictionary like object. Example:
 
 ```python
 >>> document = SolaceXMLBuilder(version="soltr/6_2")
@@ -49,20 +18,21 @@ So if you want to create a new user XML example:
 '<rpc semp-version="soltr/6_2"><create><client-username><username>myUserName</username><vpn-name>dev_MyVPN</vpn-name></client-username></create></rpc>'
 ```
 
-If you want to create a new user and set the password, ACL Profile and Client Profile,
-you can use the SolaceUser class:
+
+Plugins are written to create single SEMP commands or a list of SEMP commands in order to provision a specific object. Example:
 
 ```python
->>> from libsolace.items.SolaceUser import SolaceUser
 >>> connection = SolaceAPI("dev")
->>> xml = connection.manage("SolaceUser").new_user(username="foo", vpn_name="bar")
+>>> # create the command for creating a new user via the "SolaceUser" plugin
+>>> xml = connection.manage("SolaceUser").create_user(username="foo", vpn_name="bar")
 <rpc semp-version="soltr/6_0"><create><client-username><username>foo</username><vpn-name>bar</vpn-name></client-username></create></rpc>
+>>> # create the commands for a user and all related objects
 >>> xmlList = connection.manage("SolaceUser",
-		    username='dev_myUser',
+		      username='dev_myUser',
 			  password='myPassword',
-				vpn_name='dev_MyVPN',
-				acl_profile='dev_MyVPN',
-				client_profile='glassfish').commands.commands
+			  vpn_name='dev_MyVPN',
+			  acl_profile='dev_MyVPN',
+			  client_profile='glassfish').commands.commands
 [ list of XML documents to POST to `dev` appliances ]
 ```
 
@@ -77,30 +47,37 @@ care to detect the appliance OS version for you. e.g.
 ```
 
 
-## TODO FIXME
-Open:
-* SolOS 7 Config Sync
+
+### CMDB Configuration data and Naming Patterns
+
+In my use case, each Solace Cluster could potentially host multiple 'environments', therefore ALL objects are created
+with a environment specific name to allow multi-homing.
+
+e.g.:
+    * dev_MyVPN
+    * qa1_MyUsername
+    * prod1_MyProfile
+    * dev_MyACL
+
+This means that any cluster can host any number of environments combined without conflicting resources. The CMDBClient
+must resolve the final item name by substituting the environment name into the string. e.g. '%s_myVpn' % env_name. This
+can be achieved through the Naming plugin. see <a href="libsolace/plugins/NamingStandard.py">NamingStandard</a> and 
+<a href="libsolace/plugins/ZoinksNamingStandard.py">ZoinksNamingStandard</a>
+
+See <a href="libsolace/plugins/CMDBClient.py">CMDBClient</a> for a CMDB plugin example.
 
 
-Completed:
-* ~~optional environment name substitution~~
-* ~~Item's are plugins and SolOS version aware~~
-* ~~Plugins not instantiated only once, make them safe by moving work to separated classes for User,Queue,Vpn,...~~
+### Limitations
 
-Abandoned:
-
-## Limitations
-
-* XML can only be validated if it passes through a SolaceCommandQueue instance.
-* Appliance responses are difficult to validate since the "slave" appliance will
-almost always return errors when NOT "active", and already existing CI's will
-throw a error on create events and so forth.
-* Since python dictionaries cannot contain `-` use `_`, the SolaceNode class
-will substitute a `-` for a `_` and vice-versa as needed on keyNames
+* XML can only be validated if it is enqueued in a SolaceCommandQueue instance.
+* Appliance responses are difficult to validate since the "slave" appliance will almost always return errors when NOT 
+"active", and already existing CI's will throw a error on create events and incorrect states.
+* Since python dictionaries cannot contain `-` use `_`, the SolaceNode class will substitute a `-` for a `_` and 
+vice-versa as needed on keyNames.
 
 ## Install
 
-You might need libyaml-devel or equivilant!
+You might need libyaml-devel or equivilant for your OS.
 
 ```
 python setup.py install
@@ -108,30 +85,27 @@ python setup.py install
 
 ## Configuration
 
-libsolace requires a `libsolace.yaml` file in order to know what environments
-exist and what appliances are part of those environments. A single appliance can
-be part of multiple environments.
+libsolace requires a `libsolace.yaml` file in order to know what environments exist and what appliances are part of 
+those environments. A single appliance can be part of multiple environments.
 
 The `libsolace.yaml` file is searched for in:
 
 * 'libsolace.yaml'
-*  '/etc/libsolace/libsolace.yaml'
+* '/etc/libsolace/libsolace.yaml'
 * '/opt/libsolace/libsolace.yaml'
 
-The configuration loader is also responsible for loading all plugins as specified
-in the PLUGINS key.
+The configuration loader is also responsible for loading all plugins as specified in the PLUGINS key.
 
-See `libsolace.yaml` for more info.
+See <a href="libsolace.yaml.template">libsolace.yaml.template</a> for more info.
 
 ## Plugins
 
-libsolace is pluggable, in that you can register your own classes to customize
-the appliance management. You need to implement your own CMDBClient which should
-integrate with whatever configuration system you desire to populate solace.
+libsolace is pluggable, and you can register your own classes to customize the appliance management. You need to 
+implement your own CMDBClient which should integrate with whatever configuration system you desire to populate solace.
 
-See libsolace/plugins/CMDBClient.py
-See libsolace/plugins/*
-See libsolace/items/*
+See <a href="libsolace/plugins/CMDBClient.py">CMDBClient</a>
+See <a href="libsolace/plugins/">All Plugins</a>
+See <a href="libsolace/items/">Item Plugins</a>
 
 ## bin
 
@@ -151,12 +125,16 @@ Plugin Manage Identifier: "SolaceQueue"
 
 Get Queue Usage Example:
 
+
 ```python
+from libsolace.SolaceAPI import SolaceAPI
 connection = SolaceAPI('dev')
 connection.manage("SolaceQueue").get(queue_name="testqueue1", vpn_name="dev_testvpn")
+{'reply': {'show': {'queue': {'queues': {'queue': {'info': {'num-messages-spooled': '0', 'message-vpn': 'dev_testvpn', 'egress-config-status': 'Up', 'egress-selector-present': 'No', 'network-topic': '#P2P/QUE/v:solace1/testqueue1', 'owner': 'dev_testvpn', 'max-bind-count': '1000', 'endpt-id': '2134', 'access-type': 'exclusive', 'event': {'event-thresholds': [{'clear-value': '600', 'clear-percentage': '60', 'set-percentage': '80', 'name': 'bind-count', 'set-value': '800'}, {'clear-value': '2457', 'clear-percentage': '60', 'set-percentage': '80', 'name': 'spool-usage', 'set-value': '3276'}, {'clear-value': '0', 'clear-percentage': '60', 'set-percentage': '80', 'name': 'reject-low-priority-msg-limit', 'set-value': '0'}]}, 'total-delivered-unacked-msgs': '0', 'durable': 'true', 'max-redelivery': '0', 'created-by-mgmt': 'Yes', 'max-message-size': '10000000', 'topic-subscription-count': '0', 'type': 'Primary', 'ingress-config-status': 'Up', 'bind-time-forwarding-mode': 'Store-And-Forward', 'quota': '4096', 'reject-low-priority-msg-limit': '0', 'others-permission': 'Consume (1100)', 'current-spool-usage-in-mb': '0', 'reject-msg-to-sender-on-discard': 'Yes', 'max-delivered-unacked-msgs-per-flow': '250000', 'bind-count-threshold-high-percentage': '80', 'bind-count-threshold-high-clear-percentage': '60', 'low-priority-msg-congestion-state': 'Disabled', 'respect-ttl': 'No', 'high-water-mark-in-mb': '0', 'total-acked-msgs-in-progress': '0', 'bind-count': '0'}, 'name': 'testqueue1'}}}}}}
 ```
 
 Create Queue Example:
+
 
 ```python
 # list of queues we want to create

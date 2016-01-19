@@ -21,7 +21,7 @@ class SolaceQueue(Plugin):
         "owner": "default"
     }
 
-    def __init__(self, **kwargs):
+    def __init__(self, *args, **kwargs):
         """ Manage Queues
 
         This plugin manages SolaceQueue's within the VPN scope. It needs to be
@@ -48,14 +48,15 @@ class SolaceQueue(Plugin):
         """
 
         if kwargs == {}:
+            logging.info("Getter Mode")
             return
 
         self.api = get_key_from_kwargs("api", kwargs)
-        self.commands = SolaceCommandQueue(version = self.api.version)
-        self.vpn_name = get_key_from_kwargs("vpn_name", kwargs)
+        self.commands = SolaceCommandQueue(version=self.api.version)
+        self.vpn_name = get_key_from_kwargs("vpn_name", kwargs, default="default")
         self.testmode = get_key_from_kwargs("testmode", kwargs, default=False)
-        self.queues = get_key_from_kwargs("queues", kwargs)
-        self.shutdown_on_apply = get_key_from_kwargs("shutdown_on_apply", kwargs)
+        self.queues = get_key_from_kwargs("queues", kwargs, default={})
+        self.shutdown_on_apply = get_key_from_kwargs("shutdown_on_apply", kwargs, default=False)
         self.defaults = get_key_from_kwargs('defaults', kwargs, default = self.defaults)
         self.options = None
         logging.info("Queues: %s" % self.queues)
@@ -101,7 +102,6 @@ class SolaceQueue(Plugin):
         """
         queue_name = get_key_from_kwargs("queue_name", kwargs)
         vpn_name = get_key_from_kwargs("vpn_name", kwargs)
-        #api = get_key_from_kwargs("api", kwargs)
 
         self.api.x = SolaceXMLBuilder("Querying Queue %s" % queue_name)
         self.api.x.show.queue.name = queue_name

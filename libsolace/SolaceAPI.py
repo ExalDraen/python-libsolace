@@ -95,7 +95,11 @@ class SolaceAPI:
 
     """
 
-    def __init__(self, environment, version=None, **kwargs):
+    def __init__(self, environment, version=None, detect_status=True, testmode=False, **kwargs):
+        """
+
+
+        """
         try:
             logging.debug("Solace Client version: %s" % version)
 
@@ -106,7 +110,7 @@ class SolaceAPI:
             logging.debug("Loaded Config: %s" % self.config)
 
             # testmode sets the user to the RO user
-            self.testmode = kwargs.get("testmode", False)
+            self.testmode = testmode
             if self.testmode:
                 self.config['USER'] = settings.READ_ONLY_USER
                 self.config['PASS'] = settings.READ_ONLY_PASS
@@ -118,7 +122,7 @@ class SolaceAPI:
 
             # detect primary / backup node instance states or assume
             # 1st node is primary and second is backup
-            self.detect_status = kwargs.get("detect_status", True)
+            self.detect_status = detect_status
             if self.detect_status:
                 logging.debug("Detecting primary and backup node states")
                 self.status = self.get_message_spool(**kwargs)
@@ -130,7 +134,7 @@ class SolaceAPI:
                     logging.debug(spoolStatus)
                     if spoolStatus == 'AD-Active' and self.primaryRouter == None:
                         self.primaryRouter = node['HOST']
-                    elif self.backupRouter == None and self.primaryRouter != None:
+                    elif self.backupRouter is None and self.primaryRouter != None:
                         self.backupRouter = node['HOST']
                     else:
                         logging.warn("More than one backup router?")
