@@ -22,7 +22,7 @@ class CMDBClient(Plugin):
     # "init" the instance object of the Plugin
     def __init__(self, settings=None, **kwargs):
         logging.info("Configuring with settings: %s" % settings)
-        #url = settings.MY_CMDB_REST_BACKEND
+        url = settings.CMDB_URL
 
     def get_vpns_by_owner(self, owner_name, environment='dev', **kwargs):
         """
@@ -36,7 +36,7 @@ class CMDBClient(Plugin):
         vpn1['vpn_config'] = {}
         vpn1['vpn_config']['spool_size'] = '1024'
         vpn1['password'] = 'd0nt_u5e_th1s'
-        vpn1['id'] = '%s_testvpn'
+        vpn1['id'] = name('%s_testvpn' % environment)
         vpn1['name'] = name(vpn1['id'], environment)
 
         vpns.append(vpn1)
@@ -68,7 +68,7 @@ class CMDBClient(Plugin):
         queue1['queue_config']["retries"] = 0
         queue1['queue_config']['max_bind_count'] = 1000
         # %lsVPN is a special owner which sets the owner to the VPN itself
-        queue1['queue_config']['owner'] = "%lsVPN"
+        queue1['queue_config']['owner'] = name("%s_testvpn" % environment)
         queue1['queue_config']["consume"] = "all"
         queue1["name"] = "testqueue1"
 

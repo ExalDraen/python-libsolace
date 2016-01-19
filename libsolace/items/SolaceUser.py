@@ -45,9 +45,8 @@ class SolaceUser(Plugin):
             return
 
         self.api = get_key_from_kwargs('api', kwargs)
-        self.commands = SolaceCommandQueue(version = self.api.version)
-        self.options = None # not implemented
-
+        self.commands = SolaceCommandQueue(version=self.api.version)
+        self.options = None
         self.username = get_key_from_kwargs("username", kwargs)
         self.password = get_key_from_kwargs("password", kwargs)
 
