@@ -9,6 +9,21 @@ SOURCE_DIR = os.path.join(ROOT_DIR)
 # Also, when git is not available (PyPi package), use stored version.py.
 version_py = os.path.join(os.path.dirname(__file__), 'version.py')
 
+install_requires = [
+    'ordereddict==1.1',
+    'prettyprint==0.1.5',
+    'simplejson==3.5.3',
+    'pyparsing',
+    'urllib3==1.9',
+    'lxml==3.3.5',
+    'pyyaml==3.11'
+]
+
+try:
+    import importlib
+except ImportError:
+    install_requires.append('importlib')
+
 try:
     p = subprocess.Popen(['git', 'describe'], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     o = p.communicate()
@@ -42,15 +57,7 @@ setup(name='libsolace',
           'unittest2==0.5.1',
           'coverage==3.7.1'
       ],
-      install_requires=[
-          'ordereddict==1.1',
-          'prettyprint==0.1.5',
-          'simplejson==3.5.3',
-          'pyparsing',
-          'urllib3==1.9',
-          'lxml==3.3.5',
-          'pyyaml==3.11'
-      ],
+      install_requires=install_requires,
       scripts=[
           'bin/solace-provision.py'
       ]

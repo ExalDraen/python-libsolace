@@ -79,13 +79,10 @@ class SolaceUsers(Plugin):
                     try:
                         # Check if user already exists, if not then shutdown immediately after creating the user
                         self.get(**user_kwargs).reply.show.client_username.client_usernames.client_username
-                    except KeyError:
-                        user_kwargs['shutdown_on_apply'] = True
                     except AttributeError:
+                        logging.info("User %s doesn't exist, using shutdown_on_apply to True for user" % user_kwargs['username'])
                         user_kwargs['shutdown_on_apply'] = True
-                    except:
-                        user_kwargs['shutdown_on_apply'] = True
-                    self.new_user(**user_kwargs)
+                    self.create_user(**user_kwargs)
                     self.disable_user(**user_kwargs)
                     self.set_client_profile(**user_kwargs)
                     self.set_acl_profile(**user_kwargs)
@@ -167,11 +164,11 @@ class SolaceUsers(Plugin):
                 return False
         return True
 
-    def new_user(self, **kwargs):
+    def create_user(self, **kwargs):
         username = kwargs.get('username')
         vpn_name = kwargs.get('vpn_name')
 
-        self.api.x = SolaceXMLBuilder("New User %s" % username, version=self.api.version)
+        self.api.x = SolaceXMLBuilder("Creating User %s" % username, version=self.api.version)
         self.api.x.create.client_username.username = username
         self.api.x.create.client_username.vpn_name = vpn_name
         self.commands.enqueue(self.api.x)
