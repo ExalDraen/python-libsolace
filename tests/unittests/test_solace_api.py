@@ -2,7 +2,7 @@ __author__ = 'johlyh'
 
 import unittest2 as unittest
 import libsolace.settingsloader as settings
-from libsolace.solace import SolaceAPI
+from libsolace.SolaceAPI import SolaceAPI
 
 
 class TestSolaceAPI(unittest.TestCase):
