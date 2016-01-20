@@ -7,7 +7,7 @@ logging.getLogger().setLevel(logging.INFO)
 from optparse import OptionParser
 from libsolace.SolaceAPI import SolaceAPI
 from libsolace.SolaceXMLBuilder import SolaceXMLBuilder
-import libsolace.settingsloader as settings
+from libsolace.Naming import name
 
 def solace_delete_profile(options):
     """
@@ -20,11 +20,11 @@ def solace_delete_profile(options):
     logging.info("Options: %s" % options)
 
     for environment in options.environment:
-        solace = SolaceAPI(environment,testmode=options.testmode)
+        solace = SolaceAPI(environment, testmode=options.testmode)
 
         # try substitite environment into vpn_name if it is formated '%s_somename'
         try:
-            vpnname = options.vpnname % environment
+            vpnname = name(options.vpnname, environment)
         except Exception, e:
             vpnname = options.vpnname
 

@@ -12,8 +12,8 @@ import logging
 import libsolace
 from libsolace.plugin import Plugin
 from libsolace.Naming import name
+from libsolace.util import get_key_from_settings
 from libsolace.util import get_key_from_kwargs
-
 
 @libsolace.plugin_registry.register
 class CMDBClient(Plugin):
@@ -22,8 +22,16 @@ class CMDBClient(Plugin):
     plugin_name = "CMDBClient"
 
     def __init__(self, settings=None, **kwargs):
+        """
+        Example:
+        >>> cmdbapi =
+        :param settings:
+        :param kwargs:
+        :return:
+        """
         logging.info("Configuring with settings: %s" % settings)
-        url = settings.CMDB_URL  # type: str
+        self.settings = settings.__dict__  # type: dict
+        self.url = get_key_from_settings("CMDB_URL", self.settings)
 
     def get_vpns_by_owner(self, *args, **kwargs):
         """
@@ -81,7 +89,7 @@ class CMDBClient(Plugin):
         queue1['queue_config']["queue_size"] = "4096"
         queue1['queue_config']["retries"] = 0
         queue1['queue_config']['max_bind_count'] = 1000
-        queue1['queue_config']['owner'] = name("%s_testvpn", environment)
+        queue1['queue_config']['owner'] = name("%s_testproductA", environment)
         queue1['queue_config']["consume"] = "all"
         queue1["name"] = "testqueue1"
 

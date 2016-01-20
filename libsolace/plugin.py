@@ -78,7 +78,7 @@ class Plugin(object):
         :param kwargs:
         :return: class
         """
-        logging.info(self.plugins_dict)
+        logging.debug(self.plugins_dict)
         logging.info("Retrieving self:%s, args:%s, kwargs:%s" % (self, args, kwargs))
         try:
             # logging.info("Class: %s" % self.plugins_dict[args[0]].__class__)

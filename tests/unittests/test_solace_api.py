@@ -832,3 +832,4 @@ class TestSolaceAPI(unittest.TestCase):
 
         # restore method
         self.solace.get_queue = orig_method
+

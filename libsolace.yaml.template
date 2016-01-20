@@ -10,7 +10,7 @@ READ_ONLY_USER: ro
 READ_ONLY_PASS: ro
 
 # the naming standard to use, default is <env>_<name>
-NAMEHOOK: NamingStandard
+NAMEHOOK: ZoinksNamingStandard
 
 # list of all plugins to load
 PLUGINS:
@@ -23,9 +23,14 @@ PLUGINS:
   - libsolace.plugins.NamingStandard
   - libsolace.plugins.ZoinksNamingStandard
   - libsolace.items.SolaceClientProfile
+  - libsolace.plugins.Utilities
 
 # the plugin name as registered in the registry we want to use for solace config
 SOLACE_CMDB_PLUGIN: CMDBClient
+
+# The plugin to use for Solace Queue management
+SOLACE_QUEUE_PLUGIN: SolaceQueue
+SOLACE_USER_PLUGIN: SolaceUser
 
 # mapping of environment to solace appliances
 SOLACE_CONF:

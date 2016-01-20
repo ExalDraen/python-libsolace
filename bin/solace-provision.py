@@ -161,7 +161,6 @@ if __name__ == '__main__':
     # configure the client ( what init would normally do, but the plugin system
     # lacks the ability to implement stuff in init )
     cmdbapi = cmdbapi_class(settings=settings, environment=options.env)
-    #cmdbapi.configure(settings=settings, environment=options.env)
 
     # get the list of vpns to provision
     vpns = cmdbapi.get_vpns_by_owner(options.product, environment=options.env)

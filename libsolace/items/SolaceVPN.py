@@ -1,9 +1,11 @@
 import logging
 import libsolace
+from libsolace.SolaceReply import SolaceReplyHandler
 from libsolace.plugin import Plugin
 from libsolace.SolaceCommandQueue import SolaceCommandQueue
 from libsolace.SolaceXMLBuilder import SolaceXMLBuilder
 from libsolace.util import get_key_from_kwargs
+
 
 @libsolace.plugin_registry.register
 class SolaceVPN(Plugin):
@@ -43,7 +45,7 @@ class SolaceVPN(Plugin):
         self.api = get_key_from_kwargs("api", kwargs)
 
         # create a commandqueue instance for queuing up XML and validating
-        self.commands = SolaceCommandQueue(version = self.api.version)
+        self.commands = SolaceCommandQueue(version=self.api.version)
 
         if not "vpn_name" in kwargs:
             logging.info("No vpn_name kwarg, assuming query mode")
@@ -54,22 +56,23 @@ class SolaceVPN(Plugin):
             self.acl_profile = get_key_from_kwargs("vpn_name", kwargs, default=self.vpn_name)
             self.options = None
 
-            logging.debug("Creating vpn in env: %s vpn: %s, kwargs: %s" % ( self.api.environment, self.vpn_name, kwargs ))
+            logging.debug("Creating vpn in env: %s vpn: %s, kwargs: %s" % (self.api.environment, self.vpn_name, kwargs))
 
             # set defaults
-            for k,v in self.default_settings.items():
-                logging.info("Setting Key: %s to %s" % (k,v))
+            for k, v in self.default_settings.items():
+                logging.info("Setting Key: %s to %s" % (k, v))
                 setattr(self, k, v)
 
             # use kwargs to tune defaults
-            for k,v in self.default_settings.items():
+            for k, v in self.default_settings.items():
                 if k in kwargs:
-                    logging.info("Overriding Key: %s to %s" % (k,kwargs[k]))
+                    logging.info("Overriding Key: %s to %s" % (k, kwargs[k]))
                     setattr(self, k, kwargs[k])
 
             # backwards compatibility for None options passed to still execute "add" code
             if self.options == None:
-                logging.warning("No options passed, assuming you meant 'add', please update usage of this class to pass a OptionParser instance")
+                logging.warning(
+                    "No options passed, assuming you meant 'add', please update usage of this class to pass a OptionParser instance")
                 # stack the commands
                 self.create_vpn(**kwargs)
                 self.clear_radius(**kwargs)
@@ -126,7 +129,8 @@ class SolaceVPN(Plugin):
 
         logging.debug("Setting spool size to %s" % getattr(self, 'max_spool_usage'))
         # Set the Spool Size
-        self.api.x = SolaceXMLBuilder("VPN %s Set spool size to %s" % (vpn_name, max_spool_usage), version=self.api.version)
+        self.api.x = SolaceXMLBuilder("VPN %s Set spool size to %s" % (vpn_name, max_spool_usage),
+                                      version=self.api.version)
         self.api.x.message_spool.vpn_name = vpn_name
         self.api.x.message_spool.max_spool_usage.size = max_spool_usage
         self.commands.enqueue(self.api.x)
@@ -134,10 +138,13 @@ class SolaceVPN(Plugin):
     def set_large_message_threshold(self, **kwargs):
 
         vpn_name = get_key_from_kwargs("vpn_name", kwargs)
-        large_message_threshold = get_key_from_kwargs("large_message_threshold", kwargs, getattr(self, "large_message_threshold"))
+        large_message_threshold = get_key_from_kwargs("large_message_threshold", kwargs,
+                                                      getattr(self, "large_message_threshold"))
 
         # Large Message Threshold
-        self.api.x = SolaceXMLBuilder("VPN %s Settings large message threshold event to %s" % (vpn_name, large_message_threshold), version=self.api.version)
+        self.api.x = SolaceXMLBuilder(
+            "VPN %s Settings large message threshold event to %s" % (vpn_name, large_message_threshold),
+            version=self.api.version)
         self.api.x.message_vpn.vpn_name = vpn_name
         self.api.x.message_vpn.event.large_message_threshold.size = large_message_threshold
         self.commands.enqueue(self.api.x)
@@ -147,7 +154,8 @@ class SolaceVPN(Plugin):
         vpn_name = get_key_from_kwargs("vpn_name", kwargs)
 
         # Logging Tag for this VPN
-        self.api.x = SolaceXMLBuilder("VPN %s Setting logging tag to %s" % (vpn_name, vpn_name), version=self.api.version)
+        self.api.x = SolaceXMLBuilder("VPN %s Setting logging tag to %s" % (vpn_name, vpn_name),
+                                      version=self.api.version)
         self.api.x.message_vpn.vpn_name = vpn_name
         self.api.x.message_vpn.event.log_tag.tag_string = vpn_name
         self.commands.enqueue(self.api.x)
@@ -161,6 +169,22 @@ class SolaceVPN(Plugin):
         self.api.x.message_vpn.vpn_name = vpn_name
         self.api.x.message_vpn.no.shutdown
         self.commands.enqueue(self.api.x)
+
+    def list_vpns(self, **kwargs):
+
+        """
+        Returns a list of vpns
+
+        :param vpn_name: the vpn_name search pattern to apply.
+        :return:
+        """
+        vpn_name = get_key_from_kwargs("vpn_name", kwargs)
+
+        self.api.x = SolaceXMLBuilder("Getting list of VPNS", version=self.api.version)
+        self.api.x.show.message_vpn.vpn_name = vpn_name
+        response = SolaceReplyHandler(self.api.rpc(str(self.api.x), primaryOnly=True))
+
+        return [vpn['name'] for vpn in response.reply.show.message_vpn.vpn]
 
     def __getitem__(self, k):
         return self.__dict__[k]

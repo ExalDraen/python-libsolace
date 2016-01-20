@@ -4,14 +4,15 @@ misc functions
 '''
 
 # Some basic imports
-import sys
-import os
+
 import re
 import xml.sax.handler
 import pkg_resources
 import base64
 from xml.dom.minidom import Document
 from distutils.version import StrictVersion
+
+import libsolace
 from libsolace.Exceptions import MissingProperty
 
 try:
@@ -21,7 +22,7 @@ except ImportError, e:
 
 import logging
 logger = logging.getLogger(__name__)
-import pprint
+
 
 try:
     import urllib3
@@ -313,4 +314,30 @@ def get_key_from_kwargs(key, kwargs, default=None):
     elif default!=None:
         return default
     else:
-        raise(MissingProperty(key))
+        raise(MissingProperty("%s is missing from kwargs"))
+
+
+def get_key_from_settings(key, kwargs, default=None):
+    """
+    Same as above, but different error message
+    """
+    if key in kwargs:
+        return kwargs.get(key)
+    elif default!=None:
+        return default
+    else:
+        raise(MissingProperty("%s is missing from yaml config"))
+
+
+def get_plugin(plugin_name, solace_api, *args, **kwargs):
+    """
+    Returns a new plugin configured for the environment
+
+    :param plugin_name: name of the plugun
+    :param solace_api: a instance of SolaceAPI
+    :param kwargs:
+    :return:
+    """
+    plugin = libsolace.plugin_registry(plugin_name, **kwargs)
+    logging.info(args)
+    return plugin(api=solace_api, *args, **kwargs)

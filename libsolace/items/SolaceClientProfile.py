@@ -19,6 +19,10 @@ class SolaceClientProfile(Plugin):
 
         self.api = get_key_from_kwargs("api", kwargs)
         self.commands = SolaceCommandQueue(version = self.api.version)
+        kwargs.pop("api")
+
+        if kwargs == {}:
+            return
         self.name = get_key_from_kwargs('name', kwargs)
         self.vpn_name = get_key_from_kwargs('vpn_name', kwargs)
         self.defaults = get_key_from_kwargs('defaults', kwargs, default = self.defaults)
@@ -49,9 +53,18 @@ class SolaceClientProfile(Plugin):
 
         self.api.x = SolaceXMLBuilder("Create Client Profile", version=self.api.version)
         self.api.x.create.client_profile.name = name
-        logging.info(version_equal_or_greater_than('soltr/6_2', self.api.version))
         if version_equal_or_greater_than('soltr/6_2', self.api.version):
             self.api.x.create.client_profile.vpn_name = vpn_name
+        self.commands.enqueue(self.api.x)
+        return self.api.x
+
+    def delete(self, **kwargs):
+        name = get_key_from_kwargs("name", kwargs)
+        vpn_name = get_key_from_kwargs("vpn_name", kwargs)
+        self.api.x = SolaceXMLBuilder("Delete Client Profile", version=self.api.version)
+        self.api.x.no.client_profile.name = name
+        if version_equal_or_greater_than('soltr/6_2', self.api.version):
+            self.api.x.no.client_profile.vpn_name = vpn_name
         self.commands.enqueue(self.api.x)
         return self.api.x
 
