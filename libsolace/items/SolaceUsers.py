@@ -7,6 +7,7 @@ from libsolace.SolaceXMLBuilder import SolaceXMLBuilder
 from libsolace.SolaceReply import SolaceReplyHandler
 from libsolace.items.SolaceUser import SolaceUser
 from libsolace.util import get_key_from_kwargs
+from libsolace.Exceptions import *
 
 @libsolace.plugin_registry.register
 class SolaceUsers(Plugin):
@@ -79,7 +80,7 @@ class SolaceUsers(Plugin):
                     try:
                         # Check if user already exists, if not then shutdown immediately after creating the user
                         self.get(**user_kwargs).reply.show.client_username.client_usernames.client_username
-                    except (AttributeError, KeyError):
+                    except (AttributeError, KeyError, MissingClientUser):
                         logging.info("User %s doesn't exist, using shutdown_on_apply to True for user" % user_kwargs['username'])
                         user_kwargs['shutdown_on_apply'] = True
                     self.create_user(**user_kwargs)
@@ -118,7 +119,7 @@ class SolaceUsers(Plugin):
         response = SolaceReplyHandler(self.api.rpc(str(self.api.x), primaryOnly=True))
         logging.info(response.reply.show.client_username.client_usernames)
         if response.reply.show.client_username.client_usernames == 'None':
-            raise Exception("No such user")
+            raise MissingClientUser("No such user %s" % username)
         else:
             return response
 
