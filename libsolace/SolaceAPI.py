@@ -126,27 +126,28 @@ class SolaceAPI:
             # 1st node is primary and second is backup
             self.detect_status = detect_status
             if self.detect_status:
-                logging.debug("Detecting primary and backup node states")
+                logging.info("Detecting primary and backup node states")
                 self.status = self.get_message_spool(**kwargs)
                 self.primaryRouter = None
                 self.backupRouter = None
 
                 for node in self.status:
-                    spoolStatus = node['rpc-reply']['rpc']['show']['message-spool']['message-spool-info'][
-                        'operational-status']
-                    logging.debug(spoolStatus)
-                    if spoolStatus == 'AD-Active' and self.primaryRouter == None:
+                    result = self.__detect_state(node)
+                    if result == 'Primary':
                         self.primaryRouter = node['HOST']
-                    elif self.backupRouter is None and self.primaryRouter != None:
+                    elif result == 'Backup':
                         self.backupRouter = node['HOST']
-                    else:
-                        logging.warn("More than one backup router?")
-                        self.primaryRouter = node['HOST']
-                    logging.info("Primary Router: %s" % self.primaryRouter)
-                    logging.info("Backup Router: %s" % self.backupRouter)
+                if self.primaryRouter is None:
+                    raise Exception("Failed to detect primary router")
+                if self.backupRouter is None:
+                    raise Exception("Failed to detect backup router")
+                if self.primaryRouter == self.backupRouter:
+                    raise Exception("Error, detected router %s to be both primary and backup" % self.primaryRouter)
+                logging.info("Detected primary Router: %s" % self.primaryRouter)
+                logging.info("Detected backup Router: %s" % self.backupRouter)
 
             else:
-                logging.debug("Not detecting statuses, using config")
+                logging.info("Not detecting statuses, using config")
                 self.primaryRouter = self.config['MGMT'][0]
                 self.backupRouter = self.config['MGMT'][1]
 
@@ -264,6 +265,16 @@ class SolaceAPI:
         request = SolaceXMLBuilder(version="soltr/6_0")
         request.show.message_spool
         return self.rpc(str(request), **kwargs)
+
+    def __detect_state(self, response):
+        """ TODO: is this sufficient to detect cluster state? """
+        message_spool = response['rpc-reply']['rpc']['show']['message-spool']['message-spool-info']
+        if message_spool['operational-status'] == 'AD-Active':
+            return 'Primary'
+        elif message_spool['operational-status'] == 'AD-Standby':
+            return 'Backup'
+        else:
+            raise Exception("Unknown message-spool operational-status '%s'" % message_spool['operational-status'])
 
     # @DeprecationWarning
     # def get_queue(self, queue, vpn, detail=False, **kwargs):
