@@ -8,6 +8,7 @@ from libsolace.SolaceReply import SolaceReplyHandler
 from libsolace.items.SolaceUser import SolaceUser
 from libsolace.util import get_key_from_kwargs
 from libsolace.Exceptions import *
+from libsolace.Decorators import only_on_shutdown
 
 @libsolace.plugin_registry.register
 class SolaceUsers(Plugin):
@@ -175,6 +176,7 @@ class SolaceUsers(Plugin):
         self.commands.enqueue(self.api.x)
         return self.api.x;
 
+    @only_on_shutdown('user')
     def disable_user(self, **kwargs):
         """
         Disable the user ( suspending pub/sub )
@@ -197,6 +199,7 @@ class SolaceUsers(Plugin):
             logging.warning("Not disabling User, commands could fail since shutdown_on_apply = %s" % self.shutdown_on_apply)
             return None
 
+    @only_on_shutdown('user')
     def set_client_profile(self, **kwargs):
 
         username = kwargs.get('username')
@@ -211,6 +214,7 @@ class SolaceUsers(Plugin):
         self.commands.enqueue(self.api.x)
         return self.api.x
 
+    @only_on_shutdown('user')
     def set_acl_profile(self, **kwargs):
 
         username = kwargs.get('username')

@@ -5,6 +5,7 @@ from libsolace.SolaceCommandQueue import SolaceCommandQueue
 from libsolace.SolaceXMLBuilder import SolaceXMLBuilder
 from libsolace.SolaceReply import SolaceReplyHandler
 from libsolace.util import get_key_from_kwargs
+from libsolace.Decorators import only_on_shutdown
 
 @libsolace.plugin_registry.register
 class SolaceQueue(Plugin):

@@ -9,6 +9,7 @@ import re
 import xml.sax.handler
 import pkg_resources
 import base64
+import inspect
 from xml.dom.minidom import Document
 from distutils.version import StrictVersion
 
@@ -341,3 +342,12 @@ def get_plugin(plugin_name, solace_api, *args, **kwargs):
     plugin = libsolace.plugin_registry(plugin_name, **kwargs)
     logging.info(args)
     return plugin(api=solace_api, *args, **kwargs)
+
+
+def get_calling_module():
+    frm = inspect.stack()[2]
+    function = str(frm[3])
+    line=str(frm[2])
+    modulepath=str(frm[1]).split('/')
+    module = str(modulepath.pop())
+    return module

@@ -8,7 +8,7 @@ except ImportError, e:
 import re
 
 from libsolace.SolaceNode import SolaceNode
-from libsolace.util import d2x
+from libsolace.util import d2x, get_calling_module
 
 class SolaceXMLBuilder(object):
     """
@@ -32,7 +32,8 @@ class SolaceXMLBuilder(object):
         if description is not None:
             self.description=description
         self.version = version
-        logging.info("%s description: %s " % (self.version, description))
+        calling_module = get_calling_module()
+        logging.info("Calling module %s - %s description: %s " % (calling_module, self.version, description))
 
     def __getattr__(self, name):
         name = re.sub("_", "-", name)
