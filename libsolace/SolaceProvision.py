@@ -78,7 +78,7 @@ class SolaceProvision:
                                     detect_status=self.detect_status)
 
         # get version of semp TODO FIXME, this should not be needed after Plugin implemented
-        if (self.version == None):
+        if self.version is None:
             self.version = self.connection.version
         else:
             logging.warn("Overriding default semp version %s" % self.version)

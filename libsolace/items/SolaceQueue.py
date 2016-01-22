@@ -10,7 +10,6 @@ from libsolace.Decorators import only_on_shutdown, only_if_not_exists, only_if_e
 
 @libsolace.plugin_registry.register
 class SolaceQueue(Plugin):
-
     plugin_name = "SolaceQueue"
 
     # defaults should be provided from the settingsloader key
@@ -53,9 +52,8 @@ class SolaceQueue(Plugin):
             logging.info("Getter Mode")
             return
 
-
         # decorator, for caching decorator create and set this property
-        #self.exists = None
+        # self.exists = None
 
 
         self.api = get_key_from_kwargs("api", kwargs)
@@ -64,32 +62,33 @@ class SolaceQueue(Plugin):
         self.testmode = get_key_from_kwargs("testmode", kwargs, default=False)
         self.queues = get_key_from_kwargs("queues", kwargs, default={})
         self.shutdown_on_apply = get_key_from_kwargs("shutdown_on_apply", kwargs, default=False)
-        self.defaults = get_key_from_kwargs('defaults', kwargs, default = self.defaults)
+        self.defaults = get_key_from_kwargs('defaults', kwargs, default=self.defaults)
         self.options = None
         logging.info("Queues: %s" % self.queues)
 
         # backwards compatibility for None options passed to still execute "add" code
-        if self.options == None:
-            logging.warning("No options passed, assuming you meant 'add', please update usage of this class to pass a OptionParser instance")
+        if self.options is None:
+            logging.warning(
+                    "No options passed, assuming you meant 'add', please update usage of this class to pass a OptionParser instance")
 
             for queue in self.queues:
 
                 queueName = queue['name']
 
                 queue_config = self.get_queue_config(queue, **kwargs)
-                self.create_queue(queue_name = queueName, **kwargs)
-                self.shutdown_egress(queue_name = queueName, **kwargs)
+                self.create_queue(queue_name=queueName, **kwargs)
+                self.shutdown_egress(queue_name=queueName, **kwargs)
                 if queue_config['exclusive'].lower() == "true":
-                    self.exclusive(queue_name = queueName, exclusive=True, **kwargs)
+                    self.exclusive(queue_name=queueName, exclusive=True, **kwargs)
                 else:
-                    self.exclusive(queue_name = queueName, exclusive=False, **kwargs)
-                self.owner(queue_name = queueName, owner_username = queue_config['owner'], **kwargs)
-                self.max_bind_count(queue_name = queueName, max_bind_count = queue_config['max_bind_count'], **kwargs)
-                self.consume(queue_name = queueName, consume = queue_config['consume'], **kwargs)
-                self.spool_size(queue_name = queueName, queue_size = queue_config['queue_size'], **kwargs)
-                self.retries(queue_name = queueName, retries = queue_config['retries'], **kwargs)
-                self.reject_on_discard(queue_name = queueName, **kwargs)
-                self.enable(queue_name = queueName, **kwargs)
+                    self.exclusive(queue_name=queueName, exclusive=False, **kwargs)
+                self.owner(queue_name=queueName, owner_username=queue_config['owner'], **kwargs)
+                self.max_bind_count(queue_name=queueName, max_bind_count=queue_config['max_bind_count'], **kwargs)
+                self.consume(queue_name=queueName, consume=queue_config['consume'], **kwargs)
+                self.spool_size(queue_name=queueName, queue_size=queue_config['queue_size'], **kwargs)
+                self.retries(queue_name=queueName, retries=queue_config['retries'], **kwargs)
+                self.reject_on_discard(queue_name=queueName, **kwargs)
+                self.enable(queue_name=queueName, **kwargs)
 
     def get(self, **kwargs):
         """
@@ -147,7 +146,7 @@ class SolaceQueue(Plugin):
             logging.debug("Checking env overrides for queue %s" % queue['env'])
             for e in queue['env']:
                 if e['name'] == self.api.environment:
-                    logging.info('setting queue_config to environment %s values' % e['name'] )
+                    logging.info('setting queue_config to environment %s values' % e['name'])
                     return self.apply_default_config(e['queue_config'], self.defaults)
         except:
             logging.warn("No environment overides for queue %s" % queue_name)
@@ -165,12 +164,12 @@ class SolaceQueue(Plugin):
 
         final_config = {}
 
-        for k,v in default.items():
+        for k, v in default.items():
             if k in config:
-                logging.info("Config key: %s to %s" % (k,v))
+                logging.info("Config key: %s to %s" % (k, v))
                 final_config[k] = config[k]
             else:
-                logging.info("Default config key: %s to %s" % (k,v))
+                logging.info("Default config key: %s to %s" % (k, v))
                 final_config[k] = v
         return final_config
 
@@ -197,9 +196,9 @@ class SolaceQueue(Plugin):
         vpn_name = get_key_from_kwargs("vpn_name", kwargs)
         queue_name = get_key_from_kwargs("queue_name", kwargs)
 
-        if ( shutdown_on_apply=='b' ) or ( shutdown_on_apply == 'q' ) or ( shutdown_on_apply == True):
+        if (shutdown_on_apply == 'b') or (shutdown_on_apply == 'q') or (shutdown_on_apply is True):
             # Lets only shutdown the egress of the queue
-            self.api.x = SolaceXMLBuilder("Shutting down egress for queue:%s" % queue_name, version = self.api.version)
+            self.api.x = SolaceXMLBuilder("Shutting down egress for queue:%s" % queue_name, version=self.api.version)
             self.api.x.message_spool.vpn_name = vpn_name
             self.api.x.message_spool.queue.name = queue_name
             self.api.x.message_spool.queue.shutdown.egress
@@ -222,7 +221,7 @@ class SolaceQueue(Plugin):
 
         # Default to NON Exclusive queue
         if not exclusive:
-            self.api.x = SolaceXMLBuilder("Set Queue %s to Non Exclusive " % queue_name , version=self.api.version)
+            self.api.x = SolaceXMLBuilder("Set Queue %s to Non Exclusive " % queue_name, version=self.api.version)
             self.api.x.message_spool.vpn_name = vpn_name
             self.api.x.message_spool.queue.name = queue_name
             self.api.x.message_spool.queue.access_type.non_exclusive
@@ -230,7 +229,7 @@ class SolaceQueue(Plugin):
             return str(self.api.x)
         else:
             # Non Exclusive queue
-            self.api.x = SolaceXMLBuilder("Set Queue %s to Exclusive " % queue_name , version=self.api.version)
+            self.api.x = SolaceXMLBuilder("Set Queue %s to Exclusive " % queue_name, version=self.api.version)
             self.api.x.message_spool.vpn_name = vpn_name
             self.api.x.message_spool.queue.name = queue_name
             self.api.x.message_spool.queue.access_type.exclusive
@@ -266,7 +265,8 @@ class SolaceQueue(Plugin):
         queue_name = get_key_from_kwargs("queue_name", kwargs)
         max_bind_count = get_key_from_kwargs("max_bind_count", kwargs)
 
-        self.api.x = SolaceXMLBuilder("Settings Queue %s max bind count to %s" % (queue_name, str(max_bind_count)), version=self.api.version)
+        self.api.x = SolaceXMLBuilder("Settings Queue %s max bind count to %s" % (queue_name, str(max_bind_count)),
+                                      version=self.api.version)
         self.api.x.message_spool.vpn_name = vpn_name
         self.api.x.message_spool.queue.name = queue_name
         self.api.x.message_spool.queue.max_bind_count.value = max_bind_count
@@ -301,7 +301,8 @@ class SolaceQueue(Plugin):
         queue_size = get_key_from_kwargs("queue_size", kwargs)
 
         # Configure Queue Spool Usage
-        self.api.x = SolaceXMLBuilder("Set Queue %s spool size: %s" % (queue_name, queue_size), version=self.api.version)
+        self.api.x = SolaceXMLBuilder("Set Queue %s spool size: %s" % (queue_name, queue_size),
+                                      version=self.api.version)
         self.api.x.message_spool.vpn_name = vpn_name
         self.api.x.message_spool.queue.name = queue_name
         self.api.x.message_spool.queue.max_spool_usage.size = queue_size
@@ -316,7 +317,8 @@ class SolaceQueue(Plugin):
         queue_name = get_key_from_kwargs("queue_name", kwargs)
         retries = get_key_from_kwargs("retries", kwargs, default=0)
 
-        self.api.x = SolaceXMLBuilder("Tuning max-redelivery retries for %s to %s" % (queue_name, retries), version=self.api.version)
+        self.api.x = SolaceXMLBuilder("Tuning max-redelivery retries for %s to %s" % (queue_name, retries),
+                                      version=self.api.version)
         self.api.x.message_spool.vpn_name = vpn_name
         self.api.x.message_spool.queue.name = queue_name
         self.api.x.message_spool.queue.max_redelivery.value = retries
