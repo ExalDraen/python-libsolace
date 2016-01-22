@@ -5,6 +5,9 @@ The plugin architecture
 import logging
 import re
 
+from libsolace.util import get_calling_module
+
+
 class PluginClass(type):
     """
     This is a metaclass for construction only.
@@ -79,13 +82,18 @@ class Plugin(object):
         :return: class
         """
         logging.debug(self.plugins_dict)
-        logging.info("Retrieving self:%s, args:%s, kwargs:%s" % (self, args, kwargs))
+        logging.info("Retrieving Plugin args:%s, kwargs:%s" % (args, kwargs))
         try:
             # logging.info("Class: %s" % self.plugins_dict[args[0]].__class__)
             # return self.plugins_dict[args[0]].__class__
-            logging.info("Class: %s" % self.plugins_dict[args[0]])
+            logging.debug("Class: %s" % self.plugins_dict[args[0]])
             return self.plugins_dict[args[0]]
         except:
-            logging.warn("No plugin named: %s found, available plugins are: %s" % (args[0],self.plugins_dict))
+            logging.warn("No plugin named: %s found, available plugins are: %s" % (args[0], self.plugins_dict))
             logging.warn("Please check the plugin is listed in the yaml config and that you have @libsolace.plugin_registry.register in the class")
             raise
+
+    def set_exists(self, state):
+        module = get_calling_module(point=3)
+        logging.info("Calling module: %s, Setting Exists bit: %s" % (module, state))
+        self.exists = state

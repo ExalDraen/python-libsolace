@@ -28,5 +28,5 @@ def name(*args, **kwargs):
     try:
         return libsolace.plugin_registry(settings.NAMEHOOK)().solve(*args, **kwargs)
     except Exception, e:
-        logging.error("Unable to solve name of object")
+        logging.error("Unable to solve name of object, reason: %s %s" % (e.__class__, e.message))
         raise

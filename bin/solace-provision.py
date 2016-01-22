@@ -135,6 +135,7 @@ if __name__ == '__main__':
     if options.testmode:
         logging.info("Test mode active")
     options.shutdown_on_apply = options.shutdown_on_apply[0]
+
     if options.shutdown_on_apply == 'n':
         logging.info("Setting options.shutdown_on_apply to False")
         options.shutdown_on_apply = False

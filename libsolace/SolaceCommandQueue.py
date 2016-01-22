@@ -31,7 +31,7 @@ class SolaceCommandQueue:
         self.commands = []
         self.commandsv2 = [] # list or tuples ( command, kwargs )
 
-    def enqueue(self, command):
+    def enqueue(self, command, **kwargs):
         """ Validate and append a command onto the command list.
 
         :type command: SolaceXMLBuilder
@@ -40,15 +40,17 @@ class SolaceCommandQueue:
         """
 
         logging.debug("command %s" % str(command))
+        logging.debug("kwargs: %s" % kwargs)
 
         try:
             root = etree.fromstring(str(command), self.parser)
             logging.debug('XML Validated')
-            self.commands.append(command)
+            self.commands.append((command, kwargs))
         except:
             logging.error('XML failed to validate, the XML was:')
             logging.error(command)
             raise
+
     def enqueueV2(self, command, **kwargs):
         """ Validate and append a command onto the command list.
 

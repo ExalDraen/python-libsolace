@@ -29,7 +29,7 @@ class CMDBClient(Plugin):
         :param kwargs:
         :return:
         """
-        logging.info("Configuring with settings: %s" % settings)
+        logging.debug("Configuring with settings: %s" % settings)
         self.settings = settings.__dict__  # type: dict
         self.url = get_key_from_settings("CMDB_URL", self.settings)
 

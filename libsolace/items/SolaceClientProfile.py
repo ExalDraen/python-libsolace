@@ -1,14 +1,15 @@
 import logging
 import libsolace
+from libsolace.SolaceReply import SolaceReplyHandler
 from libsolace.plugin import Plugin
 from libsolace.SolaceCommandQueue import SolaceCommandQueue
 from libsolace.SolaceXMLBuilder import SolaceXMLBuilder
 from libsolace.util import version_equal_or_greater_than
 from libsolace.util import get_key_from_kwargs
 
+
 @libsolace.plugin_registry.register
 class SolaceClientProfile(Plugin):
-
     plugin_name = "SolaceClientProfile"
 
     defaults = {
@@ -18,23 +19,40 @@ class SolaceClientProfile(Plugin):
     def __init__(self, *args, **kwargs):
 
         self.api = get_key_from_kwargs("api", kwargs)
-        self.commands = SolaceCommandQueue(version = self.api.version)
+        self.commands = SolaceCommandQueue(version=self.api.version)
         kwargs.pop("api")
 
         if kwargs == {}:
             return
         self.name = get_key_from_kwargs('name', kwargs)
         self.vpn_name = get_key_from_kwargs('vpn_name', kwargs)
-        self.defaults = get_key_from_kwargs('defaults', kwargs, default = self.defaults)
-        self.max_clients = get_key_from_kwargs('max_clients', kwargs, default = self.defaults.get("max_clients"))
+        self.defaults = get_key_from_kwargs('defaults', kwargs, default=self.defaults)
+        self.max_clients = get_key_from_kwargs('max_clients', kwargs, default=self.defaults.get("max_clients"))
 
         if kwargs.get('options', None) is None:
-            logging.warning("No options passed, assuming you meant 'add', please update usage of this class to pass a OptionParser instance")
+            logging.warning(
+                "No options passed, assuming you meant 'add', please update usage of this class to pass a OptionParser instance")
             self.new_client_profile(**kwargs)
             self.allow_consume(**kwargs)
             self.allow_send(**kwargs)
             self.allow_endpoint_create(**kwargs)
             self.allow_transacted_sessions(**kwargs)
+
+    def get(self, **kwargs):
+        name = get_key_from_kwargs("name", kwargs)
+        vpn_name = get_key_from_kwargs("vpn_name", kwargs)
+        details = get_key_from_kwargs("details", kwargs, default=False)
+
+        self.api.x = SolaceXMLBuilder("Get Client Profile", version=self.api.version)
+        self.api.x.show.client_profile.name = name
+        if version_equal_or_greater_than('soltr/6_2', self.api.version):
+            self.api.x.show.client_profile.vpn_name = vpn_name
+        if details:
+            self.api.x.show.client_profile.details
+        # enqueue to validate
+        self.commands.enqueue(self.api.x)
+
+        return SolaceReplyHandler(self.api.rpc(str(self.api.x)))
 
     def new_client_profile(self, **kwargs):
         """

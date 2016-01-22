@@ -3,6 +3,7 @@ import re
 import simplejson as json
 import re
 
+
 class SolaceReplyHandler(object):
     """
     Solace reply handler, pass a SolaceAPI replies into this for easier handling
@@ -17,6 +18,7 @@ class SolaceReplyHandler(object):
         >>> str(srh.reply.show.client_username.client_usernames.client_username.profile)
         'glassfish'
     """
+
     def __init__(self, document=None, version="soltr/6_0", **kwargs):
         # if solace changes the RPC reply keys, we can mape it here
         # if version == "soltr/6_0" or version == "soltr/6_1" or version == "soltr/6_2" or version == "soltr/7_0" or version == "soltr/7_1_1":
@@ -33,6 +35,7 @@ class SolaceReplyHandler(object):
             logging.warn("Unable to decode json %s" % str(self.__dict__))
             raise
             # raise Exception("Unable to decode JSON")
+
 
 class SolaceReply(object):
     """ Create a "dot-name-space" navigable object from a dictionary """
@@ -82,6 +85,8 @@ if __name__ == "__main__":
     import doctest
     import logging
     import sys
-    logging.basicConfig(format='[%(module)s] %(filename)s:%(lineno)s %(asctime)s %(levelname)s %(message)s',stream=sys.stdout)
+
+    logging.basicConfig(format='[%(module)s] %(filename)s:%(lineno)s %(asctime)s %(levelname)s %(message)s',
+                        stream=sys.stdout)
     logging.getLogger().setLevel(logging.INFO)
     doctest.testmod()

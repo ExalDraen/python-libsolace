@@ -26,7 +26,7 @@ class ZoinksNamingStandard(Plugin):
     plugin_name = "ZoinksNamingStandard"
 
     def solve(self, *args, **kwargs):
-        logging.info(args)
+        logging.debug("Solving name for: %s" % str(args))
         try:
             return args[0] % args[1]
         except:

@@ -104,7 +104,7 @@ class SolaceAPI:
         try:
             logging.debug("Solace Client version: %s" % version)
 
-            logging.info("Connecting to appliances in %s" % environment)
+            logging.info("Connecting to appliances %s in %s" % (settings.SOLACE_CONF[environment]['MGMT'], environment))
             self.environment = environment
 
             self.settings = settings
@@ -154,15 +154,15 @@ class SolaceAPI:
             # if the version is NOT specified, query appliance versions
             # assumes that backup and primary are SAME firmware version.s
             if version == None:
-                logging.info("Detecting Version")
-                self.xmlbuilder = SolaceXMLBuilder("Getting Version")
+                logging.debug("Detecting Version")
+                self.xmlbuilder = SolaceXMLBuilder("Detecting SolOS-TR Version")
                 self.xmlbuilder.show.version
                 result = self.rpc(str(self.xmlbuilder), **kwargs)
                 self.version = result[0]['rpc-reply']['@semp-version']
             else:
-                logging.info("Setting Version %s" % version)
+                logging.info("Override SolOS-TR Version: %s" % version)
                 self.version = version
-            logging.info("Detected solOS-TR version: %s" % self.version)
+            logging.info("SolOS-TR Version: %s" % self.version)
 
             # backwards compatibility
             self.xmlbuilder = SolaceXMLBuilder(version=self.version)
@@ -181,14 +181,20 @@ class SolaceAPI:
         self.kwargs = kwargs
 
         # appliances in the query
-        appliances = self.config['MGMT']
+        # appliances = self.config['MGMT']
+
+        # appliances in order, fallback to unordered if this is the early calls to determine order
+        try:
+            appliances = [self.primaryRouter, self.backupRouter]
+        except AttributeError:
+            appliances = self.config['MGMT']
 
         # change appliances based on boolean conditions
         if primaryOnly:
-            logging.debug("Primary appliance ONLY")
+            logging.info("Primary appliance ONLY")
             appliances = [self.primaryRouter]
         if backupOnly:
-            logging.debug("Backup appliance ONLY")
+            logging.info("Backup appliance ONLY")
             appliances = [self.backupRouter]
 
         try:
@@ -484,7 +490,9 @@ class SolaceAPI:
         responses = None
         mywargs = kwargs
         logging.debug("Kwargs: %s" % mywargs)
-        logging.info("SEMP: %s" % xml)
+        logging.info("Request SEMP: %s" % xml)
+        logging.debug("primaryOnly: %s" % primaryOnly)
+        logging.debug("backupOnly: %s" % backupOnly)
 
         try:
             data = []
@@ -494,13 +502,13 @@ class SolaceAPI:
                 logging.debug(response)
                 response['HOST'] = k
                 if not allowfail:
-                    if response['rpc-reply'].has_key('parse-error'):
+                    if 'parse-error' in response['rpc-reply']:
                         raise Exception(str(response))
-                    elif response['rpc-reply'].has_key('permission-error'):
+                    elif 'permission-error' in response['rpc-reply']:
                         if self.testmode:
-                            logging.debug('tollerable permission error in test mode')
+                            logging.debug('tolerable permission error in test mode')
                         else:
-                            logging.critical("Sholly Hit! Request was: %s" % xml)
+                            logging.critical("Error occured, request was: %s" % xml)
                             raise Exception(str(response))
                     else:
                         data.append(response)

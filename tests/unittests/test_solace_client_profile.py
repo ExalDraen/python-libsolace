@@ -25,5 +25,8 @@ class TestSolaceClientProfile(unittest.TestCase):
 
     def test_delete_profile(self):
         xml = self.plugin.delete(name="foo", vpn_name="bar")
-        self.assertEqual(str(xml),
-                         '<rpc semp-version="soltr/6_0"><no><client-profile><name>foo</name></client-profile></no></rpc>')
+        self.assertEqual(str(xml),'<rpc semp-version="soltr/6_0"><no><client-profile><name>foo</name></client-profile></no></rpc>')
+
+    def test_get_profile(self):
+        xml = self.plugin.get(name="glassfish", vpn_name="dev_testvpn")
+        self.assertEqual(str(xml), "foo")

@@ -1,5 +1,6 @@
 import logging
 import libsolace
+from libsolace.Decorators import only_if_not_exists, only_if_exists
 from libsolace.SolaceReply import SolaceReplyHandler
 from libsolace.plugin import Plugin
 from libsolace.SolaceCommandQueue import SolaceCommandQueue
@@ -41,6 +42,9 @@ class SolaceVPN(Plugin):
         if kwargs == {}:
             return
 
+        # decorator, for caching decorator create and set this property
+        # self.exists = None
+
         # get the connection SolaceAPI instance
         self.api = get_key_from_kwargs("api", kwargs)
 
@@ -70,9 +74,9 @@ class SolaceVPN(Plugin):
                     setattr(self, k, kwargs[k])
 
             # backwards compatibility for None options passed to still execute "add" code
-            if self.options == None:
+            if self.options is None:
                 logging.warning(
-                    "No options passed, assuming you meant 'add', please update usage of this class to pass a OptionParser instance")
+                        "No options passed, assuming you meant 'add', please update usage of this class to pass a OptionParser instance")
                 # stack the commands
                 self.create_vpn(**kwargs)
                 self.clear_radius(**kwargs)
@@ -82,6 +86,7 @@ class SolaceVPN(Plugin):
                 self.set_logging_tag(**kwargs)
                 self.enable_vpn(**kwargs)
 
+    @only_if_not_exists("get", 'rpc-reply.rpc.show.message-vpn.vpn')
     def create_vpn(self, **kwargs):
 
         vpn_name = get_key_from_kwargs("vpn_name", kwargs)
@@ -89,8 +94,26 @@ class SolaceVPN(Plugin):
         # Create domain-event VPN, this can fail if VPN exists, but thats ok.
         self.api.x = SolaceXMLBuilder('VPN Create new VPN %s' % vpn_name, version=self.api.version)
         self.api.x.create.message_vpn.vpn_name = vpn_name
-        self.commands.enqueue(self.api.x)
+        self.commands.enqueue(self.api.x, **kwargs)
+        self.set_exists(True)
+        return str(self.api.x)
 
+    def get(self, **kwargs):
+
+        vpn_name = get_key_from_kwargs("vpn_name", kwargs)
+        detail = get_key_from_kwargs("detail", kwargs, default=False)
+        logging.info("Getting VPN: %s" % vpn_name)
+
+        self.api.x = SolaceXMLBuilder("Getting VPN %s" % vpn_name, version=self.api.version)
+        self.api.x.show.message_vpn.vpn_name = vpn_name
+        if detail:
+            self.api.x.show.message_vpn.detail
+
+        self.commands.enqueue(self.api.x, **kwargs)
+
+        return self.api.rpc(str(self.api.x))
+
+    @only_if_exists("get", 'rpc-reply.rpc.show.message-vpn.vpn')
     def clear_radius(self, **kwargs):
 
         vpn_name = get_key_from_kwargs("vpn_name", kwargs)
@@ -103,8 +126,10 @@ class SolaceVPN(Plugin):
             self.api.x.message_vpn.authentication.user_class.basic.radius_domain.radius_domain
         else:
             self.api.x.message_vpn.authentication.user_class.radius_domain.radius_domain
-        self.commands.enqueue(self.api.x)
+        self.commands.enqueue(self.api.x, **kwargs)
+        return str(self.api.x)
 
+    @only_if_exists("get", 'rpc-reply.rpc.show.message-vpn.vpn')
     def set_internal_auth(self, **kwargs):
 
         vpn_name = get_key_from_kwargs("vpn_name", kwargs)
@@ -120,8 +145,10 @@ class SolaceVPN(Plugin):
             self.api.x.message_vpn.vpn_name = vpn_name
             self.api.x.message_vpn.authentication.user_class.client
             self.api.x.message_vpn.authentication.user_class.auth_type.internal
-        self.commands.enqueue(self.api.x)
+        self.commands.enqueue(self.api.x, **kwargs)
+        return str(self.api.x)
 
+    @only_if_exists("get", 'rpc-reply.rpc.show.message-vpn.vpn')
     def set_spool_size(self, **kwargs):
 
         vpn_name = get_key_from_kwargs("vpn_name", kwargs)
@@ -133,8 +160,10 @@ class SolaceVPN(Plugin):
                                       version=self.api.version)
         self.api.x.message_spool.vpn_name = vpn_name
         self.api.x.message_spool.max_spool_usage.size = max_spool_usage
-        self.commands.enqueue(self.api.x)
+        self.commands.enqueue(self.api.x, **kwargs)
+        return str(self.api.x)
 
+    @only_if_exists("get", 'rpc-reply.rpc.show.message-vpn.vpn')
     def set_large_message_threshold(self, **kwargs):
 
         vpn_name = get_key_from_kwargs("vpn_name", kwargs)
@@ -143,12 +172,14 @@ class SolaceVPN(Plugin):
 
         # Large Message Threshold
         self.api.x = SolaceXMLBuilder(
-            "VPN %s Settings large message threshold event to %s" % (vpn_name, large_message_threshold),
-            version=self.api.version)
+                "VPN %s Settings large message threshold event to %s" % (vpn_name, large_message_threshold),
+                version=self.api.version)
         self.api.x.message_vpn.vpn_name = vpn_name
         self.api.x.message_vpn.event.large_message_threshold.size = large_message_threshold
-        self.commands.enqueue(self.api.x)
+        self.commands.enqueue(self.api.x, **kwargs)
+        return str(self.api.x)
 
+    @only_if_exists("get", 'rpc-reply.rpc.show.message-vpn.vpn')
     def set_logging_tag(self, **kwargs):
 
         vpn_name = get_key_from_kwargs("vpn_name", kwargs)
@@ -158,8 +189,10 @@ class SolaceVPN(Plugin):
                                       version=self.api.version)
         self.api.x.message_vpn.vpn_name = vpn_name
         self.api.x.message_vpn.event.log_tag.tag_string = vpn_name
-        self.commands.enqueue(self.api.x)
+        self.commands.enqueue(self.api.x, **kwargs)
+        return str(self.api.x)
 
+    @only_if_exists("get", 'rpc-reply.rpc.show.message-vpn.vpn')
     def enable_vpn(self, **kwargs):
 
         vpn_name = get_key_from_kwargs("vpn_name", kwargs)
@@ -168,7 +201,8 @@ class SolaceVPN(Plugin):
         self.api.x = SolaceXMLBuilder("VPN %s Enabling the vpn" % vpn_name, version=self.api.version)
         self.api.x.message_vpn.vpn_name = vpn_name
         self.api.x.message_vpn.no.shutdown
-        self.commands.enqueue(self.api.x)
+        self.commands.enqueue(self.api.x, **kwargs)
+        return str(self.api.x)
 
     def list_vpns(self, **kwargs):
 

@@ -5,7 +5,8 @@ from libsolace.SolaceCommandQueue import SolaceCommandQueue
 from libsolace.SolaceXMLBuilder import SolaceXMLBuilder
 from libsolace.SolaceReply import SolaceReplyHandler
 from libsolace.util import get_key_from_kwargs
-from libsolace.Decorators import only_on_shutdown
+from libsolace.Decorators import only_on_shutdown, only_if_not_exists, only_if_exists, primary
+
 
 @libsolace.plugin_registry.register
 class SolaceQueue(Plugin):
@@ -51,6 +52,11 @@ class SolaceQueue(Plugin):
         if kwargs == {}:
             logging.info("Getter Mode")
             return
+
+
+        # decorator, for caching decorator create and set this property
+        #self.exists = None
+
 
         self.api = get_key_from_kwargs("api", kwargs)
         self.commands = SolaceCommandQueue(version=self.api.version)
@@ -103,14 +109,14 @@ class SolaceQueue(Plugin):
         """
         queue_name = get_key_from_kwargs("queue_name", kwargs)
         vpn_name = get_key_from_kwargs("vpn_name", kwargs)
-        detail = get_key_from_kwargs("vpn_name", kwargs, default=False)
+        detail = get_key_from_kwargs("detail", kwargs, default=False)
 
         self.api.x = SolaceXMLBuilder("Querying Queue %s" % queue_name)
         self.api.x.show.queue.name = queue_name
         self.api.x.show.queue.vpn_name = vpn_name
         if detail:
             self.api.x.show.queue.detail
-        return SolaceReplyHandler(self.api.rpc(str(self.api.x), primaryOnly=True))
+        return self.api.rpc(str(self.api.x), **kwargs)
 
     def get_queue_config(self, queue, **kwargs):
         """ Returns a queue config for the queue and overrides where neccesary
@@ -168,7 +174,8 @@ class SolaceQueue(Plugin):
                 final_config[k] = v
         return final_config
 
-
+    @only_if_not_exists('get', 'rpc-reply.rpc.show.queue.queues.queue.info', primaryOnly=True)
+    @primary()
     def create_queue(self, **kwargs):
         queue_name = get_key_from_kwargs("queue_name", kwargs)
         vpn_name = get_key_from_kwargs("vpn_name", kwargs)
@@ -177,9 +184,13 @@ class SolaceQueue(Plugin):
         self.api.x = SolaceXMLBuilder("Creating Queue %s in vpn: %s" % (queue_name, vpn_name), version=self.api.version)
         self.api.x.message_spool.vpn_name = vpn_name
         self.api.x.message_spool.create.queue.name = queue_name
-        self.commands.enqueue(self.api.x)
-        return self.api.x
+        self.commands.enqueue(self.api.x, **kwargs)
+        self.set_exists(True)
+        return str(self.api.x)
 
+    @only_if_exists('get', 'rpc-reply.rpc.show.queue.queues.queue.info')
+    @only_on_shutdown('queue')
+    @primary()
     def shutdown_egress(self, **kwargs):
 
         shutdown_on_apply = get_key_from_kwargs("shutdown_on_apply", kwargs)
@@ -192,10 +203,14 @@ class SolaceQueue(Plugin):
             self.api.x.message_spool.vpn_name = vpn_name
             self.api.x.message_spool.queue.name = queue_name
             self.api.x.message_spool.queue.shutdown.egress
-            self.commands.enqueue(self.api.x)
+            self.commands.enqueue(self.api.x, **kwargs)
+            return str(self.api.x)
         else:
             logging.warning("Not disabling Queue, commands could fail since shutdown_on_apply = %s" % shutdown_on_apply)
 
+    @only_if_exists('get', 'rpc-reply.rpc.show.queue.queues.queue.info')
+    @only_on_shutdown('queue')
+    @primary()
     def exclusive(self, **kwargs):
         """
         type: exclusive bool
@@ -211,15 +226,20 @@ class SolaceQueue(Plugin):
             self.api.x.message_spool.vpn_name = vpn_name
             self.api.x.message_spool.queue.name = queue_name
             self.api.x.message_spool.queue.access_type.non_exclusive
-            self.commands.enqueue(self.api.x)
+            self.commands.enqueue(self.api.x, **kwargs)
+            return str(self.api.x)
         else:
             # Non Exclusive queue
             self.api.x = SolaceXMLBuilder("Set Queue %s to Exclusive " % queue_name , version=self.api.version)
             self.api.x.message_spool.vpn_name = vpn_name
             self.api.x.message_spool.queue.name = queue_name
             self.api.x.message_spool.queue.access_type.exclusive
-            self.commands.enqueue(self.api.x)
+            self.commands.enqueue(self.api.x, **kwargs)
+            return str(self.api.x)
 
+    @only_if_exists('get', 'rpc-reply.rpc.show.queue.queues.queue.info')
+    @only_on_shutdown('queue')
+    @primary()
     def owner(self, **kwargs):
 
         vpn_name = get_key_from_kwargs("vpn_name", kwargs)
@@ -235,8 +255,11 @@ class SolaceQueue(Plugin):
         self.api.x.message_spool.vpn_name = vpn_name
         self.api.x.message_spool.queue.name = queue_name
         self.api.x.message_spool.queue.owner.owner = owner
-        self.commands.enqueue(self.api.x)
+        self.commands.enqueue(self.api.x, **kwargs)
+        return str(self.api.x)
 
+    @only_if_exists('get', 'rpc-reply.rpc.show.queue.queues.queue.info')
+    @primary()
     def max_bind_count(self, **kwargs):
 
         vpn_name = get_key_from_kwargs("vpn_name", kwargs)
@@ -247,8 +270,12 @@ class SolaceQueue(Plugin):
         self.api.x.message_spool.vpn_name = vpn_name
         self.api.x.message_spool.queue.name = queue_name
         self.api.x.message_spool.queue.max_bind_count.value = max_bind_count
-        self.commands.enqueue(self.api.x)
+        self.commands.enqueue(self.api.x, **kwargs)
+        return str(self.api.x)
 
+    @only_if_exists('get', 'rpc-reply.rpc.show.queue.queues.queue.info')
+    @only_on_shutdown('queue')
+    @primary()
     def consume(self, **kwargs):
 
         vpn_name = get_key_from_kwargs("vpn_name", kwargs)
@@ -262,8 +289,11 @@ class SolaceQueue(Plugin):
         if consume == "all":
             self.api.x.message_spool.queue.permission.all
         self.api.x.message_spool.queue.permission.consume
-        self.commands.enqueue(self.api.x)
+        self.commands.enqueue(self.api.x, **kwargs)
+        return str(self.api.x)
 
+    @only_if_exists('get', 'rpc-reply.rpc.show.queue.queues.queue.info')
+    @primary()
     def spool_size(self, **kwargs):
 
         vpn_name = get_key_from_kwargs("vpn_name", kwargs)
@@ -275,8 +305,11 @@ class SolaceQueue(Plugin):
         self.api.x.message_spool.vpn_name = vpn_name
         self.api.x.message_spool.queue.name = queue_name
         self.api.x.message_spool.queue.max_spool_usage.size = queue_size
-        self.commands.enqueue(self.api.x)
+        self.commands.enqueue(self.api.x, **kwargs)
+        return str(self.api.x)
 
+    @only_if_exists('get', 'rpc-reply.rpc.show.queue.queues.queue.info')
+    @primary()
     def retries(self, **kwargs):
 
         vpn_name = get_key_from_kwargs("vpn_name", kwargs)
@@ -287,8 +320,11 @@ class SolaceQueue(Plugin):
         self.api.x.message_spool.vpn_name = vpn_name
         self.api.x.message_spool.queue.name = queue_name
         self.api.x.message_spool.queue.max_redelivery.value = retries
-        self.commands.enqueue(self.api.x)
+        self.commands.enqueue(self.api.x, **kwargs)
+        return str(self.api.x)
 
+    @only_if_exists('get', 'rpc-reply.rpc.show.queue.queues.queue.info')
+    @primary()
     def enable(self, **kwargs):
 
         vpn_name = get_key_from_kwargs("vpn_name", kwargs)
@@ -299,8 +335,11 @@ class SolaceQueue(Plugin):
         self.api.x.message_spool.vpn_name = vpn_name
         self.api.x.message_spool.queue.name = queue_name
         self.api.x.message_spool.queue.no.shutdown.full
-        self.commands.enqueue(self.api.x)
+        self.commands.enqueue(self.api.x, **kwargs)
+        return str(self.api.x)
 
+    @only_if_exists('get', 'rpc-reply.rpc.show.queue.queues.queue.info')
+    @primary()
     def reject_on_discard(self, **kwargs):
 
         vpn_name = get_key_from_kwargs("vpn_name", kwargs)
@@ -310,4 +349,10 @@ class SolaceQueue(Plugin):
         self.api.x.message_spool.vpn_name = vpn_name
         self.api.x.message_spool.queue.name = queue_name
         self.api.x.message_spool.queue.reject_msg_to_sender_on_discard
-        self.commands.enqueue(self.api.x)
+        self.commands.enqueue(self.api.x, **kwargs)
+        return str(self.api.x)
+
+
+    def set_exists(self, state):
+        logging.info("Setting Exists bit: %s" % state)
+        self.exists = state

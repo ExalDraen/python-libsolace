@@ -5,24 +5,19 @@ solacehelper is a class to construct solace commands and sets of commands.
 """
 
 import logging
-from lxml import etree
-import libsolace
-from libsolace.util import d2x
 from libsolace.SolaceAPI import SolaceAPI
 from libsolace.SolaceXMLBuilder import SolaceXMLBuilder
-from libsolace.SolaceCommandQueue import SolaceCommandQueue
-#from libsolace.items.SolaceClientProfile import SolaceClientProfileFactory
 from libsolace.items.SolaceACLProfile import SolaceACLProfile
-from libsolace.items.SolaceVPN import SolaceVPN
 
 try:
     import simplejson as json
-except:
+except ImportError:
     import json
 
 
 class SolaceProvision:
     """ Provision the CLIENT_PROFILE, VPN, ACL_PROFILE, QUEUES and USERS """
+
     # vpn_dict=None, queue_dict=None, environment=None, client_profile="glassfish",
     #             users=None, testmode=False, create_queues=True, shutdown_on_apply=False, options=None,
     #             version="soltr/6_0", detect_status=True,
@@ -59,7 +54,7 @@ class SolaceProvision:
             self.vpn_dict = kwargs['vpn_dict']
             self.vpn_name = self.vpn_dict['name']
             self.queue_dict = kwargs['queue_dict']
-            self.environment_name  = kwargs['environment']
+            self.environment_name = kwargs['environment']
             self.client_profile_name = kwargs['client_profile']
             self.users_dict = kwargs['users_dict']
             self.testmode = kwargs['testmode']
@@ -71,42 +66,41 @@ class SolaceProvision:
             raise KeyError('missing kwarg %s' % e)
         logging.info("vpn_dict: %s" % self.vpn_dict)
         logging.info("vpn_name: %s" % self.vpn_name)
-        logging.info("Version: %s" % self.version)
+        logging.info("Command line SolOS-TR version override: %s" % self.version)
 
         self.queueMgr = None
 
         if self.testmode:
             logging.info('TESTMODE ACTIVE')
 
-        # if options == None:
-        #     logging.warning("No options instance passed, running in legacy 'add' mode. This is because the script using")
-
         # create a connection for RPC calls to the environment
-        self.connection = SolaceAPI(self.environment_name, testmode=self.testmode, version=self.version, detect_status=self.detect_status)
+        self.connection = SolaceAPI(self.environment_name, testmode=self.testmode, version=self.version,
+                                    detect_status=self.detect_status)
 
         # get version of semp TODO FIXME, this should not be needed after Plugin implemented
-        if (self.version==None):
+        if (self.version == None):
             self.version = self.connection.version
         else:
             logging.warn("Overriding default semp version %s" % self.version)
-            self.version=self.version
+            self.version = self.version
 
         logging.debug("VPN Data Node: %s" % json.dumps(str(self.vpn_dict), ensure_ascii=False))
 
         # prepare vpn commands
         self.vpn = self.connection.manage("SolaceVPN",
-                                vpn_name = self.vpn_name,
-                                owner_name = self.vpn_name,
-                                max_spool_usage = self.vpn_dict['vpn_config']['spool_size'])
+                                          vpn_name=self.vpn_name,
+                                          owner_name=self.vpn_name,
+                                          max_spool_usage=self.vpn_dict['vpn_config']['spool_size'])
 
         logging.info("Create VPN %s" % self.vpn_name)
         for cmd in self.vpn.commands.commands:
-            logging.info(str(cmd))
+            logging.debug(str(cmd))
             if not self.testmode:
-                self.connection.rpc(str(cmd))
+                self.connection.rpc(str(cmd[0]), **cmd[1])
 
         # prepare the client_profile commands
-        self.client_profile = self.connection.manage("SolaceClientProfile", name=self.client_profile_name, vpn_name=self.vpn_name, version=self.version)
+        self.client_profile = self.connection.manage("SolaceClientProfile", name=self.client_profile_name,
+                                                     vpn_name=self.vpn_name, version=self.version)
 
         # prepare acl_profile commands, we create a profile named the same as the VPN for simplicity
         self.acl_profile = SolaceACLProfile(self.environment_name, self.vpn_name, self.vpn_name, version=self.version)
@@ -122,12 +116,12 @@ class SolaceProvision:
         ]
         self.users_dict.extend(vpn_owner_user)
         self.userMgr = self.connection.manage("SolaceUsers",
-                                    users = self.users_dict,
-                                    vpn_name = self.vpn_name,
-                                    client_profile = self.client_profile.name,
-                                    acl_profile = self.acl_profile.name,
-                                    testmode = self.testmode,
-                                    shutdown_on_apply = self.shutdown_on_apply)
+                                              users=self.users_dict,
+                                              vpn_name=self.vpn_name,
+                                              client_profile=self.client_profile.name,
+                                              acl_profile=self.acl_profile.name,
+                                              testmode=self.testmode,
+                                              shutdown_on_apply=self.shutdown_on_apply)
 
         # self.users = [self.connection.manage("SolaceUser",
         #                             username = self.vpn_name,
@@ -143,13 +137,13 @@ class SolaceProvision:
         # prepare the queues for the vpn ( if any )
         try:
             logging.info("Queue datanodes %s" % self.queue_dict)
-            if not self.queue_dict == None:
+            if self.queue_dict is not None:
                 try:
                     logging.info("Stacking queue commands for VPN: %s" % self.vpn_name)
                     self.queueMgr = self.connection.manage("SolaceQueue",
-                                                        vpn_name = self.vpn_name,
-                                                        queues = self.queue_dict,
-                                                        shutdown_on_apply = self.shutdown_on_apply)
+                                                           vpn_name=self.vpn_name,
+                                                           queues=self.queue_dict,
+                                                           shutdown_on_apply=self.shutdown_on_apply)
                 except Exception, e:
                     raise
                     # raise BaseException("Something bad has happened which was unforseen by developers: %s" % e)
@@ -180,13 +174,13 @@ class SolaceProvision:
         for cmd in self.client_profile.commands.commands:
             logging.debug(str(cmd))
             if not self.testmode:
-                self.connection.rpc(str(cmd))
+                self.connection.rpc(str(cmd[0]), **cmd[1])
 
         logging.info("Create ACL Profile for vpn %s" % self.vpn_name)
         for cmd in self.acl_profile.queue.commands:
             logging.debug(str(cmd))
             if not self.testmode:
-                self.connection.rpc(str(cmd))
+                self.connection.rpc(str(cmd[0]), **cmd[1])
 
         # for user in self.users:
         #     logging.info("Create user: %s for vpn %s" % (user.username, self.vpn_name))
@@ -199,7 +193,7 @@ class SolaceProvision:
         for cmd in self.userMgr.commands.commands:
             logging.debug(cmd)
             if not self.testmode:
-                self.connection.rpc(str(cmd))
+                self.connection.rpc(str(cmd[0]), **cmd[1])
 
         logging.info("Create Queues Bool?: %s in %s" % (self.create_queues, self.vpn_name))
         if self.create_queues:
@@ -207,20 +201,20 @@ class SolaceProvision:
             for cmd in self.queueMgr.commands.commands:
                 logging.debug(cmd)
                 if not self.testmode:
-                    self.connection.rpc(str(cmd), primaryOnly=True)
+                    self.connection.rpc(str(cmd[0]), primaryOnly=True)
 
-    def _get_version_from_appliance(self):
-        self.xmlbuilder = SolaceXMLBuilder()
-        self.xmlbuilder.show.version
-        result = self.connection.rpc(str(self.xmlbuilder))
-        return result[0]['rpc-reply']['@semp-version']
+    # def _get_version_from_appliance(self):
+    #     self.xmlbuilder = SolaceXMLBuilder()
+    #     self.xmlbuilder.show.version
+    #     result = self.connection.rpc(str(self.xmlbuilder))
+    #     return result[0]['rpc-reply']['@semp-version']
 
     def _set_vpn_confg(self):
         try:
             # Check if there is environment overide for VPN
             for e in self.vpn_dict.env:
                 if e.name == self.environment_name:
-                    logging.info('setting vpn_config to %s values' % e.name )
+                    logging.info('setting vpn_config to %s values' % e.name)
                     self.vpn_dict.vpn_config = e.vpn_config
                     logging.info("Spool Size: %s" % self.vpn_dict.vpn_config['spool_size'])
         except:
