@@ -51,7 +51,7 @@ setup(name='libsolace',
       package_data={'': ['*.xsd']},
       setup_requires=[
           'nose==1.3.3',
-          'wheel'
+          'wheel', 'simplejson'
       ],
       tests_require=[
           'unittest2==0.5.1',

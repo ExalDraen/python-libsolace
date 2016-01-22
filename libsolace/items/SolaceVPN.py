@@ -1,6 +1,6 @@
 import logging
 import libsolace
-from libsolace.Decorators import only_if_not_exists, only_if_exists
+from libsolace.Decorators import only_if_not_exists, only_if_exists, primary, backup
 from libsolace.SolaceReply import SolaceReplyHandler
 from libsolace.plugin import Plugin
 from libsolace.SolaceCommandQueue import SolaceCommandQueue
@@ -11,8 +11,9 @@ from libsolace.util import get_key_from_kwargs
 @libsolace.plugin_registry.register
 class SolaceVPN(Plugin):
     """
+    Manage a VPN
 
-    Creates a VPN
+
 
     """
 
@@ -42,7 +43,8 @@ class SolaceVPN(Plugin):
         if kwargs == {}:
             return
 
-        # decorator, for caching decorator create and set this property
+        # decorator, for caching decorator creates and set this property, Missing exception is used also, so leave
+        # completely unassigned. this line is just here for reference.
         # self.exists = None
 
         # get the connection SolaceAPI instance
@@ -56,7 +58,6 @@ class SolaceVPN(Plugin):
         else:
             self.vpn_name = get_key_from_kwargs("vpn_name", kwargs)
             self.owner_username = get_key_from_kwargs("vpn_name", kwargs)
-            self.environment = get_key_from_kwargs("environment", kwargs, default=self.api.environment)
             self.acl_profile = get_key_from_kwargs("vpn_name", kwargs, default=self.vpn_name)
             self.options = None
 
@@ -88,6 +89,12 @@ class SolaceVPN(Plugin):
 
     @only_if_not_exists("get", 'rpc-reply.rpc.show.message-vpn.vpn')
     def create_vpn(self, **kwargs):
+        """
+        Creates a vpn
+
+        :param kwargs:
+        :return:
+        """
 
         vpn_name = get_key_from_kwargs("vpn_name", kwargs)
 
@@ -99,6 +106,11 @@ class SolaceVPN(Plugin):
         return str(self.api.x)
 
     def get(self, **kwargs):
+        """
+        Returns a VPN from the appliance immediately.
+        :param kwargs:
+        :return:
+        """
 
         vpn_name = get_key_from_kwargs("vpn_name", kwargs)
         detail = get_key_from_kwargs("detail", kwargs, default=False)
@@ -205,7 +217,6 @@ class SolaceVPN(Plugin):
         return str(self.api.x)
 
     def list_vpns(self, **kwargs):
-
         """
         Returns a list of vpns
 

@@ -201,7 +201,7 @@ class SolaceProvision:
             for cmd in self.queueMgr.commands.commands:
                 logging.debug(cmd)
                 if not self.testmode:
-                    self.connection.rpc(str(cmd[0]), primaryOnly=True)
+                    self.connection.rpc(str(cmd[0]), **cmd[1])
 
     # def _get_version_from_appliance(self):
     #     self.xmlbuilder = SolaceXMLBuilder()

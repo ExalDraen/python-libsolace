@@ -11,7 +11,7 @@ def only_on_shutdown(entity):
             if entity == 'user' and mode in ['b', 'u', True]:
                 return f(*args, **kwargs)
             module = get_calling_module()
-            logging.info("Calling package %s - Shutdown on apply is not enabled, bypassing %s for entity %s" % (
+            logging.info("Package %s requires shutdown of this object, shutdown_on_apply is not set for this object type, bypassing %s for entity %s" % (
                 module, f.__name__, entity))
 
         return wrapped_f
@@ -21,7 +21,8 @@ def only_on_shutdown(entity):
 
 def only_if_not_exists(entity, data_path, primaryOnly=False, backupOnly=False):
     """
-    Return METHOD if the item does NOT exist in the Solace appliance.
+    Return method if the item does NOT exist in the Solace appliance, setting the kwarg for which appliance needs
+    the method run.
 
     if the object's exists caching bit is False, return the method
     If the object does not exist, return the method and set the exists bit to False
@@ -48,25 +49,25 @@ def only_if_not_exists(entity, data_path, primaryOnly=False, backupOnly=False):
             if primaryOnly:
                 kwargs['primaryOnly'] = primaryOnly
                 check_primary = True
-            elif backupOnly and not primaryOnly:
+            elif backupOnly:
                 kwargs['backupOnly'] = backupOnly
                 check_backup = True
             else:
-                logging.info("Both primary and backup will be queried")
+                logging.info("Package: %s requests that Both primary and backup be queried" % module)
                 check_primary = True
                 check_backup = True
 
             # if exists bit is set on the object ( caching )
             try:
                 if not args[0].exists:
-                    logging.debug("Cache hit")
+                    logging.info("Cache hit, object does NOT exist")
                     return f(*args, **kwargs)
             except Exception, e:
                 pass
 
             logging.debug("Cache miss")
 
-            logging.info("Calling package: %s, asking entity: %s, for args: %s, kwargs: %s via data_path: %s" % (
+            logging.info("Package: %s, asking entity: %s, for args: %s, kwargs: %s via data_path: %s" % (
                 module, entity, str(args), str(kwargs), data_path))
 
             response_path = data_path.split('.')
@@ -84,18 +85,18 @@ def only_if_not_exists(entity, data_path, primaryOnly=False, backupOnly=False):
                     try:
                         res[0] = res[0][p]
                     except (TypeError, IndexError):
-                        logging.info("Object not found on PRIMARY, key:%s error" % p)
+                        logging.info("Object not found on PRIMARY, key:%s setting primaryOnly" % p)
                         logging.info(o_res)
                         kwargs['primaryOnly'] = True
-                        exists=False
+                        exists = False
                 if check_backup:
                     try:
                         res[1] = res[1][p]
                     except (TypeError, IndexError):
-                        logging.info("Object not found on BACKUP, key:%s error" % p)
+                        logging.info("Object not found on BACKUP, key:%s setting backupOnly" % p)
                         logging.info(o_res)
                         kwargs['backupOnly'] = True
-                        exists=False
+                        exists = False
 
             if not exists:
                 args[0].set_exists(exists)
@@ -103,7 +104,7 @@ def only_if_not_exists(entity, data_path, primaryOnly=False, backupOnly=False):
             else:
                 # if we reach here, the object exists
                 logging.info(
-                        "Calling package %s - %s exists, ignoring creation" % (module, f.__name__))
+                        "Package %s - %s, the requested object already exists, ignoring creation" % (module, f.__name__))
                 args[0].set_exists(exists)
 
         return wrapped_f
@@ -138,24 +139,24 @@ def only_if_exists(entity, data_path, primaryOnly=False, backupOnly=False):
             if primaryOnly:
                 kwargs['primaryOnly'] = primaryOnly
                 check_primary = True
-            elif backupOnly and not primaryOnly:
+            elif backupOnly:
                 kwargs['backupOnly'] = backupOnly
                 check_backup = True
             else:
-                logging.info("Both primary and backup will be queried %s " % f.__name__)
+                logging.debug("Package: %s requests that Both primary and backup be queried" % module)
                 check_primary = True
                 check_backup = True
 
             # if exists bit is set on the object ( caching )
             try:
                 if args[0].exists:
-                    logging.debug("Cache hit")
+                    logging.info("Cache hit, object exists")
                     return f(*args, **kwargs)
             except Exception, e:
                 pass
 
             logging.debug("Cache miss")
-            logging.info("Calling package: %s, asking entity: %s, for args: %s, kwargs: %s via data_path: %s" % (
+            logging.info("Package: %s, asking entity: %s, for args: %s, kwargs: %s via data_path: %s" % (
                 module, entity, str(args), str(kwargs), data_path))
 
             response_path = data_path.split('.')
@@ -190,7 +191,7 @@ def only_if_exists(entity, data_path, primaryOnly=False, backupOnly=False):
             if exists:
                 module = get_calling_module()
                 logging.info(
-                        "Calling package %s - Object exists, calling method %s, check entity was: %s" % (module, f.__name__, entity))
+                        "Package %s - the requested object exists, calling method %s, check entity was: %s" % (module, f.__name__, entity))
                 args[0].set_exists(True)
                 return f(*args, **kwargs)
 

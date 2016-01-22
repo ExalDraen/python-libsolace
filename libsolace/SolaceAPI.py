@@ -190,12 +190,17 @@ class SolaceAPI:
             appliances = self.config['MGMT']
 
         # change appliances based on boolean conditions
-        if primaryOnly:
-            logging.info("Primary appliance ONLY")
+        if primaryOnly and backupOnly:
+            logging.info("Both primaryOnly and backupOnly are set, forcing BOTH to be queried")
+            appliances = [self.primaryRouter, self.backupRouter]
+        elif primaryOnly and not backupOnly:
+            logging.info("Primary appliance ONLY request: %s" % request)
             appliances = [self.primaryRouter]
-        if backupOnly:
-            logging.info("Backup appliance ONLY")
+        elif backupOnly and not primaryOnly:
+            logging.info("Backup appliance ONLY request: %s" % request)
             appliances = [self.backupRouter]
+        else:
+            logging.info("Both appliance to be queried: %s" % appliances)
 
         try:
             data = OrderedDict()
@@ -499,7 +504,7 @@ class SolaceAPI:
             responses, codes = self.__restcall(xml, primaryOnly=primaryOnly, backupOnly=backupOnly, **mywargs)
             for k in responses:
                 response = xml2dict.parse(responses[k])
-                logging.debug(response)
+                logging.info("Response: %s" % response)
                 response['HOST'] = k
                 if not allowfail:
                     if 'parse-error' in response['rpc-reply']:

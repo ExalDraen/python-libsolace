@@ -248,7 +248,7 @@ class SolaceQueue(Plugin):
 
         if owner == "%lsVPN":
             owner = vpn_name
-            logging.info("Owner being set to VPN itself: %s" % owner)
+            logging.info("Owner being set  to VPN itself: %s" % owner)
 
         # Queue Owner
         self.api.x = SolaceXMLBuilder("Set Queue %s owner to %s" % (queue_name, vpn_name), version=self.api.version)
@@ -351,8 +351,3 @@ class SolaceQueue(Plugin):
         self.api.x.message_spool.queue.reject_msg_to_sender_on_discard
         self.commands.enqueue(self.api.x, **kwargs)
         return str(self.api.x)
-
-
-    def set_exists(self, state):
-        logging.info("Setting Exists bit: %s" % state)
-        self.exists = state

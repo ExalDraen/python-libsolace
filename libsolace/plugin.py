@@ -81,8 +81,12 @@ class Plugin(object):
         :param kwargs:
         :return: class
         """
+
+        module = get_calling_module(point=2)
+
         logging.debug(self.plugins_dict)
-        logging.info("Retrieving Plugin args:%s, kwargs:%s" % (args, kwargs))
+        logging.info("Module %s Requesting Plugin %s" % (module, args[0]))
+        logging.debug("Plugin Request: args: %s, kwargs: %s" % (args, kwargs))
         try:
             # logging.info("Class: %s" % self.plugins_dict[args[0]].__class__)
             # return self.plugins_dict[args[0]].__class__
@@ -94,6 +98,13 @@ class Plugin(object):
             raise
 
     def set_exists(self, state):
+        """
+        Use this to set object's exists bool to cut down on using SEMP queries to validate existence.
+
+
+        :param state:
+        :return:
+        """
         module = get_calling_module(point=3)
         logging.info("Calling module: %s, Setting Exists bit: %s" % (module, state))
         self.exists = state
