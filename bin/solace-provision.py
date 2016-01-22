@@ -29,17 +29,23 @@ API on those devices.
 import os
 import sys
 import logging
-logging.basicConfig(format='[%(module)s] %(filename)s:%(lineno)s %(asctime)s %(levelname)s %(message)s',stream=sys.stdout)
+logging.basicConfig(format='%(filename)s:%(lineno)s %(levelname)s %(message)s',stream=sys.stdout)
+logging.getLogger("urllib3").setLevel(logging.WARNING)
 logging.getLogger().setLevel(logging.INFO)
 from optparse import OptionParser
+import pprint
+
+try:
+    import simplejson as json
+except:
+    import json
 
 import libsolace.settingsloader as settings
 
 try:
     import libsolace
-    from libsolace import solace
-    from libsolace.sitexml import XMLAPI
-    from libsolace.solacehelper import SolaceProvisionVPN
+    from libsolace import SolaceAPI
+    from libsolace.SolaceProvision import SolaceProvision
 except:
     print("Unable to import required libraries, is libsolace installed? try 'pip install "
           "git+https://git.somedomain.com/git/libsolace.git'")
@@ -48,6 +54,8 @@ else:
     logging.info("Using libsolace version: %s" % libsolace.__version__)
 
 
+# load a class that implements the AbstractSolaceCMDB methods
+# CMDBClass = getattr(libsolace, settings.SOLACE_CMDB)
 
 if __name__ == '__main__':
     """ parse opts, read site.xml, start provisioning vpns. """
@@ -55,10 +63,10 @@ if __name__ == '__main__':
     usage = '''Examples:
 
     Running with a specified XML config file
-    ./bin/solace-provision.py -e dev -p SolaceTest  -x https://svn.unibet.com/svn/releases/site-config/trunk/index.xml
+    ./bin/solace-provision.py -e dev -p SolaceTest  -x https://svn.mydomain.com/v1.0.2.4/site.xml
 
     Running Testmode ( no-changes, just XML validation )
-    ./bin/solace-provision.py -e dev -p SolaceTest  -x https://svn.unibet.com/svn/releases/site-config/trunk/index.xml --testmode
+    ./bin/solace-provision.py -e dev -p SolaceTest  -x https://svn.mydomain.com/v1.0.2.4/site.xml --testmode
 
     Running with the default release site-config XML
     ./bin/solace-provision.py -e dev -p SolaceTest
@@ -89,6 +97,8 @@ if __name__ == '__main__':
         help="owner name as in sitexml eg: SolaceTest")
     parser.add_option("-v", "--version", action="store", type="string", dest="version",
         default=jobdata['defaultversion'], help="version to release eg: '1.2.3.4'")
+    parser.add_option("--soltr_version", action="store", type="string", dest="soltr_version",
+        default=None, help="semp language version")
     parser.add_option("-s", "--shutdown", action="store", type="string", dest="shutdown_on_apply",
         default='n', help="--shutdown=n for none OR --shutdown=b for both OR --shutdown=q for queues OR --shutdown=u for user during config update, only required if changing existing queue/user")
     parser.add_option("-x", "--xmlurl", action="store", type="string", dest="xmlurl",
@@ -97,6 +107,15 @@ if __name__ == '__main__':
         default=None, help="path to sitexml file if on local storage")
     parser.add_option("-t", "--testmode", action="store_true", dest="testmode",
         default=False, help="only test configuration and exit")
+    parser.add_option("--aclprofile", action="store", type="string", dest="acl_profile",
+        default="default", help="client acl profile to associate")
+    parser.add_option("-c", "--clientprofile", action="store", type="string", dest="clientprofile",
+        default="glassfish", help="client profile to associate, must exist")
+    parser.add_option("--no-create-queues", action="store_false", dest="create_queues",
+        default=True, help="prevent queue creation")
+    parser.add_option("--no-detect-status", action="store_false", dest="detect_status",
+        default=True, help="disable detection of primary and backup statuses")
+
     parser.add_option("-d", "--debug", action="store_true", dest="debugmode",
         default=False, help="enable debug mode logging")
 
@@ -116,6 +135,7 @@ if __name__ == '__main__':
     if options.testmode:
         logging.info("Test mode active")
     options.shutdown_on_apply = options.shutdown_on_apply[0]
+
     if options.shutdown_on_apply == 'n':
         logging.info("Setting options.shutdown_on_apply to False")
         options.shutdown_on_apply = False
@@ -136,27 +156,40 @@ if __name__ == '__main__':
 
     logging.info('CMDB_URL: %s' % settings.CMDB_URL)
 
-    xmlapi = XMLAPI(url=settings.CMDB_URL, username=settings.CMDB_USER, password=settings.CMDB_PASS, xml_file=xmlfile)
-    vpns = xmlapi.getSolaceByOwner(options.product, environment=options.env)
+    # load the cmdb API client
+    cmdbapi_class = libsolace.plugin_registry(settings.SOLACE_CMDB_PLUGIN, settings=settings)
 
-    logging.info('vpns %s' % vpns)
+    # configure the client ( what init would normally do, but the plugin system
+    # lacks the ability to implement stuff in init )
+    cmdbapi = cmdbapi_class(settings=settings, environment=options.env)
+
+    # get the list of vpns to provision
+    vpns = cmdbapi.get_vpns_by_owner(options.product, environment=options.env)
+
+    logging.info('VPNs: %s' % json.dumps(str(vpns), ensure_ascii=False))
     if vpns == []:
         logging.warn("No VPN found with that owner / componentName")
         raise Exception
-    # Call main with environment from comand line
+
+    # Call main with environment from command line
     for vpn in vpns:
-        users = xmlapi.getUsersOfVpn(vpn.name, environment=options.env)
-        logging.info(vpn.__dict__)
+        users = cmdbapi.get_users_of_vpn(vpn['id'], environment=options.env)
+        queues = cmdbapi.get_queues_of_vpn(vpn['id'], environment=options.env)
+
+        logging.info('Found vpn %s' % json.dumps(str(vpn), ensure_ascii=False))
         logging.info('Found users %s' % users)
-        logging.info("Provisioning %s" % vpn.name)
+        logging.info('Found queues %s' % queues)
+        logging.info("Provisioning %s" % vpn['id'])
 
-        result = SolaceProvisionVPN(
-            vpn_datanode=vpn,
-            environment=options.env,
-            client_profile="glassfish",
-            users=users,
-            testmode=options.testmode,
-            shutdown_on_apply=options.shutdown_on_apply
+        result = SolaceProvision(
+            vpn_dict = vpn,
+            queue_dict = queues,
+            environment = options.env,
+            client_profile = options.clientprofile,
+            users_dict = users,
+            testmode = options.testmode,
+            shutdown_on_apply = options.shutdown_on_apply,
+            version = options.soltr_version,
+            detect_status = options.detect_status,
+            create_queues = options.create_queues
         )
-
-        logging.info(result)

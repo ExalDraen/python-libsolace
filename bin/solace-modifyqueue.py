@@ -10,8 +10,9 @@ updating the property and re-enabling the queue!
 import logging
 logging.basicConfig(level=logging.DEBUG, format='[gitti] %(asctime)s %(levelname)s %(message)s')
 import libsolace.settingsloader as settings
-from libsolace.solace import SolaceAPI
-from libsolace.solacehelper import SolaceXMLBuilder, SolaceCommandQueue
+from libsolace.SolaceAPI import SolaceAPI
+from libsolace.SolaceXMLBuilder import SolaceXMLBuilder
+from libsolace.SolaceCommandQueue import SolaceCommandQueue
 from optparse import OptionParser
 import sys
 import pprint

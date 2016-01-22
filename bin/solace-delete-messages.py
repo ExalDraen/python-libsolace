@@ -8,12 +8,15 @@ Deletes messages from the spool within queue list
 
 import logging
 import libsolace.settingsloader as settings
-from libsolace.solace import SolaceAPI
-from libsolace.solacehelper import SolaceXMLBuilder, SolaceCommandQueue
+from libsolace.SolaceAPI import SolaceAPI
+from libsolace.SolaceXMLBuilder import SolaceXMLBuilder
+from libsolace.SolaceCommandQueue import SolaceCommandQueue
 from optparse import OptionParser
 import sys
 import pprint
 
+
+SOLACE_VPN_PLUGIN = "SolaceVPN"
 
 def generateXML(vpn_name=None, queues=None):
     """
@@ -42,7 +45,7 @@ def generateXML(vpn_name=None, queues=None):
             </rpc>
 
             '''
-            cmd = SolaceXMLBuilder("Delete messages in Queue: %s" % queue.strip())
+            cmd = SolaceXMLBuilder("Delete messages in Queue: %s of VPN: %s" % (queue.strip(), vpn_name))
             cmd.admin.message_spool.vpn_name = vpn_name
             cmd.admin.message_spool.delete_messages.queue_name = queue.strip()
             commands.enqueue(cmd)
@@ -86,7 +89,7 @@ if __name__ == '__main__':
     logging.info("Connecting to appliance in %s, testmode:%s" % (settings.env, options.testmode))
     connection = SolaceAPI(settings.env, testmode=options.testmode)
 
-    print("Available VPNS are: %s" % connection.list_vpns('*'))
+    print("Available VPNS are: %s" % connection.manage(SOLACE_VPN_PLUGIN).list_vpns(vpn_name='*'))
 
     if options.queue_filter:
         print("You have said that the queue mentioned is a filter, searching for queues")
@@ -102,6 +105,6 @@ if __name__ == '__main__':
 
     if s.lower() == 'y':
         for cmd in commands.commands:
-            connection.rpc(str(cmd))
+            connection.rpc(str(cmd), primaryOnly=True)
     else:
         print("chickening out...")

@@ -4,13 +4,17 @@ misc functions
 '''
 
 # Some basic imports
-import sys
-import os
+
 import re
 import xml.sax.handler
 import pkg_resources
 import base64
+import inspect
 from xml.dom.minidom import Document
+from distutils.version import StrictVersion
+
+import libsolace
+from libsolace.Exceptions import MissingProperty
 
 try:
     from collections import OrderedDict
@@ -19,7 +23,7 @@ except ImportError, e:
 
 import logging
 logger = logging.getLogger(__name__)
-import pprint
+
 
 try:
     import urllib3
@@ -50,8 +54,6 @@ def xml2obj(src):
 	class DataNode(object):
 		def __init__(self):
 			self._attrs = {}	# XML attributes and child elements
-			self.data = None	# child text data
-			self.mydict = {}
 		def __len__(self):
 			# treat single element as a list of 1
 			return 1
@@ -163,12 +165,17 @@ class d2x:
     def display(self, version="soltr/6_0"):
         # I render from the root instead of doc to get rid of the XML header
         #return self.root.toprettyxml(indent="  ")
-        complete_xml = str('\n<rpc semp-version="%s">\n%s</rpc>' % (version, self.root.toprettyxml(indent="  ")))
-        logging.debug(complete_xml)
-        return self.root.toxml()
+        try:
+            complete_xml = str('\n<rpc semp-version="%s">\n%s</rpc>' % (version, self.root.toprettyxml(indent="  ")))
+            logging.debug(complete_xml)
+            return self.root.toxml()
+            # return self.root.toprettyxml(indent="  ")
+        except AttributeError, e:
+            logging.error("the root leaf node was not found, maybe you registered two roots!")
+            raise
 
 
-def httpRequest(url, fields=None, headers=None, method='GET', timeout=3, **kwargs):
+def httpRequest(url, fields=None, headers=None, method='GET', timeout=3, protocol="http", verifySsl=False, **kwargs):
     """
     Performs HTTP request
 
@@ -188,21 +195,29 @@ def httpRequest(url, fields=None, headers=None, method='GET', timeout=3, **kwarg
     if URLLIB3:
         logger.debug('Using urllib3')
         http = urllib3.PoolManager()
-        request = http.request_encode_url(method, url, fields=fields, headers=headers,timeout=timeout)
+        if method == 'GET':
+            request = http.request_encode_url(method, url, fields=fields, headers=headers, timeout=timeout)
+        elif method == 'POST':
+            request = http.urlopen(method, url, headers=headers, body=fields)
         code = request.status
         headers = request.getheaders()
         data = request.data
     elif URLLIB2:
+        logger.debug('Using urllib2')
         if not method in [ 'GET', 'POST' ]:
             raise Exception('Unsupported HTTP method %s while using urllib2' % method)
-        logger.debug('Using urllib2')
-        if fields:
-            fields = urllib.urlencode(fields)
-        else:
-            if method != 'GET':
-                fields = urllib.urlencode({'':''})
-        request = urllib2.Request(url,headers=headers)
-        response = urllib2.urlopen(request,fields,timeout)
+
+        req = urllib2.Request(url=url,
+              data=fields,
+              headers=headers)
+
+        ctx = None
+        if protocol == 'https' and not verify:
+            ctx = ssl.create_default_context()
+            ctx.check_hostname = False
+            ctx.verify_mode = ssl.CERT_NONE
+        response = urllib2.urlopen(req, ctx)
+
         code = response.getcode()
         headers = response.headers.dict
         data = response.read()
@@ -245,4 +260,100 @@ def generateRequestHeaders(**kwargs):
     request_headers = { 'User-agent': 'libsolace/%s' % str(version) }
     for key in kwargs.keys():
       if type(kwargs[key]) is dict: request_headers.update(kwargs[key])
+    logger.debug("Headers generated: %s" % request_headers )
     return request_headers
+
+
+def version_equal_or_greater_than(left, right):
+    """
+    Checks if right is equals or greater than left
+
+    :param left: soltr_version string
+    :type left: str
+    :param right: soltr_version string
+    :type right: str
+    :return: result of comparison
+    :rtype: bool
+
+    >>> version_equal_or_greater_than('soltr/6_0', 'soltr/6_2')
+    True
+
+    """
+    def _extract_version(soltr_version):
+        try:
+            return re.sub(u'_', '.', soltr_version.split("/")[1])
+        except:
+            msg = "Failed to parse version %s" % soltr_version
+            logger.error(msg)
+            raise Exception(msg)
+    left = _extract_version(left)
+    right = _extract_version(right)
+    return StrictVersion(right) >= StrictVersion(left)
+
+def get_key_from_kwargs(key, kwargs, default=None):
+    """
+    Returns a key from kwargs or raises exception is no key is present
+
+    Example:
+
+    >>> get_key_from_kwargs("vpn_name", kwargs)
+    'dev_testvpn'
+
+    >>> get_key_from_kwargs("missing_key", other_dict, default=True)
+    True
+
+    >>> get_key_from_kwargs("missin_key", kwargs)
+    Traceback (most recent call last):
+      File "<stdin>", line 1, in <module>
+      File "/Users/keghol/Development/libsolace/libsolace/util.py", line 303, in get_key_from_kwargs
+        raise(MissingProperty(key))
+    libsolace.Exceptions.MissingProperty: missing_key
+
+    """
+    if key in kwargs:
+        return kwargs.get(key)
+    elif default!=None:
+        return default
+    else:
+        raise(MissingProperty("%s is missing from kwargs"))
+
+
+def get_key_from_settings(key, kwargs, default=None):
+    """
+    Same as above, but different error message
+    """
+    if key in kwargs:
+        return kwargs.get(key)
+    elif default!=None:
+        return default
+    else:
+        raise(MissingProperty("%s is missing from yaml config"))
+
+
+def get_plugin(plugin_name, solace_api, *args, **kwargs):
+    """
+    Returns a new plugin configured for the environment
+
+    :param plugin_name: name of the plugun
+    :param solace_api: a instance of SolaceAPI
+    :param kwargs:
+    :return:
+    """
+    plugin = libsolace.plugin_registry(plugin_name, **kwargs)
+    logging.info(args)
+    return plugin(api=solace_api, *args, **kwargs)
+
+
+def get_calling_module(point=2):
+    """
+    Return a module at a different point in the stack.
+
+    :param point: the number of calls backwards in the stack.
+    :return:
+    """
+    frm = inspect.stack()[point]
+    function = str(frm[3])
+    line=str(frm[2])
+    modulepath=str(frm[1]).split('/')
+    module = str(modulepath.pop())
+    return "%s:%s" % (module,line)

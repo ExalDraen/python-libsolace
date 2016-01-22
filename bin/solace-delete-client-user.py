@@ -2,12 +2,15 @@
 
 import sys
 import logging
-logging.basicConfig(format='[%(module)s] %(filename)s:%(lineno)s %(asctime)s %(levelname)s %(message)s',stream=sys.stdout)
+
+logging.basicConfig(format='[%(module)s] %(filename)s:%(lineno)s %(asctime)s %(levelname)s %(message)s',
+                    stream=sys.stdout)
 logging.getLogger().setLevel(logging.INFO)
 from optparse import OptionParser
-from libsolace.solace import SolaceAPI
-from libsolace.solacehelper import SolaceXMLBuilder
-import libsolace.settingsloader as settings
+from libsolace.SolaceAPI import SolaceAPI
+from libsolace.Naming import name
+
+UTILITIES_PLUGIN = "Utilities"
 
 def solace_delete_client_username(options):
     """ Deletes users / profiles / acl's where neccesary.
@@ -21,10 +24,11 @@ def solace_delete_client_username(options):
 
     """
     for environment in options.environment:
-        solace = SolaceAPI(environment,testmode=options.testmode)
+
+        solace = SolaceAPI(environment, testmode=options.testmode)
 
         try:
-            vpnname = options.vpnname % environment
+            vpnname = name(options.vpnname, environment)
         except Exception, e:
             vpnname = options.vpnname
 
@@ -37,32 +41,38 @@ def solace_delete_client_username(options):
                 usernames.append(username)
         for username in usernames:
             # Disable / Shutdown User ( else we cant change profiles if it already exists )
-            if solace.does_client_username_exist(username,vpnname):
-                user_queue_list = solace.get_client_username_queues(username,vpnname)
+            try:
+                # solace.manage("SolaceUser").get(username=username, vpn_name=vpnname)
+                user_queue_list = solace.manage(UTILITIES_PLUGIN).get_user_queues(client_username=username, vpn_name=vpnname)
                 if len(user_queue_list) > 0:
-                    logging.error("User %s owns queues, can not remove user without reassigning ownership. VPN name: %s. List of queues: %s - skipping" % (username,vpnname,",".join(user_queue_list)))
+                    logging.error(
+                            "User %s owns queues, can not remove user without reassigning ownership. VPN name: %s. List of queues: %s - skipping" % (
+                                username, vpnname, ",".join(user_queue_list)))
                     continue
-                else: logging.info("User %s does not own any queues within VPN %s, good - continuing" % (username,vpnname))
-                if solace.is_client_username_inuse(username,vpnname):
+                else:
+                    logging.info(
+                            "User %s does not own any queues within VPN %s, good - continuing" % (username, vpnname))
+                if solace.manage(UTILITIES_PLUGIN).is_client_user_inuse(client_username=username, vpn_name=vpnname):
                     logging.error("User %s is in use - skipping" % username)
                     continue
-                else: logging.info("User %s is NOT in use, good - continuing" % username)
-                if solace.is_client_username_enabled(username,vpnname):
+                else:
+                    logging.info("User %s is NOT in use, good - continuing" % username)
+                if bool(solace.manage("SolaceUser").get(client_username=username, vpn_name=vpnname)
+                                .reply.show.client_username.client_usernames.client_username.enabled):
                     logging.info("User %s is not disabled - disabling" % username)
-                    cmd = SolaceXMLBuilder("Disabling User %s" % username)
-                    cmd.client_username.username = username
-                    cmd.client_username.vpn_name = vpnname
-                    cmd.client_username.shutdown
+                    # when calling shutdown, add the shutdown_on_apply = True to make it happen
+                    cmd = solace.manage("SolaceUser").shutdown(client_username=username, vpn_name=vpnname, shutdown_on_apply=True)
                     solace.rpc(str(cmd))
                 else:
                     logging.info("User %s already disabled" % username)
                 if options.remove:
-                    cmd = SolaceXMLBuilder("Deleting User %s" % username)
-                    cmd.no.client_username.username = username
-                    cmd.no.client_username.vpn_name = vpnname
+                    cmd = solace.manage("SolaceUser").delete(client_username=username, vpn_name=vpnname)
                     solace.rpc(str(cmd))
-            else:
+            except Exception, e:
+                logging.info(e.message)
                 logging.info("User %s does not exist - skipping" % username)
+                raise
+
 
 if __name__ == "__main__":
     usage = """ Delete a Solace Client User within a VPN
@@ -96,7 +106,7 @@ if __name__ == "__main__":
 
     if options.debugmode:
         logging.getLogger().setLevel(logging.DEBUG)
-    if not options.environment:   # if filename is not given
+    if not options.environment:  # if filename is not given
         parser.error('Environment Not Given')
     if not options.vpnname:
         parser.error("Vpn Name Not Given")

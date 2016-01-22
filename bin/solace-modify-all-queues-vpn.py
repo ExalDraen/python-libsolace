@@ -10,8 +10,9 @@ import sys
 sys.path.append("/opt/pipeline")
 import logging
 import libsolace.settingsloader as settings
-from libsolace.solace import SolaceAPI
-from libsolace.solacehelper import SolaceXMLBuilder, SolaceCommandQueue
+from libsolace.SolaceAPI import SolaceAPI
+from libsolace.SolaceXMLBuilder import SolaceXMLBuilder
+from libsolace.SolaceCommandQueue import SolaceCommandQueue
 from optparse import OptionParser
 import pprint
 settings.debugmode = False

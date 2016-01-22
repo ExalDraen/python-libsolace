@@ -9,14 +9,27 @@ CMDB_PASS: ""
 READ_ONLY_USER: ro
 READ_ONLY_PASS: ro
 
+# the naming standard to use, default is <env>_<name>
+NAMEHOOK: ZoinksNamingStandard
+
 # list of all plugins to load
 PLUGINS:
   - libsolace.plugins.CMDBClient
-  - libsolace.plugins.XMLAPI
   - libsolace.items.SolaceUser
+  - libsolace.items.SolaceUsers
+  - libsolace.items.SolaceVPN
+  - libsolace.items.SolaceQueue
+  - libsolace.plugins.NamingStandard
+  - libsolace.plugins.ZoinksNamingStandard
+  - libsolace.items.SolaceClientProfile
+  - libsolace.plugins.Utilities
 
 # the plugin name as registered in the registry we want to use for solace config
 SOLACE_CMDB_PLUGIN: CMDBClient
+
+# The plugin to use for Solace Queue management
+SOLACE_QUEUE_PLUGIN: SolaceQueue
+SOLACE_USER_PLUGIN: SolaceUser
 
 # mapping of environment to solace appliances
 SOLACE_CONF:
@@ -39,3 +52,6 @@ SOLACE_CONF:
       PASS: password
       USER: admin
       VERIFY_SSL: True
+
+SOLACE_CLIENT_PROFILE_DEFAULTS:
+  max_clients: 1000
