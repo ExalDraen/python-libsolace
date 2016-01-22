@@ -77,6 +77,8 @@ def only_if_not_exists(entity, data_path, primaryOnly=False, backupOnly=False):
             # try peek into attributes, any raises means one of the nodes does not have the object.
             o_res = res
 
+            exists = True
+
             for p in response_path:
                 if check_primary:
                     try:
@@ -85,8 +87,7 @@ def only_if_not_exists(entity, data_path, primaryOnly=False, backupOnly=False):
                         logging.info("Object not found on PRIMARY, key:%s error" % p)
                         logging.info(o_res)
                         kwargs['primaryOnly'] = True
-                        args[0].set_exists(False)
-                        return f(*args, **kwargs)
+                        exists=False
                 if check_backup:
                     try:
                         res[1] = res[1][p]
@@ -94,13 +95,16 @@ def only_if_not_exists(entity, data_path, primaryOnly=False, backupOnly=False):
                         logging.info("Object not found on BACKUP, key:%s error" % p)
                         logging.info(o_res)
                         kwargs['backupOnly'] = True
-                        args[0].set_exists(False)
-                        return f(*args, **kwargs)
+                        exists=False
 
-            # if we reach here, the object exists
-            logging.info(
-                    "Calling package %s - %s exists, ignoring creation" % (module, f.__name__))
-            args[0].set_exists(True)
+            if not exists:
+                args[0].set_exists(exists)
+                return f(*args, **kwargs)
+            else:
+                # if we reach here, the object exists
+                logging.info(
+                        "Calling package %s - %s exists, ignoring creation" % (module, f.__name__))
+                args[0].set_exists(exists)
 
         return wrapped_f
 
@@ -138,7 +142,7 @@ def only_if_exists(entity, data_path, primaryOnly=False, backupOnly=False):
                 kwargs['backupOnly'] = backupOnly
                 check_backup = True
             else:
-                logging.info("Both primary and backup will be queried")
+                logging.info("Both primary and backup will be queried %s " % f.__name__)
                 check_primary = True
                 check_backup = True
 
@@ -160,6 +164,8 @@ def only_if_exists(entity, data_path, primaryOnly=False, backupOnly=False):
             o_res = res
             logging.debug("Response %s" % res)
 
+            exists = True
+
             # try peek into attributes, any raises means one of the nodes does not have the object.
             for p in response_path:
                 if check_primary:
@@ -170,6 +176,7 @@ def only_if_exists(entity, data_path, primaryOnly=False, backupOnly=False):
                         logging.info(o_res)
                         kwargs['primaryOnly'] = True
                         args[0].set_exists(False)
+                        exists = False
                 if check_backup:
                     try:
                         res[1] = res[1][p]
@@ -178,12 +185,14 @@ def only_if_exists(entity, data_path, primaryOnly=False, backupOnly=False):
                         logging.info(o_res)
                         kwargs['backupOnly'] = True
                         args[0].set_exists(False)
+                        exists = False
 
-            module = get_calling_module()
-            logging.info(
-                    "Calling package %s - Object exists, calling method %s, check entity was: %s" % (module, f.__name__, entity))
-            args[0].set_exists(True)
-            return f(*args, **kwargs)
+            if exists:
+                module = get_calling_module()
+                logging.info(
+                        "Calling package %s - Object exists, calling method %s, check entity was: %s" % (module, f.__name__, entity))
+                args[0].set_exists(True)
+                return f(*args, **kwargs)
 
         return wrapped_f
 
