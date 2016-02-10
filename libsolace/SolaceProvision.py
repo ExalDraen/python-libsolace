@@ -108,13 +108,16 @@ class SolaceProvision:
         # prepare the user that owns this vpn
         logging.info("self.vpn_name: %s" % self.vpn_name)
 
-        vpn_owner_user = [
-            {
-                'username': self.vpn_name,
-                'password': self.vpn_dict['password']
-            }
-        ]
-        self.users_dict.extend(vpn_owner_user)
+        if not self._is_vpn_owner_user_present():
+            logging.debug("VPN owner user %s for VPN %s not present in CMDB, appending to the list of users to be created" % (self.vpn_name, self.vpn_name))
+            vpn_owner_user = [
+                {
+                    'username': self.vpn_name,
+                    'password': self.vpn_dict['password']
+                }
+            ]
+            self.users_dict.extend(vpn_owner_user)
+
         self.userMgr = self.connection.manage("SolaceUsers",
                                               users=self.users_dict,
                                               vpn_name=self.vpn_name,
@@ -220,3 +223,10 @@ class SolaceProvision:
         except:
             logging.warning("No environment overides for vpn: %s" % self.vpn_dict.name)
             pass
+
+    def _is_vpn_owner_user_present(self):
+        """
+        Checks if the special vpn_owner user is already configured in the CMDB
+        Returns boolean
+        """
+        return True in [True for x in self.users_dict if x["username"] == self.vpn_name]
