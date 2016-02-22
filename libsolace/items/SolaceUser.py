@@ -1,6 +1,7 @@
 import sys
 import logging
 import libsolace
+from libsolace.Decorators import only_on_shutdown, before, only_if_not_exists
 from libsolace.plugin import Plugin
 from libsolace.SolaceCommandQueue import SolaceCommandQueue
 from libsolace.SolaceXMLBuilder import SolaceXMLBuilder
@@ -81,13 +82,13 @@ class SolaceUser(Plugin):
         if self.testmode:
             logging.info('TESTMODE ACTIVE')
             try:
-                self._tests(**kwargs)
+                self.requirements(**kwargs)
             except Exception, e:
                 logging.error("Tests Failed %s" % e)
                 raise BaseException("Tests Failed")
 
         # backwards compatibility for None options passed to still execute "add" code
-        if self.options == None:
+        if self.options is None:
             logging.warning(
                     "No options passed, assuming you meant 'add', please update usage of this class to pass a "
                     "OptionParser instance")
@@ -107,7 +108,7 @@ class SolaceUser(Plugin):
             self.set_password(**kwargs)
             self.no_shutdown(**kwargs)
 
-    def _tests(self, **kwargs):
+    def requirements(self, **kwargs):
         """
         Call the tests before create is attempted, checks for profiles in this case
         """
@@ -141,13 +142,18 @@ class SolaceUser(Plugin):
         self.api.x.show.client_username.detail
 
         # do the request now
-        response = SolaceReplyHandler(self.api.rpc(str(self.api.x), primaryOnly=True))
-        logging.debug(response.reply.show.client_username.client_usernames)
-        if response.reply.show.client_username.client_usernames == 'None':
-            raise MissingClientUser("No such user %s" % username)
+        response = self.api.rpc(str(self.api.x), **kwargs)
+        logging.info("SRH: %s" % response[0])
+
+        if response[0]['rpc-reply']['rpc']['show']['client-username']['client-usernames'] == 'None':
+            raise MissingClientUser("Primary: No such user %s" % client_username)
+        elif response[1]['rpc-reply']['rpc']['show']['client-username']['client-usernames'] == 'None':
+            raise MissingClientUser("Backup: No such user %s" % client_username)
         else:
             return response
 
+    @only_on_shutdown('user')
+    @before("shutdown")
     def delete(self, **kwargs):
         """
         Delete user XML / enqueue command on connection instance
@@ -211,6 +217,7 @@ class SolaceUser(Plugin):
                 return False
         return True
 
+    @only_if_not_exists('get', 'rpc-reply.rpc.show.client-username.client-usernames.client-username')
     def create_user(self, **kwargs):
         """
         Create user XML / enqueue command on connection instance
@@ -233,7 +240,8 @@ class SolaceUser(Plugin):
 
     def shutdown(self, **kwargs):
         """
-        Disable the user
+        Disable the user, this method would be called by anything decorated with @shutdown
+        the kwarg shutdown_on_apply needs to be either True or 'u' or 'b' for this to take effect.
 
         Example
         >>> connection.manage("SolaceUser").shutdown(client_username="foo", vpn_name="bar", shutdown_on_apply=True)

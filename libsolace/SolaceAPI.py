@@ -155,7 +155,7 @@ class SolaceAPI:
             # assumes that backup and primary are SAME firmware version.s
             if version == None:
                 logging.debug("Detecting Version")
-                self.xmlbuilder = SolaceXMLBuilder("Detecting SolOS-TR Version")
+                self.xmlbuilder = SolaceXMLBuilder("Detecting SolOS-TR Version", version="soltr/5_0")
                 self.xmlbuilder.show.version
                 result = self.rpc(str(self.xmlbuilder), **kwargs)
                 self.version = result[0]['rpc-reply']['@semp-version']
@@ -165,10 +165,10 @@ class SolaceAPI:
             logging.info("SolOS-TR Version: %s" % self.version)
 
             # backwards compatibility
-            self.xmlbuilder = SolaceXMLBuilder(version=self.version)
+            # self.xmlbuilder = SolaceXMLBuilder(version=self.version)
 
             # shortcut / new methods
-            self.x = SolaceXMLBuilder(version=self.version)
+            self.x = SolaceXMLBuilder("XML Buider", version=self.version)
             self.cq = SolaceCommandQueue(version=self.version)
 
         except Exception, e:
@@ -273,7 +273,7 @@ class SolaceAPI:
 
     def get_message_spool(self, **kwargs):
         """ show message spool """
-        request = SolaceXMLBuilder(version="soltr/6_0")
+        request = SolaceXMLBuilder("Getting message spool status", version="soltr/5_0")
         request.show.message_spool
         return self.rpc(str(request), **kwargs)
 

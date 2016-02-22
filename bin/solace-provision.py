@@ -33,7 +33,6 @@ logging.basicConfig(format='%(filename)s:%(lineno)s %(levelname)s %(message)s',s
 logging.getLogger("urllib3").setLevel(logging.WARNING)
 logging.getLogger().setLevel(logging.INFO)
 from optparse import OptionParser
-import pprint
 
 try:
     import simplejson as json

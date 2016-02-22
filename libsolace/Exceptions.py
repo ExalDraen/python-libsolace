@@ -1,7 +1,13 @@
 from exceptions import Exception
 
-class MissingProperty(Exception):
+
+class MissingException(Exception):
     pass
 
-class MissingClientUser(Exception):
+
+class MissingProperty(MissingException):
+    pass
+
+
+class MissingClientUser(MissingException):
     pass

@@ -10,6 +10,7 @@ from libsolace.util import get_key_from_kwargs
 from libsolace.Exceptions import *
 from libsolace.Decorators import only_on_shutdown
 
+
 @libsolace.plugin_registry.register
 class SolaceUsers(Plugin):
     """ Manage dict of client-users within Solace """
@@ -48,8 +49,8 @@ class SolaceUsers(Plugin):
         else:
             logging.info("kwargs: %s" % kwargs)
             self.api = get_key_from_kwargs('api', kwargs)
-            self.commands = SolaceCommandQueue(version = self.api.version)
-            self.options = None # not implemented
+            self.commands = SolaceCommandQueue(version=self.api.version)
+            self.options = None  # not implemented
             self.users = get_key_from_kwargs("users", kwargs)
             self.vpn_name = get_key_from_kwargs("vpn_name", kwargs)
             self.acl_profile = get_key_from_kwargs("acl_profile", kwargs)
@@ -60,8 +61,13 @@ class SolaceUsers(Plugin):
 
             logging.info("""UsersCommands: %s, Environment: %s, Users: %s, vpn_name: %s,
                 acl_profile: %s, client_profile: %s, testmode: %s, shutdown_on_apply: %s""" % (self.commands,
-                    self.api.environment, self.users, self.vpn_name, self.acl_profile, self.client_profile,
-                    self.testmode, self.shutdown_on_apply))
+                                                                                               self.api.environment,
+                                                                                               self.users,
+                                                                                               self.vpn_name,
+                                                                                               self.acl_profile,
+                                                                                               self.client_profile,
+                                                                                               self.testmode,
+                                                                                               self.shutdown_on_apply))
 
             if self.testmode:
                 logging.info('TESTMODE ACTIVE')
@@ -73,7 +79,8 @@ class SolaceUsers(Plugin):
 
             # backwards compatibility for None options passed to still execute "add" code
             if self.options == None:
-                logging.warning("No options passed, assuming you meant 'add', please update usage of this class to pass a OptionParser instance")
+                logging.warning(
+                    "No options passed, assuming you meant 'add', please update usage of this class to pass a OptionParser instance")
                 for user in self.users:
                     user_kwargs = dict(kwargs)
                     user_kwargs['username'] = user['username']
@@ -82,7 +89,8 @@ class SolaceUsers(Plugin):
                         # Check if user already exists, if not then shutdown immediately after creating the user
                         self.get(**user_kwargs).reply.show.client_username.client_usernames.client_username
                     except (AttributeError, KeyError, MissingClientUser):
-                        logging.info("User %s doesn't exist, using shutdown_on_apply to True for user" % user_kwargs['username'])
+                        logging.info(
+                            "User %s doesn't exist, using shutdown_on_apply to True for user" % user_kwargs['username'])
                         user_kwargs['shutdown_on_apply'] = True
                     self.create_user(**user_kwargs)
                     self.disable_user(**user_kwargs)
@@ -105,7 +113,6 @@ class SolaceUsers(Plugin):
         self.check_client_profile_exists(**kwargs)
         self.check_acl_profile_exists(**kwargs)
 
-
     def get(self, **kwargs):
         """ Get a username from solace, return a dict """
 
@@ -117,13 +124,12 @@ class SolaceUsers(Plugin):
         self.api.x.show.client_username.vpn_name = vpn_name
         self.api.x.show.client_username.detail
 
-        response = SolaceReplyHandler(self.api.rpc(str(self.api.x), primaryOnly=True))
+        response = SolaceReplyHandler(self.api.rpc(str(self.api.x)))
         logging.info(response.reply.show.client_username.client_usernames)
         if response.reply.show.client_username.client_usernames == 'None':
             raise MissingClientUser("No such user %s" % username)
         else:
             return response
-
 
     def check_client_profile_exists(self, **kwargs):
         """
@@ -142,7 +148,8 @@ class SolaceUsers(Plugin):
         client_profile = kwargs.get('client_profile')
 
         logging.info('Checking if client_profile is present on devices')
-        self.api.x = SolaceXMLBuilder("Checking client_profile %s is present on device" % client_profile, version=self.api.version)
+        self.api.x = SolaceXMLBuilder("Checking client_profile %s is present on device" % client_profile,
+                                      version=self.api.version)
         self.api.x.show.client_profile.name = client_profile
         response = self.api.rpc(str(self.api.x), allowfail=False)
         for v in response:
@@ -156,8 +163,9 @@ class SolaceUsers(Plugin):
         acl_profile = kwargs.get('acl_profile')
 
         logging.info('Checking if acl_profile is present on devices')
-        self.api.x = SolaceXMLBuilder("Checking acl_profile %s is present on device" % acl_profile, version=self.api.version)
-        self.api.x.show.acl_profile.name=kwargs.get('acl_profile')
+        self.api.x = SolaceXMLBuilder("Checking acl_profile %s is present on device" % acl_profile,
+                                      version=self.api.version)
+        self.api.x.show.acl_profile.name = kwargs.get('acl_profile')
         response = self.api.rpc(str(self.api.x), allowfail=False)
         for v in response:
             if v['rpc-reply']['execute-result']['@code'] == 'fail':
@@ -187,7 +195,7 @@ class SolaceUsers(Plugin):
         vpn_name = kwargs.get('vpn_name')
         shutdown_on_apply = kwargs.get('shutdown_on_apply')
 
-        if ( shutdown_on_apply=='b' ) or ( shutdown_on_apply == 'u' ) or ( shutdown_on_apply == True ):
+        if (shutdown_on_apply == 'b') or (shutdown_on_apply == 'u') or (shutdown_on_apply == True):
             # Disable / Shutdown User ( else we cant change profiles )
             self.api.x = SolaceXMLBuilder("Disabling User %s" % username, version=self.api.version)
             self.api.x.client_username.username = username
@@ -196,7 +204,8 @@ class SolaceUsers(Plugin):
             self.commands.enqueue(self.api.x)
             return self.api.x
         else:
-            logging.warning("Not disabling User, commands could fail since shutdown_on_apply = %s" % self.shutdown_on_apply)
+            logging.warning(
+                "Not disabling User, commands could fail since shutdown_on_apply = %s" % self.shutdown_on_apply)
             return None
 
     @only_on_shutdown('user')
@@ -207,7 +216,8 @@ class SolaceUsers(Plugin):
         client_profile = kwargs.get('client_profile')
 
         # Client Profile
-        self.api.x = SolaceXMLBuilder("Setting User %s client profile to %s" % (username, client_profile), version=self.api.version)
+        self.api.x = SolaceXMLBuilder("Setting User %s client profile to %s" % (username, client_profile),
+                                      version=self.api.version)
         self.api.x.client_username.username = username
         self.api.x.client_username.vpn_name = vpn_name
         self.api.x.client_username.client_profile.name = client_profile
@@ -235,7 +245,8 @@ class SolaceUsers(Plugin):
         vpn_name = kwargs.get('vpn_name')
 
         # No Guarenteed Endpoint
-        self.api.x = SolaceXMLBuilder("Default User %s guaranteed endpoint override" % username, version=self.api.version)
+        self.api.x = SolaceXMLBuilder("Default User %s guaranteed endpoint override" % username,
+                                      version=self.api.version)
         self.api.x.client_username.username = username
         self.api.x.client_username.vpn_name = vpn_name
         self.api.x.client_username.no.guaranteed_endpoint_permission_override
@@ -282,8 +293,11 @@ class SolaceUsers(Plugin):
         self.commands.enqueue(self.api.x)
         return self.api.x
 
+
 if __name__ == "__main__":
-    logging.basicConfig(format='[%(module)s] %(filename)s:%(lineno)s %(asctime)s %(levelname)s %(message)s',stream=sys.stdout)
+    logging.basicConfig(format='[%(module)s] %(filename)s:%(lineno)s %(asctime)s %(levelname)s %(message)s',
+                        stream=sys.stdout)
     logging.getLogger().setLevel(logging.INFO)
     import doctest
+
     doctest.testmod()

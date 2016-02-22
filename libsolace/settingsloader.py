@@ -30,9 +30,9 @@ for yaml_file in __yamlfiles__:
     for variable in yaml_settings.keys():
         globals()[variable] = yaml_settings[variable]
     yaml_loaded = True
-    logging.info("Yaml loaded successful")
+    logging.debug("Yaml loaded successful")
 
-    logging.info("Loading plugins")
+    logging.info("Loading plugins...")
     for p in globals()['PLUGINS']:
         try:
             __import__(p, globals())

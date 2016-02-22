@@ -1,8 +1,50 @@
 import logging
+
+from libsolace.Exceptions import MissingException, MissingClientUser
 from libsolace.util import get_calling_module
 
 
+def no_owned_endpoints():
+    def wrap(f):
+        def wrapped_f(*args, **kwargs):
+            api = getattr(args[0], "api")
+            api.rpc(str(getattr(args[0], "shutdown")(**kwargs)))
+            return f(*args, **kwargs)
+        return wrapped_f
+    return wrap
+
+
+def before(method_name):
+    """
+    call named method before the decorated method
+
+    This is typically used to tell a object to shutdown so some modification can be made.
+
+    :param method_name: name of the method to call on object
+    :return:
+    """
+    def wrap(f):
+        def wrapped_f(*args, **kwargs):
+            api = getattr(args[0], "api")
+            logging.info("calling object %s's shutdown hook" % api)
+            api.rpc(str(getattr(args[0], method_name)(**kwargs)))
+            return f(*args, **kwargs)
+        return wrapped_f
+    return wrap
+
+
 def only_on_shutdown(entity):
+    """
+
+    If shutdown is True | b | u for a "user" entity, then allow the method to run.
+    If shutdown is True | b | q for a "queue" entity, then allow the method to run.
+
+    methods decorated with this can optionally be decorated with the @shutdown decorator if you are needing to
+    shutdown the object at the same time. If the object is not shutdown, the appliance will throw a error.
+
+    :param entity: (str) "queue" or "user"
+    :return:
+    """
     def wrap(f):
         def wrapped_f(*args, **kwargs):
             mode = kwargs.get('shutdown_on_apply', None)
@@ -11,8 +53,9 @@ def only_on_shutdown(entity):
             if entity == 'user' and mode in ['b', 'u', True]:
                 return f(*args, **kwargs)
             module = get_calling_module()
-            logging.info("Package %s requires shutdown of this object, shutdown_on_apply is not set for this object type, bypassing %s for entity %s" % (
-                module, f.__name__, entity))
+            logging.info(
+                "Package %s requires shutdown of this object, shutdown_on_apply is not set for this object type, bypassing %s for entity %s" % (
+                    module, f.__name__, entity))
 
         return wrapped_f
 
@@ -72,7 +115,14 @@ def only_if_not_exists(entity, data_path, primaryOnly=False, backupOnly=False):
 
             response_path = data_path.split('.')
 
-            res = getattr(args[0], entity)(**kwargs)
+            # if the getattr fails with a MissingException, which means our condition is met
+            try:
+                res = getattr(args[0], entity)(**kwargs)
+            except MissingException:
+                exists = False
+                args[0].set_exists(exists)
+                return f(*args, **kwargs)
+
             logging.info("Response %s" % res)
 
             # try peek into attributes, any raises means one of the nodes does not have the object.
@@ -104,7 +154,8 @@ def only_if_not_exists(entity, data_path, primaryOnly=False, backupOnly=False):
             else:
                 # if we reach here, the object exists
                 logging.info(
-                        "Package %s - %s, the requested object already exists, ignoring creation" % (module, f.__name__))
+                        "Package %s - %s, the requested object already exists, ignoring creation" % (
+                        module, f.__name__))
                 args[0].set_exists(exists)
 
         return wrapped_f
@@ -191,7 +242,8 @@ def only_if_exists(entity, data_path, primaryOnly=False, backupOnly=False):
             if exists:
                 module = get_calling_module()
                 logging.info(
-                        "Package %s - the requested object exists, calling method %s, check entity was: %s" % (module, f.__name__, entity))
+                        "Package %s - the requested object exists, calling method %s, check entity was: %s" % (
+                        module, f.__name__, entity))
                 args[0].set_exists(True)
                 return f(*args, **kwargs)
 
@@ -206,6 +258,7 @@ def primary():
 
     :return:
     """
+
     def wrap(f):
         def wrapped_f(*args, **kwargs):
             kwargs['primaryOnly'] = True
@@ -224,6 +277,7 @@ def backup():
 
     :return:
     """
+
     def wrap(f):
         def wrapped_f(*args, **kwargs):
             kwargs['backupOnly'] = True

@@ -71,7 +71,8 @@ See <a href="libsolace/plugins/CMDBClient.py">CMDBClient</a> for a CMDB plugin e
 
 * XML can only be validated if it is enqueued in a SolaceCommandQueue instance.
 * Appliance responses are difficult to validate since the "slave" appliance will almost always return errors when NOT 
-"active", and already existing CI's will throw a error on create events and incorrect states.
+"active", and already existing CI's will throw a error on create events and incorrect states. see 
+<a href="libsolace/Decorators.py">Decorators</a> for targeting specific appliances and states.
 * Since python dictionaries cannot contain `-` use `_`, the SolaceNode class will substitute a `-` for a `_` and 
 vice-versa as needed on keyNames.
 

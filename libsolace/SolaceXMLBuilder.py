@@ -33,7 +33,7 @@ class SolaceXMLBuilder(object):
             self.description=description
         self.version = version
         calling_module = get_calling_module()
-        logging.info("Calling module %s - %s description: %s " % (calling_module, self.version, description))
+        logging.info("Called by module: %s - %s description: %s " % (calling_module, self.version, description))
 
     def __getattr__(self, name):
         name = re.sub("_", "-", name)

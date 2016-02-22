@@ -19,10 +19,19 @@ class SolaceReplyHandler(object):
         'glassfish'
     """
 
-    def __init__(self, document=None, version="soltr/6_0", **kwargs):
-        # if solace changes the RPC reply keys, we can mape it here
-        # if version == "soltr/6_0" or version == "soltr/6_1" or version == "soltr/6_2" or version == "soltr/7_0" or version == "soltr/7_1_1":
-        self.reply = SolaceReply(document.pop()['rpc-reply']['rpc'])
+    def __init__(self, document=None, version="soltr/6_0", primaryOnly=False, backupOnly=False, **kwargs):
+
+        logging.info("kwargs: %s" % kwargs)
+        logging.info(document)
+
+        if primaryOnly and not backupOnly:
+            self.reply = SolaceReply(document['rpc-reply']['rpc'])
+        elif backupOnly and not primaryOnly:
+            self.reply = SolaceReply(document['rpc-reply']['rpc'])
+        else:
+            self.reply = SolaceReply(document.pop()['rpc-reply']['rpc'])
+            self.primary = self.reply
+            self.backup = SolaceReply(document.pop()['rpc-reply']['rpc'])
 
     def __repr__(self):
         """
@@ -34,7 +43,6 @@ class SolaceReplyHandler(object):
         except:
             logging.warn("Unable to decode json %s" % str(self.__dict__))
             raise
-            # raise Exception("Unable to decode JSON")
 
 
 class SolaceReply(object):
