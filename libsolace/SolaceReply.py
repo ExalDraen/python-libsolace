@@ -21,8 +21,8 @@ class SolaceReplyHandler(object):
 
     def __init__(self, document=None, version="soltr/6_0", primaryOnly=False, backupOnly=False, **kwargs):
 
-        logging.info("kwargs: %s" % kwargs)
-        logging.info(document)
+        logging.debug("kwargs: %s" % kwargs)
+        logging.debug(document)
 
         if primaryOnly and not backupOnly:
             self.reply = SolaceReply(document['rpc-reply']['rpc'])
@@ -39,7 +39,7 @@ class SolaceReplyHandler(object):
         """
         try:
             logging.debug("Reply Dict: %s " % self.__dict__)
-            return str(json.loads(str(self.__dict__).replace("'", '"').replace('u"', '"')))
+            return str(json.loads(str(self.__dict__).replace("'", '"').replace('u"', '"').replace('None', '"None"')))
         except:
             logging.warn("Unable to decode json %s" % str(self.__dict__))
             raise
@@ -76,6 +76,7 @@ class SolaceReply(object):
 
     def __repr__(self):
         return str(self.__dict__)
+        # return str(json.loads(str(self.__dict__).replace("'", '"').replace('u"', '"').replace('None', '"None"')))
 
     def __call__(self, *args, **kwargs):
         return self.__dict__

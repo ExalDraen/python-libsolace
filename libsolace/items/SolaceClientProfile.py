@@ -194,7 +194,7 @@ class SolaceClientProfile(Plugin):
         self.api.x = SolaceXMLBuilder("Setting Max Clients", version=self.api.version)
         self.api.x.client_profile.name = name
         if version_equal_or_greater_than('soltr/6_2', self.api.version):
-            cmd.create.client_profile.vpn_name = vpn_name
+            self.api.x.client_profile.vpn_name = vpn_name
         self.api.x.client_profile.max_connections_per_client_username.value = max_clients
         self.commands.enqueue(self.api.x)
         return self.api.x
@@ -216,7 +216,7 @@ class SolaceClientProfile(Plugin):
         self.api.x = SolaceXMLBuilder("Setting Bridging", version=self.api.version)
         self.api.x.client_profile.name = name
         if version_equal_or_greater_than('soltr/6_2', self.api.version):
-            self.api.x.create.client_profile.vpn_name = vpn_name
+            self.api.x.client_profile.vpn_name = vpn_name
         self.api.x.client_profile.allow_bridge_connections
         self.commands.enqueue(self.api.x)
         return self.api.x

@@ -61,7 +61,7 @@ e.g.:
 
 This means that any cluster can host any number of environments combined without conflicting resources. The CMDBClient
 must resolve the final item name by substituting the environment name into the string. e.g. '%s_myVpn' % env_name. This
-can be achieved through the Naming plugin. see <a href="libsolace/plugins/NamingStandard.py">NamingStandard</a> and 
+can be achieved through the Naming plugin. see <a href="libsolace/plugins/NamingStandard.py">NamingStandard</a> and
 <a href="libsolace/plugins/ZoinksNamingStandard.py">ZoinksNamingStandard</a>
 
 See <a href="libsolace/plugins/CMDBClient.py">CMDBClient</a> for a CMDB plugin example.
@@ -70,10 +70,10 @@ See <a href="libsolace/plugins/CMDBClient.py">CMDBClient</a> for a CMDB plugin e
 ### Limitations
 
 * XML can only be validated if it is enqueued in a SolaceCommandQueue instance.
-* Appliance responses are difficult to validate since the "slave" appliance will almost always return errors when NOT 
-"active", and already existing CI's will throw a error on create events and incorrect states. see 
+* Appliance responses are difficult to validate since the "slave" appliance will almost always return errors when NOT
+"active", and already existing CI's will throw a error on create events and incorrect states. see
 <a href="libsolace/Decorators.py">Decorators</a> for targeting specific appliances and states.
-* Since python dictionaries cannot contain `-` use `_`, the SolaceNode class will substitute a `-` for a `_` and 
+* Since python dictionaries cannot contain `-` use `_`, the SolaceNode class will substitute a `-` for a `_` and
 vice-versa as needed on keyNames.
 
 ## Install
@@ -86,7 +86,7 @@ python setup.py install
 
 ## Configuration
 
-libsolace requires a `libsolace.yaml` file in order to know what environments exist and what appliances are part of 
+libsolace requires a `libsolace.yaml` file in order to know what environments exist and what appliances are part of
 those environments. A single appliance can be part of multiple environments.
 
 The `libsolace.yaml` file is searched for in:
@@ -101,7 +101,7 @@ See <a href="libsolace.yaml.template">libsolace.yaml.template</a> for more info.
 
 ## Plugins
 
-libsolace is pluggable, and you can register your own classes to customize the appliance management. You need to 
+libsolace is pluggable, and you can register your own classes to customize the appliance management. You need to
 implement your own CMDBClient which should integrate with whatever configuration system you desire to populate solace.
 
 See <a href="libsolace/plugins/CMDBClient.py">CMDBClient</a>
@@ -117,6 +117,51 @@ See the `bin` directory for examples of various activities.
 ### SolaceACLProfile
 
 ### SolaceClientProfile
+
+#### get
+
+c = SolaceAPI("qa1")
+c.manage("SolaceClientProfile").get(name="test", vpn_name="qa1_myvpn")
+
+#### new_client_profile
+
+c = SolaceAPI("qa1")
+c.rpc(str(c.manage("SolaceClientProfile").new_client_profile(name="test", vpn_name="qa1_myvpn")))
+
+#### delete
+
+c = SolaceAPI("qa1")
+c.rpc(str(c.manage("SolaceClientProfile").delete(name="test", vpn_name="qa1_myvpn")))
+
+#### allow_consume
+
+c = SolaceAPI("qa1")
+c.rpc(str(c.manage("SolaceClientProfile").allow_consume(name="test", vpn_name="qa1_myvpn")))
+
+#### allow_send
+
+c = SolaceAPI("qa1")
+c.rpc(str(c.manage("SolaceClientProfile").allow_send(name="test", vpn_name="qa1_myvpn")))
+
+#### allow_endpoint_create
+
+c = SolaceAPI("qa1")
+c.rpc(str(c.manage("SolaceClientProfile").allow_consume(name="test", vpn_name="qa1_myvpn")))
+
+#### allow_transacted_sessions
+
+c = SolaceAPI("qa1")
+c.rpc(str(c.manage("SolaceClientProfile").allow_transacted_sessions(name="test", vpn_name="qa1_myvpn")))
+
+#### set_max_clients
+
+c = SolaceAPI("qa1")
+c.rpc(str(c.manage("SolaceClientProfile").set_max_clients(name="test", vpn_name="qa1_myvpn", max_clients=500)))
+
+#### allow_bridging
+
+c = SolaceAPI("qa1")
+c.rpc(str(c.manage("SolaceClientProfile").allow_bridging(name="test", vpn_name="qa1_myvpn")))
 
 ### SolaceQueue
 

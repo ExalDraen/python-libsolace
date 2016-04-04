@@ -42,5 +42,20 @@ if __name__ == '__main__':
 
     logging.info("Connecting to appliance in %s, testmode:%s" % (settings.env, options.testmode))
     connection = SolaceAPI(settings.env, testmode=options.testmode)
+
+    connection.manage("SolaceClientProfile")
+
+    request = SolaceXMLBuilder(version=self.version)
+    request.show.message_vpn.vpn_name = vpn
+    response = self.rpc(str(request))
+    # try:
+    return [vpn['name'] for vpn in response[0]['rpc-reply']['rpc']['show']['message-vpn'][
+        'vpn']]  # ['replication']['message-vpns']['message-vpn']]
+    # except:
+    #    return [response[0]['rpc-reply']['rpc']['show']['message-vpn']['vpn']]
+except:
+    raise
+
+
     for vpn in connection.list_vpns('*'):
         print vpn
