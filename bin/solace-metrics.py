@@ -22,10 +22,30 @@ import demjson
 from time import gmtime, strftime
 import time
 
+try:
+    from influxdb import InfluxDBClient
+except Exception, e:
+    print "Unable to import influxdb, try pip install influxdb"
+
 pp = pprint.PrettyPrinter(indent=4, width=20)
 
+# possible tags to try extract from the key/value dict
+default_tags = ["name", "message-vpn"]
 
-def pumpMetrics(environment, obj, measurement):
+
+def pump_metrics(environment, obj, measurement, influx_client=None, tag_key_name=None):
+    """
+    Sends the metrics off to influxDB, currently ignores nested key value sets. FIXME TODO
+
+    :param tag_key_name:
+    :param environment:
+    :param obj:
+    :param measurement:
+    :param influx_client:
+    :return:
+    """
+    if tag_key_name is None:
+        tag_key_name = ["name", "message-vpn"]
     j = demjson.encode(obj)
     p = json.loads(j)
     t = {}
@@ -41,26 +61,34 @@ def pumpMetrics(environment, obj, measurement):
         "measurement": measurement,
         "tags": {
             # "message-vpn": p['message-vpn'],
-            "name": p['name'],
+            # "name": p['name'],
             "environment": environment
         },
         "fields": t,
         "time": timeNow
     }]
 
-    if p.has_key("message-vpn"):
-        json_body[0]['tags']['message-vpn'] = p['message-vpn']
+    for k in tag_key_name:
+        if p.has_key(k):
+            json_body[0]['tags'][k] = p[k]
+        else:
+            logging.warn("Key %s is not present, this is only a warning" % k)
 
     # print json.dumps(json_body, sort_keys=False, indent=4, separators=(',', ': '))
     # client.write_points(json_body)
-    client.write_points(json_body)
+
+    try:
+        influx_client.write_points(json_body)
+    except Exception, e:
+        logging.error(e.message)
+        logging.error("Unable to write to influxdb")
 
 
-def getTime():
+def get_time():
     return strftime("%Y-%m-%dT%H:%M:%SZ", gmtime())
 
 
-timeNow = getTime();
+timeNow = get_time();
 
 if __name__ == '__main__':
     """ Gather metrics from Solace's SEMP API and places the results into influxdb """
@@ -71,7 +99,7 @@ if __name__ == '__main__':
                       help="environment to run job in eg:[ dev | ci1 | si1 | qa1 | pt1 | prod ]")
     parser.add_option("-d", "--debug", action="store_true", dest="debug",
                       default=False, help="toggles solace debug mode")
-    parser.add_option("--influxdb", action="store_true", dest="influxdb", help="influxdb url and port", default=False)
+
     parser.add_option("--influxdb-host", action="store", type="string", dest="influxdb_host", help="influxdb hostname",
                       default="defiant")
     parser.add_option("--influxdb-port", action="store", type="int", dest="influxdb_port", help="influxdb port",
@@ -86,7 +114,6 @@ if __name__ == '__main__':
     parser.add_option("--clients", action="store_true", dest="clients", help="gather clients stats", default=False)
     parser.add_option("--vpns", action="store_true", dest="vpns", help="gather vpns stats", default=False)
 
-
     (options, args) = parser.parse_args()
 
     if not options.env:
@@ -95,21 +122,19 @@ if __name__ == '__main__':
     if options.debug:
         logging.getLogger().setLevel(logging.DEBUG)
 
-    if options.influxdb:
-        logging.info("Connecting to influxdb")
-        from influxdb import InfluxDBClient
+    logging.info("Connecting to influxdb")
 
+    try:
+        client = InfluxDBClient(options.influxdb_host, options.influxdb_port, options.influxdb_user,
+                                options.influxdb_pass, options.influxdb_db)
         try:
-            client = InfluxDBClient(options.influxdb_host, options.influxdb_port, options.influxdb_user,
-                                    options.influxdb_pass, options.influxdb_db)
-            try:
-                logging.info("Creating database %s" % options.influxdb_db )
-                client.create_database(options.influxdb_db)
-            except Exception, e:
-                logging.warn("Unable to create database, does it already exist?")
+            logging.info("Creating database %s" % options.influxdb_db)
+            client.create_database(options.influxdb_db)
         except Exception, e:
-            logging.error("Unable to connect to influxdb")
-            sys.exit(1)
+            logging.warn("Unable to create database, does it already exist?")
+    except Exception, e:
+        logging.error("Unable to connect to influxdb")
+        sys.exit(1)
 
     # forces read-only
     options.testmode = True
@@ -117,9 +142,6 @@ if __name__ == '__main__':
 
     logging.info("Connecting to appliance in %s, testmode:%s" % (settings.env, options.testmode))
     connection = SolaceAPI(settings.env, testmode=options.testmode)
-
-
-
 
     """
     Gather client stats, this is quite slow if you have MANY clients!
@@ -132,13 +154,16 @@ if __name__ == '__main__':
         # measurement point start
         startTime = time.time()
 
+        # set time now immediately before we request
+        timeNow = get_time()
+
         # get the clients
         clients = connection.rpc(str(connection.x), primaryOnly=True)
-        timeNow = getTime()
 
         # iterate over values of interest.
         for c in clients[0]['rpc-reply']['rpc']['show']['client']['primary-virtual-router']['client']:
-            pumpMetrics(options.env, c, "client-stats")
+            logging.debug(c)
+            pump_metrics(options.env, c, "client-stats", client, ["name", "message-vpn"])
 
         logging.info("Clients Gather and Commit Time: %s" % (time.time() - startTime))
 
@@ -152,14 +177,14 @@ if __name__ == '__main__':
 
         startTime = time.time()
 
-        vpns = connection.rpc(str(connection.x), primaryOnly=True)
-        timeNow = getTime()
+        # set time now immediately before we request
+        timeNow = get_time()
 
-        print vpns
+        vpns = connection.rpc(str(connection.x), primaryOnly=True)
 
         # iterate over vpns
         for v in vpns[0]['rpc-reply']['rpc']['show']['message-vpn']['vpn']:
-            print v
-            pumpMetrics(options.env, v, "vpn-stats")
+            logging.debug(v)
+            pump_metrics(options.env, v, "vpn-stats", client, ["name"])
 
         logging.info("Vpns Gather and Commit Time: %s" % (time.time() - startTime))
