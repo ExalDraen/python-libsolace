@@ -80,6 +80,11 @@ vice-versa as needed on keyNames.
 
 You might need libyaml-devel or equivilant for your OS.
 
+For debian derivitaves this is:
+libxslt1-dev 
+libxml2-dev
+python-dev
+
 ```
 python setup.py install
 ```
