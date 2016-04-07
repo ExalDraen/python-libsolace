@@ -6,17 +6,15 @@ Deletes messages from the spool within queue list
 
 """
 
-import sys
 import logging
-logging.basicConfig(format='[%(module)s] %(filename)s:%(lineno)s %(asctime)s %(levelname)s %(message)s',stream=sys.stdout)
+import sys
+
+logging.basicConfig(format='[%(module)s] %(filename)s:%(lineno)s %(asctime)s %(levelname)s %(message)s', stream=sys.stderr)
 import libsolace.settingsloader as settings
 from libsolace.SolaceAPI import SolaceAPI
 from libsolace.SolaceXMLBuilder import SolaceXMLBuilder
-from libsolace.SolaceCommandQueue import SolaceCommandQueue
 from optparse import OptionParser
 import sys
-import pprint
-
 
 if __name__ == '__main__':
     """ parse opts, read site.xml, start provisioning vpns. """
@@ -45,17 +43,9 @@ if __name__ == '__main__':
 
     connection.manage("SolaceClientProfile")
 
-    request = SolaceXMLBuilder(version=self.version)
-    request.show.message_vpn.vpn_name = vpn
-    response = self.rpc(str(request))
-    # try:
-    return [vpn['name'] for vpn in response[0]['rpc-reply']['rpc']['show']['message-vpn'][
-        'vpn']]  # ['replication']['message-vpns']['message-vpn']]
-    # except:
-    #    return [response[0]['rpc-reply']['rpc']['show']['message-vpn']['vpn']]
-except:
-    raise
+    request = SolaceXMLBuilder()
+    request.show.message_vpn.vpn_name = '*'
+    response = connection.rpc(str(request), primaryOnly=True)
 
-
-    for vpn in connection.list_vpns('*'):
-        print vpn
+    for vpn in response[0]['rpc-reply']['rpc']['show']['message-vpn']['vpn']:
+        print vpn['name']

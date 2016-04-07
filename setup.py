@@ -16,7 +16,8 @@ install_requires = [
     'pyparsing',
     'urllib3==1.9',
     'lxml==3.3.5',
-    'pyyaml==3.11'
+    'pyyaml==3.11',
+    'demjson==2.2.4'
 ]
 
 try:
