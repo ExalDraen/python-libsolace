@@ -109,7 +109,7 @@ if __name__ == '__main__':
     parser.add_option("--influxdb-pass", action="store", type="string", dest="influxdb_pass", help="influxdb pass",
                       default="root")
     parser.add_option("--influxdb-db", action="store", type="string", dest="influxdb_db", help="influxdb db name",
-                      default="solace-metrics")
+                      default="solace")
 
     parser.add_option("--clients", action="store_true", dest="clients", help="gather clients stats", default=False)
     parser.add_option("--vpns", action="store_true", dest="vpns", help="gather vpns stats", default=False)
@@ -132,9 +132,13 @@ if __name__ == '__main__':
             client.create_database(options.influxdb_db)
         except Exception, e:
             logging.warn("Unable to create database, does it already exist?")
+        # client.create_retention_policy("30d", "4w", 1, options.influxdb_db, True)
     except Exception, e:
         logging.error("Unable to connect to influxdb")
         sys.exit(1)
+
+    logging.info("Altering retention policies")
+    client.alter_retention_policy("default", duration="4w", replication=1, default=True)
 
     # forces read-only
     options.testmode = True
