@@ -54,9 +54,16 @@ def pump_metrics(environment, obj, measurement, influx_client=None, tag_key_name
         logging.debug("Key: %s value %s" % (k, p[stats_key][k]))
         try:
             t[k] = long(p[stats_key][k])
+        # try fix nested docs
         except Exception, ve:
-            logging.debug("skipping")
-            pass
+            try:
+                subdoc = demjson.encode(p[stats_key][k])
+                p2 = json.loads(subdoc)
+                for k2 in p2:
+                    t[k+"-"+k2] = p2[k2]
+            except Exception, x2:
+                logging.warn("skipping %s" % k)
+                pass
 
     json_body = [{
         "measurement": measurement,
