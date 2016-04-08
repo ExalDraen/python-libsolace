@@ -44,10 +44,14 @@ def pump_metrics(environment, obj, measurement, influx_client=None, tag_key_name
     :param influx_client:
     :return:
     """
+
     if tag_key_name is None:
         tag_key_name = ["name", "message-vpn"]
     j = demjson.encode(obj)
     p = json.loads(j)
+
+    print json.dumps(obj, sort_keys=False, indent=4, separators=(',', ': '))
+
     t = {}
     for k in p["stats"]:
         logging.debug("Key: %s value %s" % (k, p["stats"][k]))
@@ -60,8 +64,6 @@ def pump_metrics(environment, obj, measurement, influx_client=None, tag_key_name
     json_body = [{
         "measurement": measurement,
         "tags": {
-            # "message-vpn": p['message-vpn'],
-            # "name": p['name'],
             "environment": environment
         },
         "fields": t,
@@ -112,7 +114,10 @@ if __name__ == '__main__':
                       default="solace")
 
     parser.add_option("--clients", action="store_true", dest="clients", help="gather clients stats", default=False)
+    parser.add_option("--client-users", action="store_true", dest="clientusers", help="gather client user stats", default=False)
     parser.add_option("--vpns", action="store_true", dest="vpns", help="gather vpns stats", default=False)
+    parser.add_option("--retention", action="store", dest="retention", help="retension time eg 1h, 90m, 12h, 7d, and 4w", default="4w")
+    parser.add_option("--set-retention", action="store_true", dest="update_retention", default=False, help="update the retention default policy")
 
     (options, args) = parser.parse_args()
 
@@ -137,8 +142,9 @@ if __name__ == '__main__':
         logging.error("Unable to connect to influxdb")
         sys.exit(1)
 
-    logging.info("Altering retention policies")
-    client.alter_retention_policy("default", duration="4w", replication=1, default=True)
+    if options.update_retention:
+        logging.info("Altering retention policies")
+        client.alter_retention_policy("default", duration="4w", replication=1, default=True)
 
     # forces read-only
     options.testmode = True
@@ -170,6 +176,28 @@ if __name__ == '__main__':
             pump_metrics(options.env, c, "client-stats", client, ["name", "message-vpn"])
 
         logging.info("Clients Gather and Commit Time: %s" % (time.time() - startTime))
+
+    if options.clientusers:
+        connection.x = SolaceXMLBuilder("show client users stats")
+        connection.x.show.client_username.name = "*"
+        connection.x.show.client_username.stats
+
+        # measurement point start
+        startTime = time.time()
+
+        # set time now immediately before we request
+        timeNow = get_time()
+
+        # get the clients
+        clients = connection.rpc(str(connection.x), primaryOnly=True)
+
+        # iterate over values of interest.
+        logging.info(clients[0])
+        for c in clients[0]['rpc-reply']['rpc']['show']['client-username']['client-usernames']:
+            logging.debug(c)
+            pump_metrics(options.env, c, "client-stats", client, ["name", "message-vpn"])
+
+        logging.info("Client Users Gather and Commit Time: %s" % (time.time() - startTime))
 
     """
     Gather VPN Stats
