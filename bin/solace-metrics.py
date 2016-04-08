@@ -30,7 +30,7 @@ except Exception, e:
 pp = pprint.PrettyPrinter(indent=4, width=20)
 
 
-def pump_metrics(environment, obj, measurement, influx_client=None, tag_key_name=None):
+def pump_metrics(environment, obj, measurement, influx_client=None, tag_key_name=None, stats_key="stats"):
     """
     Sends the metrics off to influxDB, currently ignores nested key value sets. FIXME TODO
 
@@ -50,10 +50,10 @@ def pump_metrics(environment, obj, measurement, influx_client=None, tag_key_name
     print json.dumps(obj, sort_keys=False, indent=4, separators=(',', ': '))
 
     t = {}
-    for k in p["stats"]:
-        logging.debug("Key: %s value %s" % (k, p["stats"][k]))
+    for k in p[stats_key]:
+        logging.debug("Key: %s value %s" % (k, p[stats_key][k]))
         try:
-            t[k] = long(p["stats"][k])
+            t[k] = long(p[stats_key][k])
         except Exception, ve:
             logging.debug("skipping")
             pass
@@ -113,6 +113,9 @@ if __name__ == '__main__':
     parser.add_option("--clients", action="store_true", dest="clients", help="gather clients stats", default=False)
     parser.add_option("--client-users", action="store_true", dest="clientusers", help="gather client user stats", default=False)
     parser.add_option("--vpns", action="store_true", dest="vpns", help="gather vpns stats", default=False)
+    parser.add_option("--spool", action="store_true", dest="spool", help="gather spool stats", default=False)
+
+
     parser.add_option("--retention", action="store", dest="retention", help="retension time eg 1h, 90m, 12h, 7d, and 4w", default="4w")
     parser.add_option("--set-retention", action="store_true", dest="update_retention", default=False, help="update the retention default policy")
 
@@ -217,3 +220,24 @@ if __name__ == '__main__':
             pump_metrics(options.env, v, "vpn-stats", client, ["name"])
 
         logging.info("Vpns Gather and Commit Time: %s" % (time.time() - startTime))
+
+    if options.spool:
+        connection.x = SolaceXMLBuilder("show global spool stats")
+        connection.x.show.message_spool
+        connection.x.show.message_spool.stats
+
+        startTime = time.time()
+
+        # set time now immediately before we request
+        timeNow = get_time()
+
+        vpnspools = connection.rpc(str(connection.x), primaryOnly=True)
+
+        print json.dumps(vpnspools[0], sort_keys=False, indent=4, separators=(',', ': '))
+        # logging.info(vpnspools[0])
+
+        # iterate over vpns
+        # for v in vpnspools[0]['rpc-reply']['rpc']['show']['message-spool']['message-spool-stats']:
+        pump_metrics(options.env, vpnspools[0]['rpc-reply']['rpc']['show']['message-spool'], "spool-stats", client, [], "message-spool-stats")
+
+        logging.info("Spool Gather and Commit Time: %s" % (time.time() - startTime))
