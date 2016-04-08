@@ -30,7 +30,7 @@ except Exception, e:
 pp = pprint.PrettyPrinter(indent=4, width=20)
 
 
-def pump_metrics(environment, obj, measurement, influx_client=None, tag_key_name=None, tags=None, stats_key="stats"):
+def pump_metrics(environment, obj, measurement, influx_client=None, tag_key_name=None, tags={}, stats_key="stats"):
     """
     Sends the metrics off to influxDB, currently ignores nested key value sets. FIXME TODO
 
@@ -178,7 +178,7 @@ if __name__ == '__main__':
         # iterate over values of interest.
         for c in clients[0]['rpc-reply']['rpc']['show']['client']['primary-virtual-router']['client']:
             logging.debug(c)
-            pump_metrics(options.env, c, "client-stats", influx_client=client, tag_key_names=["name", "message-vpn"])
+            pump_metrics(options.env, c, "client-stats", influx_client=client, tag_key_name=["name", "message-vpn"])
 
         logging.info("Clients Gather and Commit Time: %s" % (time.time() - startTime))
 
@@ -200,7 +200,7 @@ if __name__ == '__main__':
         logging.info(clients[0])
         for c in clients[0]['rpc-reply']['rpc']['show']['client-username']['client-usernames']:
             logging.debug(c)
-            pump_metrics(options.env, c, "client-stats", influx_client=client, tag_key_names=["name", "message-vpn"])
+            pump_metrics(options.env, c, "client-stats", influx_client=client, tag_key_name=["name", "message-vpn"])
 
         logging.info("Client Users Gather and Commit Time: %s" % (time.time() - startTime))
 
@@ -222,7 +222,7 @@ if __name__ == '__main__':
         # iterate over vpns
         for v in vpns[0]['rpc-reply']['rpc']['show']['message-vpn']['vpn']:
             logging.debug(v)
-            pump_metrics(options.env, v, "vpn-stats", influx_client=client, tag_key_names=["name"])
+            pump_metrics(options.env, v, "vpn-stats", influx_client=client, tag_key_name=["name"])
 
         logging.info("Vpns Gather and Commit Time: %s" % (time.time() - startTime))
 
