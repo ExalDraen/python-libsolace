@@ -29,15 +29,12 @@ except Exception, e:
 
 pp = pprint.PrettyPrinter(indent=4, width=20)
 
-# possible tags to try extract from the key/value dict
-default_tags = ["name", "message-vpn"]
-
 
 def pump_metrics(environment, obj, measurement, influx_client=None, tag_key_name=None):
     """
     Sends the metrics off to influxDB, currently ignores nested key value sets. FIXME TODO
 
-    :param tag_key_name:
+    :param tag_key_name: keys in the object which are to be tags e.g. name, message-vpn, client-username
     :param environment:
     :param obj:
     :param measurement:
