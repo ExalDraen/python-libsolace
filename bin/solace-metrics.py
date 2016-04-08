@@ -4,6 +4,15 @@
 
 Gather solace metrics from SEMP API and pump them into influxdb
 
+
+TESTING
+
+
+docker run -d --name=grafana -p 3000:3000 grafana/grafana
+
+docker run -d --name=influxdb2 -p 8083:8083 -p 8086:8086 -e ADMIN_USER="root" -e INFLUXDB_INIT_PWD="admin" -e PRE_CREATE_DB="db1;db2;db3" unixunion/influxdb:latest
+
+
 """
 
 import logging
@@ -30,10 +39,30 @@ except Exception, e:
 pp = pprint.PrettyPrinter(indent=4, width=20)
 
 
-def pump_metrics(environment, obj, measurement, influx_client=None, tag_key_name=None, tags={}, stats_key="stats"):
+def flatten_json(y):
+    out = {}
+
+    def flatten(x, name=''):
+        if type(x) is dict:
+            for a in x:
+                flatten(x[a], name + a + '_')
+        else:
+            try:
+                out[str(name[:-1])] = long(x)
+            except Exception, e:
+                # strip out non number
+                pass
+
+    flatten(y)
+    # print json.dumps(out, sort_keys=False, indent=4, separators=(',', ': '))
+    return out
+
+
+def pump_metrics(environment, obj, measurement, influx_client=None, tag_key_name=None, tags={}):
     """
     Sends the metrics off to influxDB, currently ignores nested key value sets. FIXME TODO
 
+    :param tags:
     :param tag_key_name: keys in the object which are to be tags e.g. name, message-vpn, client-username
     :param environment:
     :param obj:
@@ -47,23 +76,11 @@ def pump_metrics(environment, obj, measurement, influx_client=None, tag_key_name
     j = demjson.encode(obj)
     p = json.loads(j)
 
-    print json.dumps(obj, sort_keys=False, indent=4, separators=(',', ': '))
+    t = flatten_json(obj)
+    # print json.dumps(p, sort_keys=False, indent=4, separators=(',', ': '))
 
-    t = {}
-    for k in p[stats_key]:
-        logging.debug("Key: %s value %s" % (k, p[stats_key][k]))
-        try:
-            t[k] = long(p[stats_key][k])
-        # try fix nested docs
-        except Exception, ve:
-            try:
-                subdoc = demjson.encode(p[stats_key][k])
-                p2 = json.loads(subdoc)
-                for k2 in p2:
-                    t[k+"-"+k2] = p2[k2]
-            except Exception, x2:
-                logging.warn("skipping %s" % k)
-                pass
+    # print "Keys to plot"
+    # print json.dumps(t, sort_keys=False, indent=4, separators=(',', ': '))
 
     json_body = [{
         "measurement": measurement,
@@ -121,15 +138,21 @@ if __name__ == '__main__':
                       default="solace")
 
     parser.add_option("--clients", action="store_true", dest="clients", help="gather clients stats", default=False)
-    parser.add_option("--client-users", action="store_true", dest="clientusers", help="gather client user stats", default=False)
+    # parser.add_option("--client-users", action="store_true", dest="clientusers", help="gather client user stats",
+    #                   default=False)
+    parser.add_option("--client-spools", action="store_true", dest="clientspools", help="gather client spool stats",
+                      default=False)
+
     parser.add_option("--vpns", action="store_true", dest="vpns", help="gather vpns stats", default=False)
     parser.add_option("--spool", action="store_true", dest="spool", help="gather spool stats", default=False)
 
     parser.add_option("--filter", action="store", type="string", dest="filter", help="filter e.g. '*' / 'prod_foo'",
                       default="*")
 
-    parser.add_option("--retention", action="store", dest="retention", help="retension time eg 1h, 90m, 12h, 7d, and 4w", default="4w")
-    parser.add_option("--set-retention", action="store_true", dest="update_retention", default=False, help="update the retention default policy")
+    parser.add_option("--retention", action="store", dest="retention",
+                      help="retension time eg 1h, 90m, 12h, 7d, and 4w", default="4w")
+    parser.add_option("--set-retention", action="store_true", dest="update_retention", default=False,
+                      help="update the retention default policy")
 
     (options, args) = parser.parse_args()
 
@@ -149,7 +172,7 @@ if __name__ == '__main__':
             client.create_database(options.influxdb_db)
         except Exception, e:
             logging.warn("Unable to create database, does it already exist?")
-        # client.create_retention_policy("30d", "4w", 1, options.influxdb_db, True)
+            # client.create_retention_policy("30d", "4w", 1, options.influxdb_db, True)
     except Exception, e:
         logging.error("Unable to connect to influxdb")
         sys.exit(1)
@@ -189,10 +212,11 @@ if __name__ == '__main__':
 
         logging.info("Clients Gather and Commit Time: %s" % (time.time() - startTime))
 
-    if options.clientusers:
-        connection.x = SolaceXMLBuilder("show client users stats")
-        connection.x.show.client_username.name = options.filter
-        connection.x.show.client_username.stats
+    if options.clientspools:
+        # get client spool stats
+        connection.x = SolaceXMLBuilder("show clients spool stats")
+        connection.x.show.client.name = options.filter
+        connection.x.show.client.message_spool_stats
 
         # measurement point start
         startTime = time.time()
@@ -202,14 +226,42 @@ if __name__ == '__main__':
 
         # get the clients
         clients = connection.rpc(str(connection.x), primaryOnly=True)
+        # print json.dumps(clients[0], sort_keys=False, indent=4, separators=(',', ': '))
 
         # iterate over values of interest.
-        logging.info(clients[0])
-        for c in clients[0]['rpc-reply']['rpc']['show']['client-username']['client-usernames']:
-            logging.debug(c)
-            pump_metrics(options.env, c, "client-stats", influx_client=client, tag_key_name=["name", "message-vpn"])
+        for c in clients[0]['rpc-reply']['rpc']['show']['client']['primary-virtual-router']['client']:
+            print "doc start"
+            print json.dumps(c, sort_keys=False, indent=4, separators=(',', ': '))
+            print "doc end"
 
-        logging.info("Client Users Gather and Commit Time: %s" % (time.time() - startTime))
+            pump_metrics(options.env, c, "client-spool-stats", influx_client=client,
+                         tag_key_name=["client-username", "message-vpn", "user", "name", "client-address", "platform",
+                                       "profile", "acl-profile"])
+
+        logging.info("Clients Gather and Commit Time: %s" % (time.time() - startTime))
+
+    # if options.clientusers:
+    #     connection.x = SolaceXMLBuilder("show client users stats")
+    #     connection.x.show.client_username.name = options.filter
+    #     connection.x.show.client_username.stats
+    #
+    #     # measurement point start
+    #     startTime = time.time()
+    #
+    #     # set time now immediately before we request
+    #     timeNow = get_time()
+    #
+    #     # get the clients
+    #     clients = connection.rpc(str(connection.x), primaryOnly=True)
+    #
+    #     # iterate over values of interest.
+    #     print json.dumps(clients[0], sort_keys=False, indent=4, separators=(',', ': '))
+    #
+    #     for c in clients[0]['rpc-reply']['rpc']['show']['client-username']['client-usernames']:
+    #         logging.debug(c)
+    #         pump_metrics(options.env, c, "client-stats", influx_client=client, tag_key_name=["name", "message-vpn"])
+    #
+    #     logging.info("Client Users Gather and Commit Time: %s" % (time.time() - startTime))
 
     """
     Gather VPN Stats
@@ -260,6 +312,7 @@ if __name__ == '__main__':
 
         # iterate over vpns
         # for v in vpnspools[0]['rpc-reply']['rpc']['show']['message-spool']['message-spool-stats']:
-        pump_metrics(options.env, vpnspools[0]['rpc-reply']['rpc']['show']['message-spool'], "spool-stats", influx_client=client, tag_key_name=tag_keys, tags=tags , stats_key="message-spool-stats")
+        pump_metrics(options.env, vpnspools[0]['rpc-reply']['rpc']['show']['message-spool'], "spool-stats",
+                     influx_client=client, tag_key_name=tag_keys, tags=tags)
 
         logging.info("Spool Gather and Commit Time: %s" % (time.time() - startTime))
