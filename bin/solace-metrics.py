@@ -30,7 +30,7 @@ except Exception, e:
 pp = pprint.PrettyPrinter(indent=4, width=20)
 
 
-def pump_metrics(environment, obj, measurement, influx_client=None, tag_key_name=None, stats_key="stats"):
+def pump_metrics(environment, obj, measurement, influx_client=None, tag_key_name=None, tags=None, stats_key="stats"):
     """
     Sends the metrics off to influxDB, currently ignores nested key value sets. FIXME TODO
 
@@ -72,6 +72,9 @@ def pump_metrics(environment, obj, measurement, influx_client=None, tag_key_name
             json_body[0]['tags'][k] = p[k]
         else:
             logging.warn("Key %s is not present, this is only a warning" % k)
+
+    for tag in tags:
+        json_body[0]['tags'][tag] = tags[tag]
 
     # print json.dumps(json_body, sort_keys=False, indent=4, separators=(',', ': '))
     # client.write_points(json_body)
@@ -115,6 +118,8 @@ if __name__ == '__main__':
     parser.add_option("--vpns", action="store_true", dest="vpns", help="gather vpns stats", default=False)
     parser.add_option("--spool", action="store_true", dest="spool", help="gather spool stats", default=False)
 
+    parser.add_option("--filter", action="store", type="string", dest="filter", help="filter e.g. '*' / 'prod_foo'",
+                      default="*")
 
     parser.add_option("--retention", action="store", dest="retention", help="retension time eg 1h, 90m, 12h, 7d, and 4w", default="4w")
     parser.add_option("--set-retention", action="store_true", dest="update_retention", default=False, help="update the retention default policy")
@@ -158,7 +163,7 @@ if __name__ == '__main__':
     """
     if options.clients:
         connection.x = SolaceXMLBuilder("show clients stats")
-        connection.x.show.client.name = "*"
+        connection.x.show.client.name = options.filter
         connection.x.show.client.stats
 
         # measurement point start
@@ -173,13 +178,13 @@ if __name__ == '__main__':
         # iterate over values of interest.
         for c in clients[0]['rpc-reply']['rpc']['show']['client']['primary-virtual-router']['client']:
             logging.debug(c)
-            pump_metrics(options.env, c, "client-stats", client, ["name", "message-vpn"])
+            pump_metrics(options.env, c, "client-stats", influx_client=client, tag_key_names=["name", "message-vpn"])
 
         logging.info("Clients Gather and Commit Time: %s" % (time.time() - startTime))
 
     if options.clientusers:
         connection.x = SolaceXMLBuilder("show client users stats")
-        connection.x.show.client_username.name = "*"
+        connection.x.show.client_username.name = options.filter
         connection.x.show.client_username.stats
 
         # measurement point start
@@ -195,7 +200,7 @@ if __name__ == '__main__':
         logging.info(clients[0])
         for c in clients[0]['rpc-reply']['rpc']['show']['client-username']['client-usernames']:
             logging.debug(c)
-            pump_metrics(options.env, c, "client-stats", client, ["name", "message-vpn"])
+            pump_metrics(options.env, c, "client-stats", influx_client=client, tag_key_names=["name", "message-vpn"])
 
         logging.info("Client Users Gather and Commit Time: %s" % (time.time() - startTime))
 
@@ -204,7 +209,7 @@ if __name__ == '__main__':
     """
     if options.vpns:
         connection.x = SolaceXMLBuilder("show clients stats")
-        connection.x.show.message_vpn.vpn_name = "*"
+        connection.x.show.message_vpn.vpn_name = options.filter
         connection.x.show.message_vpn.stats
 
         startTime = time.time()
@@ -217,13 +222,23 @@ if __name__ == '__main__':
         # iterate over vpns
         for v in vpns[0]['rpc-reply']['rpc']['show']['message-vpn']['vpn']:
             logging.debug(v)
-            pump_metrics(options.env, v, "vpn-stats", client, ["name"])
+            pump_metrics(options.env, v, "vpn-stats", influx_client=client, tag_key_names=["name"])
 
         logging.info("Vpns Gather and Commit Time: %s" % (time.time() - startTime))
 
     if options.spool:
+
+        tag_keys = []
+        tags = {}
+
         connection.x = SolaceXMLBuilder("show global spool stats")
-        connection.x.show.message_spool
+        if options.filter == "*":
+            logging.info("Not Filtering")
+            connection.x.show.message_spool
+        else:
+            logging.info("Filtering")
+            tags["message-vpn"] = options.filter
+            connection.x.show.message_spool.vpn_name = options.filter
         connection.x.show.message_spool.stats
 
         startTime = time.time()
@@ -238,6 +253,6 @@ if __name__ == '__main__':
 
         # iterate over vpns
         # for v in vpnspools[0]['rpc-reply']['rpc']['show']['message-spool']['message-spool-stats']:
-        pump_metrics(options.env, vpnspools[0]['rpc-reply']['rpc']['show']['message-spool'], "spool-stats", client, [], "message-spool-stats")
+        pump_metrics(options.env, vpnspools[0]['rpc-reply']['rpc']['show']['message-spool'], "spool-stats", influx_client=client, tag_key_name=tag_keys, tags=tags , stats_key="message-spool-stats")
 
         logging.info("Spool Gather and Commit Time: %s" % (time.time() - startTime))
