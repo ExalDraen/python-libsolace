@@ -57,6 +57,8 @@ def flatten_json(y):
 class InfluxDBClient(Plugin):
     """
 
+    import libsolace.settingsloader as settings
+    import libsolace
     metrics_class = libsolace.plugin_registry('InfluxDBClient', settings=settings)
     metrics = metrics_class(settings=settings)
 
@@ -81,7 +83,8 @@ class InfluxDBClient(Plugin):
 
     def send(self, measurement, data, **tags):
         """
-
+        import libsolace.settingsloader as settings
+        import libsolace
         metrics_class = libsolace.plugin_registry('InfluxDBClient', settings=settings)
         metrics = metrics_class(settings=settings)
 

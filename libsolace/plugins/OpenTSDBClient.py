@@ -54,17 +54,17 @@ class OpenTSDBClient(Plugin):
         self.client = potsdb.Client(self.host, port=self.port, qsize=self.qsize, host_tag=self.host_tag,
                                     mps=self.mps, check_host=self.check_host)
 
-    def send(self, key, value, **tags):
+    def send(self, measurement, data, **tags):
         """
         send('test.metric5', 100, extratag1='tagvalue', extratag2='tagvalue')
 
-        :param key:
-        :param value:
+        :param measurement: the key name
+        :param data: the value
         :param tags:
         :return:
         """
         try:
-            self.client.log(key, value, **tags)
+            self.client.log(measurement, data, **tags)
         except Exception, e:
             logging.error(e.message)
             logging.error("Unable to send metrics")
