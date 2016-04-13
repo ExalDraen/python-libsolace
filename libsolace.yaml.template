@@ -15,6 +15,7 @@ NAMEHOOK: ZoinksNamingStandard
 # list of all plugins to load
 PLUGINS:
   - libsolace.plugins.CMDBClient
+  - libsolace.plugins.XMLAPI
   - libsolace.items.SolaceUser
   - libsolace.items.SolaceUsers
   - libsolace.items.SolaceVPN
@@ -23,6 +24,8 @@ PLUGINS:
   - libsolace.plugins.ZoinksNamingStandard
   - libsolace.items.SolaceClientProfile
   - libsolace.plugins.Utilities
+#  - libsolace.plugins.OpenTSDBClient
+#  - libsolace.plugins.InfluxDBClient
 
 # the plugin name as registered in the registry we want to use for solace config
 SOLACE_CMDB_PLUGIN: CMDBClient
@@ -55,3 +58,10 @@ SOLACE_CONF:
 
 SOLACE_CLIENT_PROFILE_DEFAULTS:
   max_clients: 1000
+
+# for metrics, see bin/metrics.sh
+#INFLUXDB_HOST: localhost
+#INFLUXDB_PORT: 8086
+#INFLUXDB_USER: user
+#INFLUXDB_PASS: pass
+#INFLUXDB_DB: solace

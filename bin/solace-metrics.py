@@ -25,20 +25,19 @@ from libsolace.SolaceAPI import SolaceAPI
 from libsolace.SolaceXMLBuilder import SolaceXMLBuilder
 from optparse import OptionParser
 import simplejson as json
-import sys
-import pprint
 import demjson
 from time import gmtime, strftime
 import time
 
 try:
     from influxdb import InfluxDBClient
-except Exception, e:
+except ImportError, e:
     print "Unable to import influxdb, try pip install influxdb"
+    sys.exit(1)
 
-pp = pprint.PrettyPrinter(indent=4, width=20)
+# pp = pprint.PrettyPrinter(indent=4, width=20)
 
-
+# flattens a json document concatenating key names and stripping non numbers
 def flatten_json(y):
     out = {}
 
@@ -110,16 +109,18 @@ def pump_metrics(environment, obj, measurement, influx_client=None, tag_key_name
         logging.error("Unable to write to influxdb")
 
 
+# time consistency
 def get_time():
     return strftime("%Y-%m-%dT%H:%M:%SZ", gmtime())
 
 
-timeNow = get_time();
+# first time measurement
+timeNow = get_time()
 
 if __name__ == '__main__':
-    """ Gather metrics from Solace's SEMP API and places the results into influxdb """
+    """ Gather metrics from Solace's SEMP API and send the results to influxdb """
 
-    usage = "list all vpns in an environment"
+    usage = "Gather metrics and send to influxdb"
     parser = OptionParser(usage=usage)
     parser.add_option("-e", "--env", "--environment", action="store", type="string", dest="env",
                       help="environment to run job in eg:[ dev | ci1 | si1 | qa1 | pt1 | prod ]")
@@ -138,11 +139,8 @@ if __name__ == '__main__':
                       default="solace")
 
     parser.add_option("--clients", action="store_true", dest="clients", help="gather clients stats", default=False)
-    # parser.add_option("--client-users", action="store_true", dest="clientusers", help="gather client user stats",
-    #                   default=False)
     parser.add_option("--client-spools", action="store_true", dest="clientspools", help="gather client spool stats",
                       default=False)
-
     parser.add_option("--vpns", action="store_true", dest="vpns", help="gather vpns stats", default=False)
     parser.add_option("--spool", action="store_true", dest="spool", help="gather spool stats", default=False)
 
@@ -152,7 +150,7 @@ if __name__ == '__main__':
     parser.add_option("--retention", action="store", dest="retention",
                       help="retension time eg 1h, 90m, 12h, 7d, and 4w", default="4w")
     parser.add_option("--set-retention", action="store_true", dest="update_retention", default=False,
-                      help="update the retention default policy")
+                      help="update the retention default policy in accordance with --retention")
 
     (options, args) = parser.parse_args()
 
@@ -162,17 +160,20 @@ if __name__ == '__main__':
     if options.debug:
         logging.getLogger().setLevel(logging.DEBUG)
 
-    logging.info("Connecting to influxdb")
-
     try:
-        client = InfluxDBClient(options.influxdb_host, options.influxdb_port, options.influxdb_user,
-                                options.influxdb_pass, options.influxdb_db)
+        logging.info("Connecting to influxdb")
+        client = InfluxDBClient(options.influxdb_host,
+                                options.influxdb_port,
+                                options.influxdb_user,
+                                options.influxdb_pass,
+                                options.influxdb_db)
         try:
             logging.info("Creating database %s" % options.influxdb_db)
             client.create_database(options.influxdb_db)
         except Exception, e:
             logging.warn("Unable to create database, does it already exist?")
             # client.create_retention_policy("30d", "4w", 1, options.influxdb_db, True)
+
     except Exception, e:
         logging.error("Unable to connect to influxdb")
         sys.exit(1)
@@ -240,29 +241,6 @@ if __name__ == '__main__':
 
         logging.info("Clients Gather and Commit Time: %s" % (time.time() - startTime))
 
-    # if options.clientusers:
-    #     connection.x = SolaceXMLBuilder("show client users stats")
-    #     connection.x.show.client_username.name = options.filter
-    #     connection.x.show.client_username.stats
-    #
-    #     # measurement point start
-    #     startTime = time.time()
-    #
-    #     # set time now immediately before we request
-    #     timeNow = get_time()
-    #
-    #     # get the clients
-    #     clients = connection.rpc(str(connection.x), primaryOnly=True)
-    #
-    #     # iterate over values of interest.
-    #     print json.dumps(clients[0], sort_keys=False, indent=4, separators=(',', ': '))
-    #
-    #     for c in clients[0]['rpc-reply']['rpc']['show']['client-username']['client-usernames']:
-    #         logging.debug(c)
-    #         pump_metrics(options.env, c, "client-stats", influx_client=client, tag_key_name=["name", "message-vpn"])
-    #
-    #     logging.info("Client Users Gather and Commit Time: %s" % (time.time() - startTime))
-
     """
     Gather VPN Stats
     """
@@ -285,6 +263,9 @@ if __name__ == '__main__':
 
         logging.info("Vpns Gather and Commit Time: %s" % (time.time() - startTime))
 
+    """
+    Get Spool stats
+    """
     if options.spool:
 
         tag_keys = []
@@ -308,10 +289,7 @@ if __name__ == '__main__':
         vpnspools = connection.rpc(str(connection.x), primaryOnly=True)
 
         print json.dumps(vpnspools[0], sort_keys=False, indent=4, separators=(',', ': '))
-        # logging.info(vpnspools[0])
 
-        # iterate over vpns
-        # for v in vpnspools[0]['rpc-reply']['rpc']['show']['message-spool']['message-spool-stats']:
         pump_metrics(options.env, vpnspools[0]['rpc-reply']['rpc']['show']['message-spool'], "spool-stats",
                      influx_client=client, tag_key_name=tag_keys, tags=tags)
 
