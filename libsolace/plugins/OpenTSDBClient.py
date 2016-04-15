@@ -33,7 +33,8 @@ TSDB_MPS: 100
 @libsolace.plugin_registry.register
 class OpenTSDBClient(Plugin):
     """
-
+    import libsolace.settingsloader as settings
+    import libsolace
     metrics_class = libsolace.plugin_registry('OpenTSDBClient', settings=settings)
     metrics = metrics_class(settings=settings)
 
@@ -56,7 +57,12 @@ class OpenTSDBClient(Plugin):
 
     def send(self, measurement, data, **tags):
         """
-        send('test.metric5', 100, extratag1='tagvalue', extratag2='tagvalue')
+
+        import libsolace.settingsloader as settings
+        import libsolace
+        metrics_class = libsolace.plugin_registry('OpenTSDBClient', settings=settings)
+        metrics = metrics_class(settings=settings)
+        metrics.send('somekey', 100, extratag1='tagvalue', extratag2='tagvalue')
 
         :param measurement: the key name
         :param data: the value
@@ -65,6 +71,6 @@ class OpenTSDBClient(Plugin):
         """
         try:
             self.client.log(measurement, data, **tags)
-        except Exception, e:
-            logging.error(e.message)
+        except Exception, ex:
+            logging.error(ex.message)
             logging.error("Unable to send metrics")

@@ -141,14 +141,19 @@ if __name__ == '__main__':
     parser.add_option("--clients", action="store_true", dest="clients", help="gather clients stats", default=False)
     parser.add_option("--client-spools", action="store_true", dest="clientspools", help="gather client spool stats",
                       default=False)
+
     parser.add_option("--vpns", action="store_true", dest="vpns", help="gather vpns stats", default=False)
+
     parser.add_option("--spool", action="store_true", dest="spool", help="gather spool stats", default=False)
+
+    parser.add_option("--queues", action="store_true", dest="queues", help="queue stats", default=False)
 
     parser.add_option("--filter", action="store", type="string", dest="filter", help="filter e.g. '*' / 'prod_foo'",
                       default="*")
 
     parser.add_option("--retention", action="store", dest="retention",
                       help="retension time eg 1h, 90m, 12h, 7d, and 4w", default="4w")
+
     parser.add_option("--set-retention", action="store_true", dest="update_retention", default=False,
                       help="update the retention default policy in accordance with --retention")
 
@@ -292,5 +297,41 @@ if __name__ == '__main__':
 
         pump_metrics(options.env, vpnspools[0]['rpc-reply']['rpc']['show']['message-spool'], "spool-stats",
                      influx_client=client, tag_key_name=tag_keys, tags=tags)
+
+        logging.info("Spool Gather and Commit Time: %s" % (time.time() - startTime))
+
+
+    """
+    Get Queue stats
+    """
+    if options.queues:
+
+        tag_keys = []
+        tags = {}
+
+        connection.x = SolaceXMLBuilder("show queue stats")
+        if options.filter == "*":
+            logging.info("Not Filtering")
+            connection.x.show.queue.name = "*"
+        else:
+            logging.info("Filtering")
+            tags["queue_name"] = options.filter
+            connection.x.show.queue.name = options.filter
+        connection.x.show.queue.stats
+
+        startTime = time.time()
+
+        # set time now immediately before we request
+        timeNow = get_time()
+
+        queues = connection.rpc(str(connection.x), primaryOnly=True)
+
+        # print json.dumps(queues[0], sort_keys=False, indent=4, separators=(',', ': '))
+
+        for q in queues[0]['rpc-reply']['rpc']['show']['queue']['queues']["queue"]:
+            # print json.dumps(q, sort_keys=False, indent=4, separators=(',', ': '))
+            tags["message-vpn"] = q["info"]["message-vpn"]
+            tags["queue-name"] = q["name"]
+            pump_metrics(options.env, q, "queues-stats", influx_client=client, tag_key_name=tag_keys, tags=tags)
 
         logging.info("Spool Gather and Commit Time: %s" % (time.time() - startTime))
