@@ -119,25 +119,31 @@ See the `bin` directory for examples of various activities.
 
 Overview of some of the plugins and classes. Generally, you would initialize the solace API with:
 
-    import libsolace.settingsloader as settings
-    import libsolace
-    from libsolace.SolaceAPI import SolaceAPI
-    c = SolaceAPI("dev")
-    xmls = c.manage(......).commands.commands
-    for xml in xmls:
-        c.rpc(str(xml))
+```python
+>>> import libsolace.settingsloader as settings
+>>> import libsolace
+>>> from libsolace.SolaceAPI import SolaceAPI
+>>> c = SolaceAPI("dev")
+>>> xmls = c.manage(......).commands.commands
+>>> for xml in xmls:
+>>>   c.rpc(str(xml))
+```
 
 ### SolaceACLProfile
 
 #### init
 Calls new_acl, allow_publish, allow_subscribe and allow_connect, returns list of xml strings
 
-    acl_profile_xml_list =  c.manage("SolaceACLProfile", name=self.vpn_name, vpn_name=self.vpn_name).commands.commands
+```python
+>>> acl_profile_xml_list =  c.manage("SolaceACLProfile", name=self.vpn_name, vpn_name=self.vpn_name).commands.commands
+```
 
 #### new_acl
 Returns single XML string required to create a new ACL
 
-    str_xml=c.manage("SolaceACLProfile").new_acl(name="testprofile", vpn_name="myvpn")
+```python
+>>> str_xml=c.manage("SolaceACLProfile").new_acl(name="testprofile", vpn_name="myvpn")
+```
 
 #### allow_publish, allow_subscribe, allow_connect
 Returns only the XML to allow a specific feature
