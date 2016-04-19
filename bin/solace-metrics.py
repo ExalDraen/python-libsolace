@@ -10,7 +10,7 @@ TESTING
 
 docker run -d --name=grafana -p 3000:3000 grafana/grafana
 
-docker run -d --name=influxdb2 -p 8083:8083 -p 8086:8086 -e ADMIN_USER="root" -e INFLUXDB_INIT_PWD="admin" -e PRE_CREATE_DB="db1;db2;db3" unixunion/influxdb:latest
+docker run -d --name=influxdb2 -p 8083:8083 -p 8086:8086 -e ADMIN_USER="root" -e INFLUXDB_INIT_PWD="admin" -e PRE_CREATE_DB="solace" influxdb/influxdb:latest
 
 
 """
@@ -34,6 +34,7 @@ try:
 except ImportError, e:
     print "Unable to import influxdb, try pip install influxdb"
     sys.exit(1)
+
 
 # pp = pprint.PrettyPrinter(indent=4, width=20)
 
@@ -299,7 +300,6 @@ if __name__ == '__main__':
                      influx_client=client, tag_key_name=tag_keys, tags=tags)
 
         logging.info("Spool Gather and Commit Time: %s" % (time.time() - startTime))
-
 
     """
     Get Queue stats

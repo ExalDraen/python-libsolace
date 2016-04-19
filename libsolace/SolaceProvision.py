@@ -57,6 +57,7 @@ class SolaceProvision:
             self.environment_name = kwargs['environment']
             self.client_profile_name = kwargs['client_profile']
             self.users_dict = kwargs['users_dict']
+            logging.debug("USERS_DICT: %s" % self.users_dict )
             self.testmode = kwargs['testmode']
             self.create_queues = kwargs['create_queues']
             self.shutdown_on_apply = kwargs['shutdown_on_apply']
@@ -114,6 +115,8 @@ class SolaceProvision:
                 'password': self.vpn_dict['password']
             }
         ]
+
+        logging.info(self.users_dict)
         self.users_dict.extend(vpn_owner_user)
         self.userMgr = self.connection.manage("SolaceUsers",
                                               users=self.users_dict,

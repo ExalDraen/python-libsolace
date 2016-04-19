@@ -15,6 +15,7 @@ NAMEHOOK: ZoinksNamingStandard
 # list of all plugins to load
 PLUGINS:
   - libsolace.plugins.CMDBClient
+  - libsolace.plugins.YAMLClient
   - libsolace.plugins.XMLAPI
   - libsolace.items.SolaceUser
   - libsolace.items.SolaceUsers

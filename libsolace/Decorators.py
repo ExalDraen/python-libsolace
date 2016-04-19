@@ -81,6 +81,8 @@ def only_if_not_exists(entity, data_path, primaryOnly=False, backupOnly=False):
     def wrap(f):
         def wrapped_f(*args, **kwargs):
 
+            logging.info(kwargs)
+
             # default false
             check_primary = False
             check_backup = False

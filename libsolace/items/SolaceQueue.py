@@ -110,7 +110,7 @@ class SolaceQueue(Plugin):
         vpn_name = get_key_from_kwargs("vpn_name", kwargs)
         detail = get_key_from_kwargs("detail", kwargs, default=False)
 
-        self.api.x = SolaceXMLBuilder("Querying Queue %s" % queue_name)
+        self.api.x = SolaceXMLBuilder("Querying Queue %s" % queue_name, version=self.api.version)
         self.api.x.show.queue.name = queue_name
         self.api.x.show.queue.vpn_name = vpn_name
         if detail:

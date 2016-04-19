@@ -26,7 +26,11 @@ class SolaceXMLBuilder(object):
 
     """
 
-    def __init__(self, description=None, version="soltr/6_0", **kwargs):
+    def __init__(self, description=None, version=None, **kwargs):
+
+        if version is None:
+            version="soltr/6_0"
+
         self.__dict__ = OrderedDict()
         self.__setattr__ = None
         if description is not None:

@@ -170,10 +170,14 @@ if __name__ == '__main__':
         logging.warn("No VPN found with that owner / componentName")
         raise Exception
 
+    logging.info("VPNS %s" % vpns)
+
     # Call main with environment from command line
     for vpn in vpns:
         users = cmdbapi.get_users_of_vpn(vpn['id'], environment=options.env)
+        logging.info(users)
         queues = cmdbapi.get_queues_of_vpn(vpn['id'], environment=options.env)
+        logging.info(queues)
 
         logging.info('Found vpn %s' % json.dumps(str(vpn), ensure_ascii=False))
         logging.info('Found users %s' % users)

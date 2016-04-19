@@ -102,7 +102,8 @@ class SolaceAPI:
 
         """
         try:
-            logging.debug("Solace Client version: %s" % version)
+            logging.info("Solace Client SEMP version: %s" % version)
+            self.version = version
 
             logging.info("Connecting to appliances %s in %s" % (settings.SOLACE_CONF[environment]['MGMT'], environment))
             self.environment = environment
@@ -148,8 +149,18 @@ class SolaceAPI:
 
             else:
                 logging.info("Not detecting statuses, using config")
-                self.primaryRouter = self.config['MGMT'][0]
-                self.backupRouter = self.config['MGMT'][1]
+                try:
+                    self.primaryRouter = self.config['MGMT'][0]
+                except IndexError, e:
+                    logging.error("No routers")
+                    raise
+                try:
+                    self.backupRouter = self.config['MGMT'][1]
+                except IndexError, e:
+                    logging.warn("No second router in config")
+                    kwargs["primaryOnly"] = True
+                    kwargs["backupOnly"] = False
+                    pass
 
             # if the version is NOT specified, query appliance versions
             # assumes that backup and primary are SAME firmware version.s
@@ -186,21 +197,25 @@ class SolaceAPI:
         # appliances in order, fallback to unordered if this is the early calls to determine order
         try:
             appliances = [self.primaryRouter, self.backupRouter]
-        except AttributeError:
+        except AttributeError, e:
             appliances = self.config['MGMT']
 
         # change appliances based on boolean conditions
-        if primaryOnly and backupOnly:
-            appliances = [self.primaryRouter, self.backupRouter]
-            logging.info("Forced Both: %s, request: %s" % (appliances, request))
-        elif primaryOnly and not backupOnly:
-            appliances = [self.primaryRouter]
-            logging.info("Primary: %s, request: %s" % (appliances, request))
-        elif backupOnly and not primaryOnly:
-            appliances = [self.backupRouter]
-            logging.info("Backup: %s, request: %s" % (appliances, request))
+        if len(appliances) >1:
+            if primaryOnly and backupOnly:
+                appliances = [self.primaryRouter, self.backupRouter]
+                logging.info("Forced Both: %s, request: %s" % (appliances, request))
+            elif primaryOnly and not backupOnly:
+                appliances = [self.primaryRouter]
+                logging.info("Primary: %s, request: %s" % (appliances, request))
+            elif backupOnly and not primaryOnly:
+                appliances = [self.backupRouter]
+                logging.info("Backup: %s, request: %s" % (appliances, request))
+            else:
+                logging.info("Both: %s, request: %s" % (appliances, request))
         else:
-            logging.info("Both: %s, request: %s" % (appliances, request))
+            logging.warn("Only one appliance in config!!!")
+            appliances = [self.primaryRouter]
 
         try:
             data = OrderedDict()
@@ -272,8 +287,10 @@ class SolaceAPI:
         return self.rpc(str(request))
 
     def get_message_spool(self, **kwargs):
-        """ show message spool """
-        request = SolaceXMLBuilder("Getting message spool status", version="soltr/5_0")
+        """ show message spool
+        :param version:
+        """
+        request = SolaceXMLBuilder("Getting message spool status", version=self.version)
         request.show.message_spool
         return self.rpc(str(request), **kwargs)
 

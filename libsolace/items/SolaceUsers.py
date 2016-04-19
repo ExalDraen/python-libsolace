@@ -4,7 +4,7 @@ import libsolace
 from libsolace.plugin import Plugin
 from libsolace.SolaceCommandQueue import SolaceCommandQueue
 from libsolace.SolaceXMLBuilder import SolaceXMLBuilder
-from libsolace.SolaceReply import SolaceReplyHandler
+# from libsolace.SolaceReply import SolaceReplyHandler
 from libsolace.items.SolaceUser import SolaceUser
 from libsolace.util import get_key_from_kwargs
 from libsolace.Exceptions import *
@@ -124,7 +124,7 @@ class SolaceUsers(Plugin):
         self.api.x.show.client_username.vpn_name = vpn_name
         self.api.x.show.client_username.detail
 
-        response = SolaceReplyHandler(self.api.rpc(str(self.api.x)))
+        response = self.api.rpc(str(self.api.x))
         logging.info(response.reply.show.client_username.client_usernames)
         if response.reply.show.client_username.client_usernames == 'None':
             raise MissingClientUser("No such user %s" % username)

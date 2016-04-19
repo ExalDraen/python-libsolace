@@ -5,7 +5,6 @@ from libsolace.Decorators import only_on_shutdown, before, only_if_not_exists
 from libsolace.plugin import Plugin
 from libsolace.SolaceCommandQueue import SolaceCommandQueue
 from libsolace.SolaceXMLBuilder import SolaceXMLBuilder
-from libsolace.SolaceReply import SolaceReplyHandler
 from libsolace.util import get_key_from_kwargs
 from libsolace.Exceptions import *
 
