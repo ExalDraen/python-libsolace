@@ -103,12 +103,16 @@ class SolaceQueue(Plugin):
 
         Examples:
             >>> connection = SolaceAPI("dev")
-            >>> q = connection.manager("SolaceQueue").get(queue_name='*', vpn_name='dev_testvpn')
+            >>> q = connection.manage("SolaceQueue").get(queue_name='*', vpn_name='dev_testvpn')
 
         """
         queue_name = get_key_from_kwargs("queue_name", kwargs)
         vpn_name = get_key_from_kwargs("vpn_name", kwargs)
         detail = get_key_from_kwargs("detail", kwargs, default=False)
+
+        # if this request is not specifically targeted at the backup, default to primary
+        if get_key_from_kwargs("backupOnly", kwargs, default=False) is False:
+            kwargs["primaryOnly"] = True
 
         self.api.x = SolaceXMLBuilder("Querying Queue %s" % queue_name, version=self.api.version)
         self.api.x.show.queue.name = queue_name
@@ -173,9 +177,16 @@ class SolaceQueue(Plugin):
                 final_config[k] = v
         return final_config
 
+    # perform the if_exists on the primary only
     @only_if_not_exists('get', 'rpc-reply.rpc.show.queue.queues.queue.info', primaryOnly=True)
     @primary()
     def create_queue(self, **kwargs):
+        """
+        Create queue XML
+
+        :param kwargs:
+        :return:
+        """
         queue_name = get_key_from_kwargs("queue_name", kwargs)
         vpn_name = get_key_from_kwargs("vpn_name", kwargs)
 
@@ -187,7 +198,8 @@ class SolaceQueue(Plugin):
         self.set_exists(True)
         return str(self.api.x)
 
-    @only_if_exists('get', 'rpc-reply.rpc.show.queue.queues.queue.info')
+    # perform the if_exists on the primary only
+    @only_if_exists('get', 'rpc-reply.rpc.show.queue.queues.queue.info', primaryOnly=True)
     @only_on_shutdown('queue')
     @primary()
     def shutdown_egress(self, **kwargs):
@@ -207,7 +219,32 @@ class SolaceQueue(Plugin):
         else:
             logging.warning("Not disabling Queue, commands could fail since shutdown_on_apply = %s" % shutdown_on_apply)
 
-    @only_if_exists('get', 'rpc-reply.rpc.show.queue.queues.queue.info')
+
+    # perform the if_exists on the primary only
+    @only_if_exists('get', 'rpc-reply.rpc.show.queue.queues.queue.info', primaryOnly=True)
+    @only_on_shutdown('queue')
+    @primary()
+    def shutdown_ingress(self, **kwargs):
+
+        shutdown_on_apply = get_key_from_kwargs("shutdown_on_apply", kwargs)
+        vpn_name = get_key_from_kwargs("vpn_name", kwargs)
+        queue_name = get_key_from_kwargs("queue_name", kwargs)
+
+        if (shutdown_on_apply == 'b') or (shutdown_on_apply == 'q') or (shutdown_on_apply is True):
+            # Lets only shutdown the egress of the queue
+            self.api.x = SolaceXMLBuilder("Shutting down egress for queue:%s" % queue_name, version=self.api.version)
+            self.api.x.message_spool.vpn_name = vpn_name
+            self.api.x.message_spool.queue.name = queue_name
+            self.api.x.message_spool.queue.shutdown.ingress
+            self.commands.enqueue(self.api.x, **kwargs)
+            return str(self.api.x)
+        else:
+            logging.warning("Not disabling Queue, commands could fail since shutdown_on_apply = %s" % shutdown_on_apply)
+
+
+
+    # perform the if_exists on the primary only
+    @only_if_exists('get', 'rpc-reply.rpc.show.queue.queues.queue.info', primaryOnly=True)
     @only_on_shutdown('queue')
     @primary()
     def exclusive(self, **kwargs):
@@ -236,7 +273,7 @@ class SolaceQueue(Plugin):
             self.commands.enqueue(self.api.x, **kwargs)
             return str(self.api.x)
 
-    @only_if_exists('get', 'rpc-reply.rpc.show.queue.queues.queue.info')
+    @only_if_exists('get', 'rpc-reply.rpc.show.queue.queues.queue.info', primaryOnly=True)
     @only_on_shutdown('queue')
     @primary()
     def owner(self, **kwargs):
@@ -257,7 +294,7 @@ class SolaceQueue(Plugin):
         self.commands.enqueue(self.api.x, **kwargs)
         return str(self.api.x)
 
-    @only_if_exists('get', 'rpc-reply.rpc.show.queue.queues.queue.info')
+    @only_if_exists('get', 'rpc-reply.rpc.show.queue.queues.queue.info', primaryOnly=True)
     @primary()
     def max_bind_count(self, **kwargs):
 
@@ -273,7 +310,7 @@ class SolaceQueue(Plugin):
         self.commands.enqueue(self.api.x, **kwargs)
         return str(self.api.x)
 
-    @only_if_exists('get', 'rpc-reply.rpc.show.queue.queues.queue.info')
+    @only_if_exists('get', 'rpc-reply.rpc.show.queue.queues.queue.info', primaryOnly=True)
     @only_on_shutdown('queue')
     @primary()
     def consume(self, **kwargs):
@@ -292,7 +329,7 @@ class SolaceQueue(Plugin):
         self.commands.enqueue(self.api.x, **kwargs)
         return str(self.api.x)
 
-    @only_if_exists('get', 'rpc-reply.rpc.show.queue.queues.queue.info')
+    @only_if_exists('get', 'rpc-reply.rpc.show.queue.queues.queue.info', primaryOnly=True)
     @primary()
     def spool_size(self, **kwargs):
 
@@ -309,7 +346,7 @@ class SolaceQueue(Plugin):
         self.commands.enqueue(self.api.x, **kwargs)
         return str(self.api.x)
 
-    @only_if_exists('get', 'rpc-reply.rpc.show.queue.queues.queue.info')
+    @only_if_exists('get', 'rpc-reply.rpc.show.queue.queues.queue.info', primaryOnly=True)
     @primary()
     def retries(self, **kwargs):
 
@@ -325,7 +362,7 @@ class SolaceQueue(Plugin):
         self.commands.enqueue(self.api.x, **kwargs)
         return str(self.api.x)
 
-    @only_if_exists('get', 'rpc-reply.rpc.show.queue.queues.queue.info')
+    @only_if_exists('get', 'rpc-reply.rpc.show.queue.queues.queue.info', primaryOnly=True)
     @primary()
     def enable(self, **kwargs):
 
@@ -340,7 +377,7 @@ class SolaceQueue(Plugin):
         self.commands.enqueue(self.api.x, **kwargs)
         return str(self.api.x)
 
-    @only_if_exists('get', 'rpc-reply.rpc.show.queue.queues.queue.info')
+    @only_if_exists('get', 'rpc-reply.rpc.show.queue.queues.queue.info', primaryOnly=True)
     @primary()
     def reject_on_discard(self, **kwargs):
 

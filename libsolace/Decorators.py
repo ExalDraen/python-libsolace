@@ -196,7 +196,7 @@ def only_if_exists(entity, data_path, primaryOnly=False, backupOnly=False):
                 kwargs['backupOnly'] = backupOnly
                 check_backup = True
             else:
-                logging.debug("Package: %s requests that Both primary and backup be queried" % module)
+                logging.info("Package: %s requests that Both primary and backup be queried" % module)
                 check_primary = True
                 check_backup = True
 

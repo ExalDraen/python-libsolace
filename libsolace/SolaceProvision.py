@@ -6,8 +6,7 @@ solacehelper is a class to construct solace commands and sets of commands.
 
 import logging
 from libsolace.SolaceAPI import SolaceAPI
-from libsolace.SolaceXMLBuilder import SolaceXMLBuilder
-from libsolace.items.SolaceACLProfile import SolaceACLProfile
+# from libsolace.items.SolaceACLProfile import SolaceACLProfile
 
 try:
     import simplejson as json
@@ -104,7 +103,8 @@ class SolaceProvision:
                                                      vpn_name=self.vpn_name, version=self.version)
 
         # prepare acl_profile commands, we create a profile named the same as the VPN for simplicity
-        self.acl_profile = SolaceACLProfile(self.environment_name, self.vpn_name, self.vpn_name, version=self.version)
+        # self.acl_profile = SolaceACLProfile(self.environment_name, self.vpn_name, self.vpn_name, version=self.version)
+        self.acl_profile = self.connection.manage("SolaceACLProfile", name=self.vpn_name, vpn_name=self.vpn_name)
 
         # prepare the user that owns this vpn
         logging.info("self.vpn_name: %s" % self.vpn_name)
@@ -180,7 +180,7 @@ class SolaceProvision:
                 self.connection.rpc(str(cmd[0]), **cmd[1])
 
         logging.info("Create ACL Profile for vpn %s" % self.vpn_name)
-        for cmd in self.acl_profile.queue.commands:
+        for cmd in self.acl_profile.commands.commands:
             logging.debug(str(cmd))
             if not self.testmode:
                 self.connection.rpc(str(cmd[0]), **cmd[1])

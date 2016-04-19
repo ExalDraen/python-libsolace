@@ -120,13 +120,13 @@ See the `bin` directory for examples of various activities.
 Overview of some of the plugins and classes. Generally, you would initialize the solace API with:
 
 ```python
-    import libsolace.settingsloader as settings
-    import libsolace
-    from libsolace.SolaceAPI import SolaceAPI
-    c = SolaceAPI("dev")
-    xmls = c.manage(......).commands.commands
-    for xml in xmls:
-      c.rpc(str(xml))
+import libsolace.settingsloader as settings
+import libsolace
+from libsolace.SolaceAPI import SolaceAPI
+client = SolaceAPI("dev")
+xmls = client.manage(......)
+for xml in xmls.commands.commands:
+  c.rpc(str(xml))
 ```
 
 ### SolaceACLProfile
@@ -135,21 +135,21 @@ Overview of some of the plugins and classes. Generally, you would initialize the
 Calls new_acl, allow_publish, allow_subscribe and allow_connect, returns list of xml strings
 
 ```python
-    acl_profile_xml_list =  c.manage("SolaceACLProfile", name=self.vpn_name, vpn_name=self.vpn_name).commands.commands
+acl_profile_xml_list =  client.manage("SolaceACLProfile", name=self.vpn_name, vpn_name=self.vpn_name).commands.commands
 ```
 
 #### new_acl
 Returns single XML string required to create a new ACL
 
 ```python
-    str_xml=c.manage("SolaceACLProfile").new_acl(name="testprofile", vpn_name="myvpn")
+str_xml=client.manage("SolaceACLProfile").new_acl(name="testprofile", vpn_name="myvpn")
 ```
 
 #### allow_publish, allow_subscribe, allow_connect
 Returns only the XML to allow a specific feature
 
 ```python
-    str_xml=c.manage("SolaceACLProfile").allow_publish(name="testprofile", vpn_name="myvpn")
+str_xml=client.manage("SolaceACLProfile").allow_publish(name="testprofile", vpn_name="myvpn")
 ```
 ### SolaceClientProfile
 
@@ -162,36 +162,36 @@ Plugin Manage Identifier: "SolaceClientProfile"
 Returns a dictionary, or raises an exception if not found
 
 ```python
-    profile_dict = c.manage("SolaceClientProfile").get(name="profilename", vpn_name="vpnname")
+profile_dict = client.manage("SolaceClientProfile").get(name="profilename", vpn_name="vpnname")
 ```    
 
 #### new_client_profile
 Returns a single xml string
 
 ```python
-    new_client_profile_xml = c.manage("SolaceClientProfile")\
-        .new_client_profile(
-            name="test",
-            vpn_name="qa1_myvpn"
-    )
+new_client_profile_xml = client.manage("SolaceClientProfile")\
+    .new_client_profile(\
+        name="test",\
+        vpn_name="qa1_myvpn"\
+)
 ```
     
 #### delete
 Returns a single xml string
 
 ```python
-    delete_xml = c.manage("SolaceClientProfile")
-        .delete(
-            name="test", 
-            vpn_name="qa1_myvpn"
-    )
+delete_xml = client.manage("SolaceClientProfile")\
+    .delete(\
+        name="test",\ 
+        vpn_name="qa1_myvpn"\
+)
 ```
 
 #### allow_consume
 Returns a single xml string
 
 ```python
-    xml = c.manage("SolaceClientProfile").allow_consume(name="test", vpn_name="qa1_myvpn")
+str_xml = client.manage("SolaceClientProfile").allow_consume(name="test", vpn_name="qa1_myvpn")
 ```
 
 #### allow_send
@@ -199,34 +199,34 @@ Returns a single xml string
 
 
 ```python
-    xml = c.manage("SolaceClientProfile").allow_send(name="test", vpn_name="qa1_myvpn")
+str_xml = client.manage("SolaceClientProfile").allow_send(name="test", vpn_name="qa1_myvpn")
 ```
 
 #### allow_endpoint_create
 Returns a single xml string
 
 ```python
-    xml = c.manage("SolaceClientProfile").allow_consume(name="test", vpn_name="qa1_myvpn")
+str_xml = client.manage("SolaceClientProfile").allow_consume(name="test", vpn_name="qa1_myvpn")
 ```
 
 #### allow_transacted_sessions
 Returns a single xml string
 
 ```python
-    xml = c.manage("SolaceClientProfile").allow_transacted_sessions(name="test", vpn_name="qa1_myvpn")
+str_xml = client.manage("SolaceClientProfile").allow_transacted_sessions(name="test", vpn_name="qa1_myvpn")
 ```
 
 #### set_max_clients
 Returns a single xml string
 
 ```python
-c.manage("SolaceClientProfile").set_max_clients(name="test", vpn_name="qa1_myvpn", max_clients=500)
+str_xml = client.manage("SolaceClientProfile").set_max_clients(name="test", vpn_name="qa1_myvpn", max_clients=500)
 ```
 #### allow_bridging
 Returns a single xml string
 
 ```python
-c.rpc(str(c.manage("SolaceClientProfile").allow_bridging(name="test", vpn_name="qa1_myvpn")))
+str_xml = client.manage("SolaceClientProfile").allow_bridging(name="test", vpn_name="qa1_myvpn")
 ```
 
 ### SolaceQueue
@@ -239,10 +239,7 @@ Get Queue Usage Example:
 
 
 ```python
-    from libsolace.SolaceAPI import SolaceAPI
-    connection = SolaceAPI('dev')
-    connection.manage("SolaceQueue").get(queue_name="testqueue1", vpn_name="dev_testvpn")
-    {'reply': {'show': {'queue': {'queues': {'queue': {'info': {'num-messages-spooled': '0', 'message-vpn': 'dev_testvpn', 'egress-config-status': 'Up', 'egress-selector-present': 'No', 'network-topic': '#P2P/QUE/v:solace1/testqueue1', 'owner': 'dev_testvpn', 'max-bind-count': '1000', 'endpt-id': '2134', 'access-type': 'exclusive', 'event': {'event-thresholds': [{'clear-value': '600', 'clear-percentage': '60', 'set-percentage': '80', 'name': 'bind-count', 'set-value': '800'}, {'clear-value': '2457', 'clear-percentage': '60', 'set-percentage': '80', 'name': 'spool-usage', 'set-value': '3276'}, {'clear-value': '0', 'clear-percentage': '60', 'set-percentage': '80', 'name': 'reject-low-priority-msg-limit', 'set-value': '0'}]}, 'total-delivered-unacked-msgs': '0', 'durable': 'true', 'max-redelivery': '0', 'created-by-mgmt': 'Yes', 'max-message-size': '10000000', 'topic-subscription-count': '0', 'type': 'Primary', 'ingress-config-status': 'Up', 'bind-time-forwarding-mode': 'Store-And-Forward', 'quota': '4096', 'reject-low-priority-msg-limit': '0', 'others-permission': 'Consume (1100)', 'current-spool-usage-in-mb': '0', 'reject-msg-to-sender-on-discard': 'Yes', 'max-delivered-unacked-msgs-per-flow': '250000', 'bind-count-threshold-high-percentage': '80', 'bind-count-threshold-high-clear-percentage': '60', 'low-priority-msg-congestion-state': 'Disabled', 'respect-ttl': 'No', 'high-water-mark-in-mb': '0', 'total-acked-msgs-in-progress': '0', 'bind-count': '0'}, 'name': 'testqueue1'}}}}}}
+queue_dict = client.manage("SolaceQueue").get(queue_name="testqueue1", vpn_name="dev_testvpn")
 ```
 
 Create Queue Example:
@@ -265,12 +262,103 @@ queue1["name"] = "testqueue1"
 qlist.append(queue1)
 # connect to the appliance
 connection = SolaceAPI('dev')
-qcreate = connection.manage("SolaceQueue", vpn_name="dev_testvpn", queues = qlist)
+qcreate = connection.manage("SolaceQueue", vpn_name="dev_testvpn", queues=qlist)
 for cmd in qcreate.commands.commands:
-	connection.rpc(str(cmd))
-
+    # cmd is a tuple of the XML and "args"
+	connection.rpc(str(cmd[0]), **cmd[1])
 ```
 
+##### get
+Returns queue(s) as a dict.
+
+```python
+q = client.manage("SolaceQueue").get(queue_name='*', vpn_name='dev_testvpn')
+```
+
+
+#### create_queue @only_if_not_exists
+Returns a single xml string if queue does not exist!
+
+```python
+str_xml = client.manage("SolaceQueue").create_queue(queue_name="foo2", vpn_name="dev_testvpn")
+```
+
+#### shutdown_egress @only_if_exists @only_on_shutdown('q' OR 'b' OR True) @primary
+Return XML to shutdown a queue egress.
+
+```python
+str_xml = client.manage("SolaceQueue").shutdown_egress(queue_name="testqueue1", vpn_name="dev_testvpn", shutdown_on_apply=True)
+```
+
+#### shutdown_ingress @only_if_exists @only_on_shutdown('q' OR 'b' OR True) @primary
+Return XML to shutdown a queue ingress.
+
+```python
+str_xml = client.manage("SolaceQueue").shutdown_ingress(queue_name="testqueue1", vpn_name="dev_testvpn", shutdown_on_apply=True)
+```
+
+#### exclusive @only_if_exists @only_on_shutdown('q' OR 'b' OR True) @primary
+Set exclusive to True / False for a queue. You need to STOP the queue before and START it after this.
+
+```python
+str_xml = client.manage("SolaceQueue").exclusive(queue_name="testqueue1", vpn_name="dev_testvpn", shutdown_on_apply=True, exclusive=True)
+```
+
+#### owner @only_if_exists @only_on_shutdown('q' OR 'b' OR True) @primary
+Set the owner of a Queue. You need to STOP the queue before and START it after this.
+
+```python
+str_xml = client.manage("SolaceQueue")\
+    .owner(vpn_name="dev_testvpn",\
+           queue_name="testqueue1",\
+           owner_username="dev_test_keghol",\
+           shutdown_on_apply=True,\
+           primaryOnly=True\
+    )
+```
+
+#### max_bind_count @only_if_exists @primary
+Limits the number of bindings on a queue. Recommended to limit misbehaving applications from consuming all sockets.
+
+```python
+str_xml = client.manage("SolaceQueue").max_bind_count(vpn_name="dev_testvpn", queue_name="testqueue1", max_bind_count=10)
+```
+
+
+#### consume @only_if_exists @only_on_shutdown('q' OR 'b' OR True) @primary
+Set consume.
+
+```python
+str_xml = client.manage("SolaceQueue").consume(vpn_name="dev_testvpn", queue_name="testqueue1", consume="all", shutdown_on_apply=True)
+```
+
+#### spool_size @only_if_exists @primary
+Set the spool size. Can be run hot!
+
+```python
+str_xml = client.manage("SolaceQueue").spool_size(vpn_name="dev_testvpn", queue_name="testqueue1", queue_size=1024)
+```
+
+#### retries @only_if_exists @primary
+Set the number of delivery retries. Max 255
+
+```python
+str_xml = client.manage("SolaceQueue").retries(vpn_name="dev_testvpn", queue_name="testqueue1", retries=10)
+```
+
+#### enable @only_if_exists @primary
+Enable a queue if its disabled.
+
+```python
+str_xml = client.manage("SolaceQueue").enable(vpn_name="dev_testvpn", queue_name="testqueue1")
+```
+
+#### reject_on_discard @only_if_exists @primary
+Turn on notify producers of discard through rejection.
+
+```python
+str_xml = client.manage("SolaceQueue").reject_on_discard(vpn_name="dev_testvpn", queue_name="testqueue1")
+```
 
 ### SolaceUsers
 

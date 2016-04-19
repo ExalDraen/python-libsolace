@@ -17,6 +17,7 @@ PLUGINS:
   - libsolace.plugins.CMDBClient
   - libsolace.plugins.YAMLClient
   - libsolace.plugins.XMLAPI
+  - libsolace.items.SolaceACLProfile
   - libsolace.items.SolaceUser
   - libsolace.items.SolaceUsers
   - libsolace.items.SolaceVPN

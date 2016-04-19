@@ -1,13 +1,30 @@
 import logging
+
+import libsolace
+from libsolace import Plugin
 from libsolace.SolaceCommandQueue import SolaceCommandQueue
 from libsolace.SolaceXMLBuilder import SolaceXMLBuilder
+from libsolace.util import get_key_from_kwargs
 
-class SolaceACLProfile:
+
+@libsolace.plugin_registry.register
+class SolaceACLProfile(Plugin):
     """ Construct the ACLProfile which is specific for the VPN e.g: "si1_domainevent"
     """
 
-    def __init__(self, environment, name, vpn_name, options=None, version="soltr/6_0", **kwargs):
+    plugin_name = "SolaceACLProfile"
+
+    def __init__(self, *args, **kwargs):
         """
+
+        Example:
+
+        import libsolace.settingsloader as settings
+        import libsolace
+        from libsolace.SolaceAPI import SolaceAPI
+        c = SolaceAPI("dev")
+        c.manage("SolaceACLProfile", name="myprofile", vpn_name="testvpn").commands.commands
+
         :type environment: str
         :type name: str
         :type vpn: SolaceVPN
@@ -17,47 +34,65 @@ class SolaceACLProfile:
         :param vpn: instance of vpn to link to
 
         """
-        self.version = version
-        self.queue = SolaceCommandQueue(version=self.version)
-        self.environment = environment
-        self.name = name
-        self.vpn_name = vpn_name
 
-        logging.info("Queue: %s, Environment: %s, Name: %s, VPN: %s"
-            % (self.queue, self.environment, self.name, self.vpn_name))
+        self.api = get_key_from_kwargs("api", kwargs)
+        self.commands = SolaceCommandQueue(version=self.api.version)
+        kwargs.pop("api")
 
-        # backwards compatibility for None options passed to still execute "add" code
-        if options == None:
-            logging.warning("No options passed, assuming you meant 'add', please update usage of this class to pass a OptionParser instance")
+        if kwargs == {}:
+            return
+        self.name = get_key_from_kwargs('name', kwargs)
+        self.vpn_name = get_key_from_kwargs('vpn_name', kwargs)
+
+        if kwargs.get('options', None) is None:
+            logging.warning(
+                    "No options passed, assuming you meant 'add', please update usage of this class to pass a OptionParser instance")
             # queue up the commands
-            self._new_acl()
-            self._allow_publish()
-            self._allow_subscribe()
-            self._allow_connect()
+            self.new_acl(**kwargs)
+            self.allow_publish(**kwargs)
+            self.allow_subscribe(**kwargs)
+            self.allow_connect(**kwargs)
 
-    def _new_acl(self):
-        cmd = SolaceXMLBuilder("Profile %s" % self.name, version=self.version)
-        cmd.create.acl_profile.name = self.name
-        cmd.create.acl_profile.vpn_name = self.vpn_name
-        self.queue.enqueue(cmd)
+    def new_acl(self, **kwargs):
+        name = get_key_from_kwargs("name", kwargs)
+        vpn_name = get_key_from_kwargs("vpn_name", kwargs)
 
-    def _allow_publish(self):
-        cmd = SolaceXMLBuilder("Allow Publish %s" % self.name, version=self.version)
-        cmd.acl_profile.name = self.name
-        cmd.acl_profile.vpn_name = self.vpn_name
-        cmd.acl_profile.publish_topic.default_action.allow
-        self.queue.enqueue(cmd)
+        self.api.x = SolaceXMLBuilder("Profile %s" % name, version=self.api.version)
+        self.api.x.create.acl_profile.name = name
+        self.api.x.create.acl_profile.vpn_name = vpn_name
+        self.commands.enqueue(self.api.x)
+        return self.api.x
 
-    def _allow_subscribe(self):
-        cmd = SolaceXMLBuilder("VPN %s Allowing ACL Profile to subscribe to VPN" % self.name, version=self.version)
-        cmd.acl_profile.name = self.name
-        cmd.acl_profile.vpn_name = self.vpn_name
-        cmd.acl_profile.subscribe_topic.default_action.allow
-        self.queue.enqueue(cmd)
 
-    def _allow_connect(self):
-        cmd = SolaceXMLBuilder("VPN %s Allowing ACL Profile to connect to VPN" % self.name, version=self.version)
-        cmd.acl_profile.name = self.name
-        cmd.acl_profile.vpn_name = self.vpn_name
-        cmd.acl_profile.client_connect.default_action.allow
-        self.queue.enqueue(cmd)
+    def allow_publish(self, **kwargs):
+        name = get_key_from_kwargs("name", kwargs)
+        vpn_name = get_key_from_kwargs("vpn_name", kwargs)
+
+        self.api.x = SolaceXMLBuilder("Allow Publish %s" % name, version=self.api.version)
+        self.api.x.acl_profile.name = name
+        self.api.x.acl_profile.vpn_name = vpn_name
+        self.api.x.acl_profile.publish_topic.default_action.allow
+        self.commands.enqueue(self.api.x)
+        return self.api.x
+
+    def allow_subscribe(self, **kwargs):
+        name = get_key_from_kwargs("name", kwargs)
+        vpn_name = get_key_from_kwargs("vpn_name", kwargs)
+
+        self.api.x = SolaceXMLBuilder("VPN %s Allowing ACL Profile to subscribe to VPN" % name, version=self.api.version)
+        self.api.x.acl_profile.name = name
+        self.api.x.acl_profile.vpn_name = vpn_name
+        self.api.x.acl_profile.subscribe_topic.default_action.allow
+        self.commands.enqueue(self.api.x)
+        return self.api.x
+
+    def allow_connect(self, **kwargs):
+        name = get_key_from_kwargs("name", kwargs)
+        vpn_name = get_key_from_kwargs("vpn_name", kwargs)
+
+        self.api.x = SolaceXMLBuilder("VPN %s Allowing ACL Profile to connect to VPN" % name, version=self.api.version)
+        self.api.x.acl_profile.name = name
+        self.api.x.acl_profile.vpn_name = vpn_name
+        self.api.x.acl_profile.client_connect.default_action.allow
+        self.commands.enqueue(self.api.x)
+        return self.api.x
