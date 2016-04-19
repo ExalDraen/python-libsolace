@@ -10,10 +10,10 @@ and aimed at managing multiple clusters in multiple environments.
 The core of this provisioning system is the SolaceXMLBuilder class which can generate XML through recursive instantiation of a dictionary like object. Example:
 
 ```python
->>> document = SolaceXMLBuilder(version="soltr/6_2")
->>> document.create.client_username.username = "myUserName"
->>> document.create.client_username.vpn_name = "dev_MyVPN"
->>> str(document)
+    document = SolaceXMLBuilder(version="soltr/6_2")
+    document.create.client_username.username = "myUserName"
+    document.create.client_username.vpn_name = "dev_MyVPN"
+    str(document)
 '<rpc semp-version="soltr/6_2"><create><client-username><username>myUserName</username><vpn-name>dev_MyVPN</vpn-name></client-username></create></rpc>'
 ```
 
@@ -21,12 +21,12 @@ The core of this provisioning system is the SolaceXMLBuilder class which can gen
 Plugins are written to create single SEMP commands or a list of SEMP commands in order to provision a specific object. Example:
 
 ```python
->>> connection = SolaceAPI("dev")
->>> # create the command for creating a new user via the "SolaceUser" plugin
->>> xml = connection.manage("SolaceUser").create_user(username="foo", vpn_name="bar")
+    connection = SolaceAPI("dev")
+    # create the command for creating a new user via the "SolaceUser" plugin
+    xml = connection.manage("SolaceUser").create_user(username="foo", vpn_name="bar")
 <rpc semp-version="soltr/6_0"><create><client-username><username>foo</username><vpn-name>bar</vpn-name></client-username></create></rpc>
->>> # create the commands for a user and all related objects
->>> xmlList = connection.manage("SolaceUser",
+    # create the commands for a user and all related objects
+    xmlList = connection.manage("SolaceUser",
 		      username='dev_myUser',
 			  password='myPassword',
 			  vpn_name='dev_MyVPN',
@@ -39,9 +39,9 @@ The SolaceXMLBuilder is typically used through the SolaceAPI, which will take
 care to detect the appliance OS version for you. e.g.
 
 ```python
->>> from libsolace.SolaceAPI import SolaceAPI
->>> conn = SolaceAPI("dev")
->>> conn.manage("SolaceUser").get(username="dev_testvpn", vpn_name="dev_testvpn")
+    from libsolace.SolaceAPI import SolaceAPI
+    conn = SolaceAPI("dev")
+    conn.manage("SolaceUser").get(username="dev_testvpn", vpn_name="dev_testvpn")
 {'reply': {u'show': {u'client-username': {u'client-usernames': {u'client-username': {u'profile': u'glassfish', u'acl-profile': u'dev_testvpn', u'guaranteed-endpoint-permission-override': u'false', u'client-username': u'dev_testvpn', u'enabled': u'true', u'message-vpn': u'dev_testvpn', u'password-configured': u'true', u'num-clients': u'0', u'num-endpoints': u'2', u'subscription-manager': u'false', u'max-connections': u'500', u'max-endpoints': u'16000'}}}}}}
 ```
 
@@ -85,7 +85,7 @@ libxslt1-dev
 libxml2-dev
 python-dev
 
-```
+```sh
 python setup.py install
 ```
 
@@ -120,13 +120,13 @@ See the `bin` directory for examples of various activities.
 Overview of some of the plugins and classes. Generally, you would initialize the solace API with:
 
 ```python
->>> import libsolace.settingsloader as settings
->>> import libsolace
->>> from libsolace.SolaceAPI import SolaceAPI
->>> c = SolaceAPI("dev")
->>> xmls = c.manage(......).commands.commands
->>> for xml in xmls:
->>>   c.rpc(str(xml))
+    import libsolace.settingsloader as settings
+    import libsolace
+    from libsolace.SolaceAPI import SolaceAPI
+    c = SolaceAPI("dev")
+    xmls = c.manage(......).commands.commands
+    for xml in xmls:
+      c.rpc(str(xml))
 ```
 
 ### SolaceACLProfile
@@ -135,74 +135,99 @@ Overview of some of the plugins and classes. Generally, you would initialize the
 Calls new_acl, allow_publish, allow_subscribe and allow_connect, returns list of xml strings
 
 ```python
->>> acl_profile_xml_list =  c.manage("SolaceACLProfile", name=self.vpn_name, vpn_name=self.vpn_name).commands.commands
+    acl_profile_xml_list =  c.manage("SolaceACLProfile", name=self.vpn_name, vpn_name=self.vpn_name).commands.commands
 ```
 
 #### new_acl
 Returns single XML string required to create a new ACL
 
 ```python
->>> str_xml=c.manage("SolaceACLProfile").new_acl(name="testprofile", vpn_name="myvpn")
+    str_xml=c.manage("SolaceACLProfile").new_acl(name="testprofile", vpn_name="myvpn")
 ```
 
 #### allow_publish, allow_subscribe, allow_connect
 Returns only the XML to allow a specific feature
 
+```python
     str_xml=c.manage("SolaceACLProfile").allow_publish(name="testprofile", vpn_name="myvpn")
-
+```
 ### SolaceClientProfile
 
-#### get
-Returns a single profile as a dictionary
+Plugin which can query and manages the creation of client profiles.
 
+Plugin Manage Identifier: "SolaceClientProfile"
+
+
+#### get
+Returns a dictionary, or raises an exception if not found
+
+```python
     profile_dict = c.manage("SolaceClientProfile").get(name="profilename", vpn_name="vpnname")
-    
+```    
 
 #### new_client_profile
+Returns a single xml string
 
+```python
     new_client_profile_xml = c.manage("SolaceClientProfile")\
         .new_client_profile(
             name="test",
             vpn_name="qa1_myvpn"
     )
+```
     
 #### delete
+Returns a single xml string
 
+```python
     delete_xml = c.manage("SolaceClientProfile")
         .delete(
             name="test", 
             vpn_name="qa1_myvpn"
     )
+```
 
 #### allow_consume
+Returns a single xml string
 
-c = SolaceAPI("qa1")
-c.rpc(str(c.manage("SolaceClientProfile").allow_consume(name="test", vpn_name="qa1_myvpn")))
+```python
+    xml = c.manage("SolaceClientProfile").allow_consume(name="test", vpn_name="qa1_myvpn")
+```
 
 #### allow_send
+Returns a single xml string
 
-c = SolaceAPI("qa1")
-c.rpc(str(c.manage("SolaceClientProfile").allow_send(name="test", vpn_name="qa1_myvpn")))
+
+```python
+    xml = c.manage("SolaceClientProfile").allow_send(name="test", vpn_name="qa1_myvpn")
+```
 
 #### allow_endpoint_create
+Returns a single xml string
 
-c = SolaceAPI("qa1")
-c.rpc(str(c.manage("SolaceClientProfile").allow_consume(name="test", vpn_name="qa1_myvpn")))
+```python
+    xml = c.manage("SolaceClientProfile").allow_consume(name="test", vpn_name="qa1_myvpn")
+```
 
 #### allow_transacted_sessions
+Returns a single xml string
 
-c = SolaceAPI("qa1")
-c.rpc(str(c.manage("SolaceClientProfile").allow_transacted_sessions(name="test", vpn_name="qa1_myvpn")))
+```python
+    xml = c.manage("SolaceClientProfile").allow_transacted_sessions(name="test", vpn_name="qa1_myvpn")
+```
 
 #### set_max_clients
+Returns a single xml string
 
-c = SolaceAPI("qa1")
-c.rpc(str(c.manage("SolaceClientProfile").set_max_clients(name="test", vpn_name="qa1_myvpn", max_clients=500)))
-
+```python
+c.manage("SolaceClientProfile").set_max_clients(name="test", vpn_name="qa1_myvpn", max_clients=500)
+```
 #### allow_bridging
+Returns a single xml string
 
-c = SolaceAPI("qa1")
+```python
 c.rpc(str(c.manage("SolaceClientProfile").allow_bridging(name="test", vpn_name="qa1_myvpn")))
+```
 
 ### SolaceQueue
 
@@ -214,10 +239,10 @@ Get Queue Usage Example:
 
 
 ```python
-from libsolace.SolaceAPI import SolaceAPI
-connection = SolaceAPI('dev')
-connection.manage("SolaceQueue").get(queue_name="testqueue1", vpn_name="dev_testvpn")
-{'reply': {'show': {'queue': {'queues': {'queue': {'info': {'num-messages-spooled': '0', 'message-vpn': 'dev_testvpn', 'egress-config-status': 'Up', 'egress-selector-present': 'No', 'network-topic': '#P2P/QUE/v:solace1/testqueue1', 'owner': 'dev_testvpn', 'max-bind-count': '1000', 'endpt-id': '2134', 'access-type': 'exclusive', 'event': {'event-thresholds': [{'clear-value': '600', 'clear-percentage': '60', 'set-percentage': '80', 'name': 'bind-count', 'set-value': '800'}, {'clear-value': '2457', 'clear-percentage': '60', 'set-percentage': '80', 'name': 'spool-usage', 'set-value': '3276'}, {'clear-value': '0', 'clear-percentage': '60', 'set-percentage': '80', 'name': 'reject-low-priority-msg-limit', 'set-value': '0'}]}, 'total-delivered-unacked-msgs': '0', 'durable': 'true', 'max-redelivery': '0', 'created-by-mgmt': 'Yes', 'max-message-size': '10000000', 'topic-subscription-count': '0', 'type': 'Primary', 'ingress-config-status': 'Up', 'bind-time-forwarding-mode': 'Store-And-Forward', 'quota': '4096', 'reject-low-priority-msg-limit': '0', 'others-permission': 'Consume (1100)', 'current-spool-usage-in-mb': '0', 'reject-msg-to-sender-on-discard': 'Yes', 'max-delivered-unacked-msgs-per-flow': '250000', 'bind-count-threshold-high-percentage': '80', 'bind-count-threshold-high-clear-percentage': '60', 'low-priority-msg-congestion-state': 'Disabled', 'respect-ttl': 'No', 'high-water-mark-in-mb': '0', 'total-acked-msgs-in-progress': '0', 'bind-count': '0'}, 'name': 'testqueue1'}}}}}}
+    from libsolace.SolaceAPI import SolaceAPI
+    connection = SolaceAPI('dev')
+    connection.manage("SolaceQueue").get(queue_name="testqueue1", vpn_name="dev_testvpn")
+    {'reply': {'show': {'queue': {'queues': {'queue': {'info': {'num-messages-spooled': '0', 'message-vpn': 'dev_testvpn', 'egress-config-status': 'Up', 'egress-selector-present': 'No', 'network-topic': '#P2P/QUE/v:solace1/testqueue1', 'owner': 'dev_testvpn', 'max-bind-count': '1000', 'endpt-id': '2134', 'access-type': 'exclusive', 'event': {'event-thresholds': [{'clear-value': '600', 'clear-percentage': '60', 'set-percentage': '80', 'name': 'bind-count', 'set-value': '800'}, {'clear-value': '2457', 'clear-percentage': '60', 'set-percentage': '80', 'name': 'spool-usage', 'set-value': '3276'}, {'clear-value': '0', 'clear-percentage': '60', 'set-percentage': '80', 'name': 'reject-low-priority-msg-limit', 'set-value': '0'}]}, 'total-delivered-unacked-msgs': '0', 'durable': 'true', 'max-redelivery': '0', 'created-by-mgmt': 'Yes', 'max-message-size': '10000000', 'topic-subscription-count': '0', 'type': 'Primary', 'ingress-config-status': 'Up', 'bind-time-forwarding-mode': 'Store-And-Forward', 'quota': '4096', 'reject-low-priority-msg-limit': '0', 'others-permission': 'Consume (1100)', 'current-spool-usage-in-mb': '0', 'reject-msg-to-sender-on-discard': 'Yes', 'max-delivered-unacked-msgs-per-flow': '250000', 'bind-count-threshold-high-percentage': '80', 'bind-count-threshold-high-clear-percentage': '60', 'low-priority-msg-congestion-state': 'Disabled', 'respect-ttl': 'No', 'high-water-mark-in-mb': '0', 'total-acked-msgs-in-progress': '0', 'bind-count': '0'}, 'name': 'testqueue1'}}}}}}
 ```
 
 Create Queue Example:
@@ -343,7 +368,7 @@ Get a VPN info with optional stats
 Returns list of vpns matching a filter
 
 ```sh
->>> connection.list_vpns('*keghol*')
+    connection.list_vpns('*keghol*')
 [u'test_dev_keghol']
 ```
 
