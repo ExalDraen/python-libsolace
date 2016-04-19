@@ -1,0 +1,39 @@
+
+VPNS:
+  SolaceTest:
+    -
+      vpn_config:
+        spool_size: 1024
+      password: d0nt_u5e_th1s
+      id: au_testvpn
+      name: au_testvpn
+    -
+      owner: SolaceTest
+      vpn_config:
+        spool_size: 1024
+      password: d0nt_u5e_th1s
+      id: au_testvpn2
+      name: au_testvpn2
+
+QUEUES:
+  au_testvpn:
+    -
+      name: testqueue1
+      queue_config:
+        exclusive: "true"
+        queue_size: 4096
+        retries: 0
+        max_bind_count: 1000
+        owner: au_testproductA
+        consume: all
+
+USERS:
+  au_testvpn:
+    -
+      username: au_testproductA
+      password: somepassword
+
+  au_testvpn2:
+    -
+      username: au_testproductA
+      password: somepassword
