@@ -2,13 +2,12 @@
 
 ## Overview
 
-This is a set of python helpers for managing and provisioning Solace Messaging Appliances. The design is to be flexible
+This is a set of python helpers for managing and provisioning Solace Messaging Appliances and the VMR. The design is to be flexible
 and aimed at managing multiple clusters in multiple environments.
 
 ### XML Generator
 
-The core of this provisioning system is the SolaceXMLBuilder class which can generate XML through recursive instantiation
-of a dictionary like object. Example:
+The core of this provisioning system is the SolaceXMLBuilder class which can generate XML through recursive instantiation of a dictionary like object. Example:
 
 ```python
 >>> document = SolaceXMLBuilder(version="soltr/6_2")
@@ -50,18 +49,20 @@ care to detect the appliance OS version for you. e.g.
 
 ### CMDB Configuration data and Naming Patterns
 
-In my use case, each Solace Cluster could potentially host multiple 'environments', therefore ALL objects are created
-with a environment specific name to allow multi-homing.
+In my use case, each Solace Cluster could potentially host multiple 'environments', therefore ALL objects are created with a environment specific name to allow multi-homing.
 
 e.g.:
+    
     * dev_MyVPN
     * qa1_MyUsername
     * prod1_MyProfile
     * dev_MyACL
 
-This means that any cluster can host any number of environments combined without conflicting resources. The CMDBClient
-must resolve the final item name by substituting the environment name into the string. e.g. '%s_myVpn' % env_name. This
-can be achieved through the Naming plugin. see <a href="libsolace/plugins/NamingStandard.py">NamingStandard</a> and
+This means that any cluster can host any number of environments combined without conflicting resources. The CMDBClient contract states it must resolve the final item name by substituting the environment name into the string. 
+
+e.g. '%s_myVpn' % env_name. 
+
+This can be achieved through a Naming plugin. see <a href="libsolace/plugins/NamingStandard.py">NamingStandard</a> and
 <a href="libsolace/plugins/ZoinksNamingStandard.py">ZoinksNamingStandard</a>
 
 See <a href="libsolace/plugins/CMDBClient.py">CMDBClient</a> for a CMDB plugin example.
@@ -70,8 +71,7 @@ See <a href="libsolace/plugins/CMDBClient.py">CMDBClient</a> for a CMDB plugin e
 ### Limitations
 
 * XML can only be validated if it is enqueued in a SolaceCommandQueue instance.
-* Appliance responses are difficult to validate since the "slave" appliance will almost always return errors when NOT
-"active", and already existing CI's will throw a error on create events and incorrect states. see
+* Appliance responses are difficult to validate since the "slave" appliance will almost always return errors when NOT "active", and already existing CI's will throw a error on create events and incorrect states. see
 <a href="libsolace/Decorators.py">Decorators</a> for targeting specific appliances and states.
 * Since python dictionaries cannot contain `-` use `_`, the SolaceNode class will substitute a `-` for a `_` and
 vice-versa as needed on keyNames.
@@ -91,8 +91,7 @@ python setup.py install
 
 ## Configuration
 
-libsolace requires a `libsolace.yaml` file in order to know what environments exist and what appliances are part of
-those environments. A single appliance can be part of multiple environments.
+libsolace requires a `libsolace.yaml` file in order to know what environments exist and what appliances are part of those environments. A single appliance can be part of multiple environments.
 
 The `libsolace.yaml` file is searched for in:
 
@@ -106,8 +105,7 @@ See <a href="libsolace.yaml.template">libsolace.yaml.template</a> for more info.
 
 ## Plugins
 
-libsolace is pluggable, and you can register your own classes to customize the appliance management. You need to
-implement your own CMDBClient which should integrate with whatever configuration system you desire to populate solace.
+libsolace is pluggable, and you can register your own classes to customize the appliance management. You need to implement your own CMDBClient which should integrate with whatever configuration system you desire to populate solace.
 
 See <a href="libsolace/plugins/CMDBClient.py">CMDBClient</a>
 See <a href="libsolace/plugins/">All Plugins</a>
@@ -119,24 +117,56 @@ See the `bin` directory for examples of various activities.
 
 ## Classes
 
+Overview of some of the plugins and classes. Generally, you would initialize the solace API with:
+
+    import libsolace.settingsloader as settings
+    import libsolace
+    from libsolace.SolaceAPI import SolaceAPI
+    c = SolaceAPI("dev")
+    xmls = c.manage(......).commands.commands
+    for xml in xmls:
+        c.rpc(str(xml))
+
 ### SolaceACLProfile
+
+#### init
+Calls new_acl, allow_publish, allow_subscribe and allow_connect, returns list of xml strings
+
+    acl_profile_xml_list =  c.manage("SolaceACLProfile", name=self.vpn_name, vpn_name=self.vpn_name).commands.commands
+
+#### new_acl
+Returns single XML string required to create a new ACL
+
+    str_xml=c.manage("SolaceACLProfile").new_acl(name="testprofile", vpn_name="myvpn")
+
+#### allow_publish, allow_subscribe, allow_connect
+Returns only the XML to allow a specific feature
+
+    str_xml=c.manage("SolaceACLProfile").allow_publish(name="testprofile", vpn_name="myvpn")
 
 ### SolaceClientProfile
 
 #### get
+Returns a single profile as a dictionary
 
-c = SolaceAPI("qa1")
-c.manage("SolaceClientProfile").get(name="test", vpn_name="qa1_myvpn")
+    profile_dict = c.manage("SolaceClientProfile").get(name="profilename", vpn_name="vpnname")
+    
 
 #### new_client_profile
 
-c = SolaceAPI("qa1")
-c.rpc(str(c.manage("SolaceClientProfile").new_client_profile(name="test", vpn_name="qa1_myvpn")))
-
+    new_client_profile_xml = c.manage("SolaceClientProfile")\
+        .new_client_profile(
+            name="test",
+            vpn_name="qa1_myvpn"
+    )
+    
 #### delete
 
-c = SolaceAPI("qa1")
-c.rpc(str(c.manage("SolaceClientProfile").delete(name="test", vpn_name="qa1_myvpn")))
+    delete_xml = c.manage("SolaceClientProfile")
+        .delete(
+            name="test", 
+            vpn_name="qa1_myvpn"
+    )
 
 #### allow_consume
 
