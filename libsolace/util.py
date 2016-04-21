@@ -198,10 +198,14 @@ def httpRequest(url, fields=None, headers=None, method='GET', timeout=3, protoco
         if method == 'GET':
             request = http.request_encode_url(method, url, fields=fields, headers=headers, timeout=timeout)
         elif method == 'POST':
+            logging.debug("method: %s, url: %s, headers: %s, fields: %s" %(method, url, headers, fields))
             request = http.urlopen(method, url, headers=headers, body=fields)
         code = request.status
+        logging.debug("response code: %s" % code )
         headers = request.getheaders()
+        logging.debug("response headers: %s" % headers)
         data = request.data
+        logging.debug("response data: %s" % data)
     elif URLLIB2:
         logger.debug('Using urllib2')
         if not method in [ 'GET', 'POST' ]:
@@ -315,7 +319,7 @@ def get_key_from_kwargs(key, kwargs, default=None):
     elif default!=None:
         return default
     else:
-        raise(MissingProperty("%s is missing from kwargs"))
+        raise(MissingProperty("%s is missing from kwargs" % key))
 
 
 def get_key_from_settings(key, kwargs, default=None):

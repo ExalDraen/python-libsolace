@@ -6,7 +6,6 @@ solacehelper is a class to construct solace commands and sets of commands.
 
 import logging
 from libsolace.SolaceAPI import SolaceAPI
-# from libsolace.items.SolaceACLProfile import SolaceACLProfile
 
 try:
     import simplejson as json

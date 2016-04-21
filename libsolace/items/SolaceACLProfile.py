@@ -16,22 +16,23 @@ class SolaceACLProfile(Plugin):
 
     def __init__(self, *args, **kwargs):
         """
+        Manage ACLProfiles
 
         Example:
 
-        import libsolace.settingsloader as settings
-        import libsolace
-        from libsolace.SolaceAPI import SolaceAPI
-        c = SolaceAPI("dev")
-        c.manage("SolaceACLProfile", name="myprofile", vpn_name="testvpn").commands.commands
+        >>> import libsolace.settingsloader as settings
+        >>> import libsolace
+        >>> from libsolace.SolaceAPI import SolaceAPI
+        >>> client = SolaceAPI("dev")
+        >>> client.manage("SolaceACLProfile", name="myprofile", vpn_name="testvpn").commands.commands
 
-        :type environment: str
+        :type api: SolaceAPI
         :type name: str
-        :type vpn: SolaceVPN
+        :type vpn_name: str
 
-        :param environment: name of environment
+        :param api: The instance of SolaceAPI if not called from SolaceAPI.manage
         :param name: name of ACL
-        :param vpn: instance of vpn to link to
+        :param vpn_name: name of the VPN to scope the ACL to
 
         """
 

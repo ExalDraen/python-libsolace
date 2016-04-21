@@ -31,7 +31,11 @@ class SolaceReplyHandler(object):
         else:
             self.reply = SolaceReply(document.pop()['rpc-reply']['rpc'])
             self.primary = self.reply
-            self.backup = SolaceReply(document.pop()['rpc-reply']['rpc'])
+            try:
+                self.backup = SolaceReply(document.pop()['rpc-reply']['rpc'])
+            except Exception, e:
+                logging.warn("Unable to process BACKUP response")
+                pass
 
     def __repr__(self):
         """

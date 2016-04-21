@@ -4,7 +4,6 @@ import libsolace
 from libsolace.plugin import Plugin
 from libsolace.SolaceCommandQueue import SolaceCommandQueue
 from libsolace.SolaceXMLBuilder import SolaceXMLBuilder
-# from libsolace.SolaceReply import SolaceReplyHandler
 from libsolace.items.SolaceUser import SolaceUser
 from libsolace.util import get_key_from_kwargs
 from libsolace.Exceptions import *
@@ -18,7 +17,7 @@ class SolaceUsers(Plugin):
     plugin_name = "SolaceUsers"
     api = "None"
 
-    def __init__(self, **kwargs):
+    def __init__(self, *args, **kwargs):
         """ Init user object
 
         :type users: dict
@@ -42,13 +41,16 @@ class SolaceUsers(Plugin):
                                     version = self.version)]
         """
 
+        self.api = get_key_from_kwargs("api", kwargs)
+        kwargs.pop("api")
+
         logging.info("SolaceUsers: kwargs: %s " % kwargs)
 
         if kwargs == {}:
             logging.info("No kwargs, factory mode")
+            return
         else:
             logging.info("kwargs: %s" % kwargs)
-            self.api = get_key_from_kwargs('api', kwargs)
             self.commands = SolaceCommandQueue(version=self.api.version)
             self.options = None  # not implemented
             self.users = get_key_from_kwargs("users", kwargs)
@@ -124,8 +126,8 @@ class SolaceUsers(Plugin):
         self.api.x.show.client_username.vpn_name = vpn_name
         self.api.x.show.client_username.detail
 
-        response = self.api.rpc(str(self.api.x))
-        logging.info(response.reply.show.client_username.client_usernames)
+        response = self.api.rpc(str(self.api.x), **kwargs)
+        logging.info(response)
         if response.reply.show.client_username.client_usernames == 'None':
             raise MissingClientUser("No such user %s" % username)
         else:

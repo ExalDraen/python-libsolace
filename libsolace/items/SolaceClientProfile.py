@@ -10,6 +10,49 @@ from libsolace.util import get_key_from_kwargs
 
 @libsolace.plugin_registry.register
 class SolaceClientProfile(Plugin):
+    """Create / Manage client profiles
+
+If only the `api` kwarg is passed, initializes in Query mode. Else name, vpn_name should be provided to enter
+provision mode.
+
+    :param api: The instance of SolaceAPI if not called from SolaceAPI.manage
+    :param name: the name of the profile
+    :param vpn_name: name of the VPN to scope the ACL to
+    :param defaults: dictionary of defaults
+    :param max_clients: max clients sharing a username connection limit
+    :type api: SolaceAPI
+    :type name: str
+    :type vpn_name: str
+    :type defaults: dict
+    :type max_clients: int
+
+Example 1:
+
+```python
+>>> import libsolace.settingsloader as settings
+>>> import libsolace
+>>> from libsolace.SolaceAPI import SolaceAPI
+>>> clazz = libsolace.plugin_registry("SolaceClientProfile", settings=settings)
+>>> api = SolaceAPI("dev")
+>>> scp = clazz(settings=settings, api=api)
+>>> client_dict = scp.get(api=api, name="default", vpn_name="default")
+```
+
+Example 2, using SolaceAPI.manage:
+
+```python
+>>> import libsolace.settingsloader as settings
+>>> from libsolace.SolaceAPI import SolaceAPI
+>>> api = SolaceAPI("dev")
+>>> scp = api.manage("SolaceClientProfile")
+>>> client_dict = scp.get(api=api, name="default", vpn_name="default")
+>>> list_xml = api.manage("SolaceClientProfile", name="myprofile", vpn_name="dev_testvpn").commands.commands
+>>> for xml in list_xml:
+>>>    api.rpc(str(xml[0]), **xml[1])
+```
+
+    """
+
     plugin_name = "SolaceClientProfile"
 
     defaults = {
@@ -24,6 +67,11 @@ class SolaceClientProfile(Plugin):
 
         if kwargs == {}:
             return
+
+        if not "name" in kwargs:
+            logging.info("No name kwarg, assuming query mode")
+            return
+
         self.name = get_key_from_kwargs('name', kwargs)
         self.vpn_name = get_key_from_kwargs('vpn_name', kwargs)
         self.defaults = get_key_from_kwargs('defaults', kwargs, default=self.defaults)
@@ -39,6 +87,25 @@ class SolaceClientProfile(Plugin):
             self.allow_transacted_sessions(**kwargs)
 
     def get(self, **kwargs):
+        """Returns a ClientProfile immediately
+
+    :param name: name of the profile
+    :param vpn_name: the name of the vpn to scope the request to
+    :param details: more details?
+    :type name: str
+    :type vpn_name: str
+    :type details: bool
+    :return: dictionary representation of client profile
+
+Example:
+
+```python
+>>> import libsolace.settingsloader as settings
+>>> from libsolace.SolaceAPI import SolaceAPI
+>>> api = SolaceAPI("dev")
+>>> scp = api.manage("SolaceClientProfile").get(name="default", vpn_name="default")
+```
+        """
         name = get_key_from_kwargs("name", kwargs)
         vpn_name = get_key_from_kwargs("vpn_name", kwargs)
         details = get_key_from_kwargs("details", kwargs, default=False)
@@ -54,17 +121,27 @@ class SolaceClientProfile(Plugin):
 
         return SolaceReplyHandler(self.api.rpc(str(self.api.x)))
 
+    # @only_if_not_exists('get', 'rpc-reply.rpc.show.message-vpn.vpn')
     def new_client_profile(self, **kwargs):
-        """
-        Create a new client profile
+        """Create a new client profile
 
-        Enqueues the semp request in self.commands and returns the SolaceXMLBuilder
-        instance.
+Enqueues the semp request in self.commands and returns the SolaceXMLBuilder
+instance.
 
-        :Parameters:
-            - `name` (`string`) - Name of the Client Profile
-            - `vpn_name` (`string`) - VPN Name for SolOS 6.2+
-        :return: (`SolaceXMLBuilder`) The xml builder
+    :param name: name of the profile
+    :param vpn_name: the name of the vpn to scope the request to
+    :type name: str
+    :type vpn_name: str
+    :return: dictionary representation of client profile
+
+Example:
+
+```python
+>>> import libsolace.settingsloader as settings
+>>> from libsolace.SolaceAPI import SolaceAPI
+>>> api = SolaceAPI("dev")
+>>> str_xml = api.manage("SolaceClientProfile").new_client_profile(name="default", vpn_name="default")
+```
         """
         name = get_key_from_kwargs("name", kwargs)
         vpn_name = get_key_from_kwargs("vpn_name", kwargs)
@@ -77,6 +154,23 @@ class SolaceClientProfile(Plugin):
         return self.api.x
 
     def delete(self, **kwargs):
+        """Delete a client profile
+
+    :param name: name of the profile
+    :param vpn_name: the name of the vpn to scope the request to
+    :type name: str
+    :type vpn_name: str
+    :return: SEMP request
+
+Example:
+
+```python
+>>> import libsolace.settingsloader as settings
+>>> from libsolace.SolaceAPI import SolaceAPI
+>>> api = SolaceAPI("dev")
+>>> str_xml = api.manage("SolaceClientProfile").delete(name="default", vpn_name="default")
+```
+        """
         name = get_key_from_kwargs("name", kwargs)
         vpn_name = get_key_from_kwargs("vpn_name", kwargs)
         self.api.x = SolaceXMLBuilder("Delete Client Profile", version=self.api.version)
@@ -87,16 +181,22 @@ class SolaceClientProfile(Plugin):
         return self.api.x
 
     def allow_consume(self, **kwargs):
-        """
-        Allow consume permission
+        """Allow consume permission
 
-        Enqueues the semp request in self.commands and returns the SolaceXMLBuilder
-        instance.
+    :param name: name of the profile
+    :param vpn_name: the name of the vpn to scope the request to
+    :type name: str
+    :type vpn_name: str
+    :return: SEMP request
 
-        :Parameters:
-            - `name` (`string`) - Name of the Client Profile
-            - `vpn_name` (`string`) - VPN Name for SolOS 6.2+
-        :return: (`SolaceXMLBuilder`) The xml builder
+Example:
+
+```python
+>>> import libsolace.settingsloader as settings
+>>> from libsolace.SolaceAPI import SolaceAPI
+>>> api = SolaceAPI("dev")
+>>> str_xml = api.manage("SolaceClientProfile").allow_consume(name="default", vpn_name="default")
+```
         """
         name = get_key_from_kwargs("name", kwargs)
         vpn_name = get_key_from_kwargs("vpn_name", kwargs)
@@ -110,15 +210,22 @@ class SolaceClientProfile(Plugin):
         return self.api.x
 
     def allow_send(self, **kwargs):
-        """
-        Allow send permission
+        """Allow send permission
 
-        Enqueues the semp request in self.commands and returns the SolaceXMLBuilder
-        instance.
+    :param name: name of the profile
+    :param vpn_name: the name of the vpn to scope the request to
+    :type name: str
+    :type vpn_name: str
+    :return: SEMP request
 
-        :Parameters:
-            - `name` (`string`) - Name of the Client Profile
-            - `vpn_name` (`string`) - VPN Name for SolOS 6.2+
+Example:
+
+```python
+>>> import libsolace.settingsloader as settings
+>>> from libsolace.SolaceAPI import SolaceAPI
+>>> api = SolaceAPI("dev")
+>>> str_xml = api.manage("SolaceClientProfile").allow_send(name="default", vpn_name="default")
+```
         """
         name = get_key_from_kwargs("name", kwargs)
         vpn_name = get_key_from_kwargs("vpn_name", kwargs)
@@ -132,15 +239,22 @@ class SolaceClientProfile(Plugin):
         return self.api.x
 
     def allow_endpoint_create(self, **kwargs):
-        """
-        Allow endpoint creation permission
+        """Allow endpoint creation permission
 
-        Enqueues the semp request in self.commands and returns the SolaceXMLBuilder
-        instance.
+    :param name: name of the profile
+    :param vpn_name: the name of the vpn to scope the request to
+    :type name: str
+    :type vpn_name: str
+    :return: SEMP request
 
-        :Parameters:
-            - `name` (`string`) - Name of the Client Profile
-            - `vpn_name` (`string`) - VPN Name for SolOS 6.2+
+Example:
+
+```python
+>>> import libsolace.settingsloader as settings
+>>> from libsolace.SolaceAPI import SolaceAPI
+>>> api = SolaceAPI("dev")
+>>> str_xml = api.manage("SolaceClientProfile").allow_endpoint_create(name="default", vpn_name="default")
+```
         """
         name = get_key_from_kwargs("name", kwargs)
         vpn_name = get_key_from_kwargs("vpn_name", kwargs)
@@ -154,15 +268,22 @@ class SolaceClientProfile(Plugin):
         return self.api.x
 
     def allow_transacted_sessions(self, **kwargs):
-        """
-        Allow transaction sessions permission
+        """Allow transaction sessions permission
 
-        Enqueues the semp request in self.commands and returns the SolaceXMLBuilder
-        instance.
+    :param name: name of the profile
+    :param vpn_name: the name of the vpn to scope the request to
+    :type name: str
+    :type vpn_name: str
+    :return: SEMP request
 
-        :Parameters:
-            - `name` (`string`) - Name of the Client Profile
-            - `vpn_name` (`string`) - VPN Name for SolOS 6.2+
+Example:
+
+```python
+>>> import libsolace.settingsloader as settings
+>>> from libsolace.SolaceAPI import SolaceAPI
+>>> api = SolaceAPI("dev")
+>>> str_xml = api.manage("SolaceClientProfile").allow_transacted_sessions(name="default", vpn_name="default")
+```
         """
         name = get_key_from_kwargs("name", kwargs)
         vpn_name = get_key_from_kwargs("vpn_name", kwargs)
@@ -176,16 +297,24 @@ class SolaceClientProfile(Plugin):
         return self.api.x
 
     def set_max_clients(self, **kwargs):
-        """
-        Set max clients for profile
+        """Set max clients for profile
 
-        Enqueues the semp request in self.commands and returns the SolaceXMLBuilder
-        instance.
+    :param name: name of the profile
+    :param vpn_name: the name of the vpn to scope the request to
+    :param max_clients: max number of clients
+    :type name: str
+    :type vpn_name: str
+    :type max_clients: int
+    :return: SEMP request
 
-        :Parameters:
-            - `name` (`string`) - Name of the Client Profile
-            - `vpn_name` (`string`) - VPN Name for SolOS 6.2+
-            - `max_clients` (`integer`) - Max number of clients
+Example:
+
+```python
+>>> import libsolace.settingsloader as settings
+>>> from libsolace.SolaceAPI import SolaceAPI
+>>> api = SolaceAPI("dev")
+>>> str_xml = api.manage("SolaceClientProfile").set_max_clients(name="default", vpn_name="default", max_clients=500)
+```
         """
         name = get_key_from_kwargs("name", kwargs)
         vpn_name = get_key_from_kwargs("vpn_name", kwargs)
@@ -200,15 +329,22 @@ class SolaceClientProfile(Plugin):
         return self.api.x
 
     def allow_bridging(self, **kwargs):
-        """
-        Allow bridging
+        """Allow bridging
 
-        Enqueues the semp request in self.commands and returns the SolaceXMLBuilder
-        instance.
+    :param name: name of the profile
+    :param vpn_name: the name of the vpn to scope the request to
+    :type name: str
+    :type vpn_name: str
+    :return: SEMP request
 
-        :Parameters:
-            - `name` (`string`) - Name of the Client Profile
-            - `vpn_name` (`string`) - VPN Name for SolOS 6.2+
+Example:
+
+```python
+>>> import libsolace.settingsloader as settings
+>>> from libsolace.SolaceAPI import SolaceAPI
+>>> api = SolaceAPI("dev")
+>>> str_xml = api.manage("SolaceClientProfile").allow_bridging(name="default", vpn_name="default")
+```
         """
         name = get_key_from_kwargs("name", kwargs)
         vpn_name = get_key_from_kwargs("vpn_name", kwargs)

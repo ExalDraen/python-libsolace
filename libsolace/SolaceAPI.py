@@ -1,4 +1,6 @@
 import logging
+import traceback
+
 import libsolace.settingsloader as settings
 import libsolace
 from libsolace.SolaceXMLBuilder import SolaceXMLBuilder
@@ -201,7 +203,7 @@ class SolaceAPI:
             appliances = self.config['MGMT']
 
         # change appliances based on boolean conditions
-        if len(appliances) >1:
+        if len(appliances) > 1:
             if primaryOnly and backupOnly:
                 appliances = [self.primaryRouter, self.backupRouter]
                 logging.info("Forced Both: %s, request: %s" % (appliances, request))
@@ -221,6 +223,7 @@ class SolaceAPI:
             data = OrderedDict()
             codes = OrderedDict()
             for host in appliances:
+                logging.debug("Querying host: %s" % host)
                 url = host
                 request_headers = generateRequestHeaders(
                         default_headers={
@@ -229,10 +232,13 @@ class SolaceAPI:
                         },
                         auth_headers=generateBasicAuthHeader(self.config['USER'], self.config['PASS'])
                 )
+                logging.debug("request_headers: %s" % request_headers)
                 (response, response_headers, code) = httpRequest(url, method='POST', headers=request_headers,
                                                                  fields=request, timeout=5000,
                                                                  verifySsl=self.config['VERIFY_SSL'])
+                logging.debug("response: %s" % response)
                 data[host] = response
+                logging.debug("code: %s" % code)
                 codes[host] = code
             logging.debug(data)
 
@@ -260,6 +266,7 @@ class SolaceAPI:
             return data, codes
 
         except Exception, e:
+            traceback.print_exc()
             logging.warn("Solace Error %s" % e)
             raise
 
@@ -515,6 +522,10 @@ class SolaceAPI:
         """
 
         logging.debug(type(xml))
+
+        if (type(xml) == type(None)):
+            logging.warn("Ignoring empty request")
+            return
 
         if (type(xml) == type(())):
             kwargs = xml[1]

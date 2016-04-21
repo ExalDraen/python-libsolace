@@ -1,4 +1,5 @@
 import logging
+from functools import wraps
 
 from libsolace.Exceptions import MissingException, MissingClientUser
 from libsolace.util import get_calling_module
@@ -6,6 +7,7 @@ from libsolace.util import get_calling_module
 
 def no_owned_endpoints():
     def wrap(f):
+        @wraps(f)
         def wrapped_f(*args, **kwargs):
             api = getattr(args[0], "api")
             api.rpc(str(getattr(args[0], "shutdown")(**kwargs)))
@@ -24,6 +26,7 @@ def before(method_name):
     :return:
     """
     def wrap(f):
+        @wraps(f)
         def wrapped_f(*args, **kwargs):
             api = getattr(args[0], "api")
             logging.info("calling object %s's shutdown hook" % api)
@@ -46,6 +49,7 @@ def only_on_shutdown(entity):
     :return:
     """
     def wrap(f):
+        @wraps(f)
         def wrapped_f(*args, **kwargs):
             mode = kwargs.get('shutdown_on_apply', None)
             if entity == 'queue' and mode in ['b', 'q', True]:
@@ -77,8 +81,8 @@ def only_if_not_exists(entity, data_path, primaryOnly=False, backupOnly=False):
     :param backupOnly: run the "getter" only against backup
     :return:
     """
-
     def wrap(f):
+        @wraps(f)
         def wrapped_f(*args, **kwargs):
 
             logging.info(kwargs)
@@ -179,6 +183,7 @@ def only_if_exists(entity, data_path, primaryOnly=False, backupOnly=False):
     """
 
     def wrap(f):
+        @wraps(f)
         def wrapped_f(*args, **kwargs):
 
             # default false
@@ -262,6 +267,7 @@ def primary():
     """
 
     def wrap(f):
+        @wraps(f)
         def wrapped_f(*args, **kwargs):
             kwargs['primaryOnly'] = True
             module = get_calling_module()
@@ -281,6 +287,7 @@ def backup():
     """
 
     def wrap(f):
+        @wraps(f)
         def wrapped_f(*args, **kwargs):
             kwargs['backupOnly'] = True
             module = get_calling_module()

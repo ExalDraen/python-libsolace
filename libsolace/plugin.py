@@ -3,7 +3,7 @@ The plugin architecture
 """
 
 import logging
-import re
+
 
 from libsolace.util import get_calling_module
 
@@ -12,9 +12,11 @@ class PluginClass(type):
     """
     This is a metaclass for construction only.
     """
+
     def __new__(cls, clsname, bases, dct):
         new_object = super(PluginClass, cls).__new__(cls, clsname, bases, dct)
         return new_object
+
 
 class Plugin(object):
     """
@@ -59,13 +61,12 @@ class Plugin(object):
         logging.debug("Plugin Init: %s, %s" % (args, kwargs))
 
     def register(self, object_class, *args, **kwargs):
-        """
-        Registers a object with the plugin registry
+        """Registers a object with the plugin registry
 
-        :param object_class: object to register, should be a class
-        :return:
+    :param object_class: object to register, should be a class
+    :return:
         """
-        logging.info("Registering Plugin id: %s from: %s " % (object_class.plugin_name, object_class) )
+        logging.info("Registering Plugin id: %s from: %s " % (object_class.plugin_name, object_class))
         # o = object_class(*args, **kwargs)
         o = object_class
         self.plugins.append(o)
@@ -94,16 +95,17 @@ class Plugin(object):
             return self.plugins_dict[args[0]]
         except:
             logging.warn("No plugin named: %s found, available plugins are: %s" % (args[0], self.plugins_dict))
-            logging.warn("Please check the plugin is listed in the yaml config and that you have @libsolace.plugin_registry.register in the class")
+            logging.warn(
+                "Please check the plugin is listed in the yaml config and that you have @libsolace.plugin_registry.register in the class")
             raise
 
     def set_exists(self, state):
-        """
-        Use this to set object's exists bool to cut down on using SEMP queries to validate existence.
+        """Exists bool is used to cut down on using SEMP queries to validate existence of items.
 
 
-        :param state:
-        :return:
+    :param state: exists or not boolean
+    :type state: bool
+    :return:
         """
         module = get_calling_module(point=3)
         logging.info("Calling module: %s, Setting Exists bit: %s" % (module, state))
