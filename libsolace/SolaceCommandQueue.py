@@ -2,12 +2,12 @@ import os
 from lxml import etree
 import logging
 
+
 class SolaceCommandQueue:
     """ Solace Command Queue Class
 
-    A simple queue which validates SEMP XML against correct version of xsd,
-    and then puts returns the commands list object.
-
+A simple queue which validates SEMP XML against correct version of xsd,
+and then puts returns the commands list object.
 
     """
 
@@ -29,14 +29,14 @@ class SolaceCommandQueue:
         schema = etree.XMLSchema(schema_root)
         self.parser = etree.XMLParser(schema=schema)
         self.commands = []
-        self.commandsv2 = [] # list or tuples ( command, kwargs )
+        self.commandsv2 = []  # list or tuples ( command, kwargs )
 
     def enqueue(self, command, **kwargs):
         """ Validate and append a command onto the command list.
 
-        :type command: SolaceXMLBuilder
-        :param command: SEMP command to validate
-        :return: None
+    :type command: SolaceXMLBuilder
+    :param command: SEMP command to validate
+    :return: None
         """
 
         logging.debug("command %s" % str(command))
@@ -54,11 +54,11 @@ class SolaceCommandQueue:
     def enqueueV2(self, command, **kwargs):
         """ Validate and append a command onto the command list.
 
-        :type command: SolaceXMLBuilder
-        :type kwargs: kwargs
-        :param command: SEMP command to validate
-        :param kwargs: primaryOnly = True, backupOnly = True
-        :return: None
+    :type command: SolaceXMLBuilder
+    :type kwargs: kwargs
+    :param command: SEMP command to validate
+    :param kwargs: primaryOnly = True, backupOnly = True
+    :return: None
         """
 
         logging.debug("command %s" % str(command))

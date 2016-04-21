@@ -8,6 +8,11 @@ except pkg_resources.DistributionNotFound:
 
 __author__ = 'Kegan Holtzhausen <Kegan.Holtzhausen@unibet.com'
 
+__doc__ = """
+libsolace is a python library to manage the configuration of Solace messaging appliances. This project has a modular
+design which provides the basic features required to manage your Solace infrastructure.
+"""
+
 # registering the plugin system
 from libsolace.plugin import Plugin
 plugin_registry = Plugin()

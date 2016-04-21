@@ -366,6 +366,12 @@ User management plugin creates multiple users at once.
 
 Plugin Manage Identifier: "SolaceUsers"
 
+#### get
+Returns a dict representing a user.
+
+```python
+
+```
 
 
 ### SolaceVPN

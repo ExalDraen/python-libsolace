@@ -11,19 +11,18 @@ from libsolace.SolaceNode import SolaceNode
 from libsolace.util import d2x, get_calling_module
 
 class SolaceXMLBuilder(object):
-    """
+    """Builds Solace's SEMP XML Configuration Commands
 
-    Builds Solace's SEMP XML Configuration Commands
+Any dot-name-space calling of a instance of SolaceXMLBuilder will create
+nested dictionary named the same. These are converted to XML when the instance
+is represented serialized or represented as a string.
 
-    Any dot-name-space calling of a instance of SolaceXMLBuilder will create
-    nested dictionary named the same. These are converted to XML when the instance
-    is represented serialized or represented as a string.
-
-    >>> a=SolaceXMLBuilder(version="soltr/6_2")
-    >>> a.foo.bar.baz=2
-    >>> str(a)
-    '<rpc semp-version="soltr/6_2">\n<foo><bar><baz>2</baz></bar></foo></rpc>'
-
+```python
+>>> a=SolaceXMLBuilder(version="soltr/6_2")
+>>> a.foo.bar.baz=2
+>>> str(a)
+'<rpc semp-version="soltr/6_2">\n<foo><bar><baz>2</baz></bar></foo></rpc>'
+```
     """
 
     def __init__(self, description=None, version=None, **kwargs):

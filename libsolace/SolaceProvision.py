@@ -14,39 +14,38 @@ except ImportError:
 
 
 class SolaceProvision:
-    """ Provision the CLIENT_PROFILE, VPN, ACL_PROFILE, QUEUES and USERS """
+    """ Provision the CLIENT_PROFILE, VPN, ACL_PROFILE, QUEUES and USERS
 
-    # vpn_dict=None, queue_dict=None, environment=None, client_profile="glassfish",
-    #             users=None, testmode=False, create_queues=True, shutdown_on_apply=False, options=None,
-    #             version="soltr/6_0", detect_status=True,
+    :type vpn_dict: dictionary
+        eg: {'owner': u'SolaceTest', 'spool_size': u'4096', 'password': u'd0nt_u5se_thIs', 'name': u'dev_testvpn'}
+    :type queue_dict: list
+        eg: [
+              {"exclusive": u"true", "type": "", "name": u"testqueue1", "queue_size": u"4096"},
+              {"exclusive": u"false", "type": "", "name": u"testqueue2", "queue_size": u"4096"}
+            ]
+    :type environment: str
+    :type client_profile: str
+    :type users: list
+    :type testmode: bool
+    :type create_queues: bool
+    :type shutdown_on_apply: bool
+
+    :param vpn_dict: vpn dictionary
+    :param queue_dict: queue dictionary list
+    :param environment: name of environment
+    :param client_profile: name of client_profile, default='glassfish'
+    :param users: list of user dictionaries to provision
+        eg: [{'username': u'dev_marcom3', 'password': u'dev_marcompass'}]
+    :param testmode: only test, dont apply changes
+    :param create_queues: disable queue creation, default = True
+    :param shutdown_on_apply: force shutdown Queue and User for config change, default = False
+
+    """
+
     def __init__(self, **kwargs):
-        """ Init the provisioning
 
-        :type vpn_dict: dictionary
-            eg: {'owner': u'SolaceTest', 'spool_size': u'4096', 'password': u'd0nt_u5se_thIs', 'name': u'dev_testvpn'}
-        :type queue_dict: list
-            eg: [
-                  {"exclusive": u"true", "type": "", "name": u"testqueue1", "queue_size": u"4096"},
-                  {"exclusive": u"false", "type": "", "name": u"testqueue2", "queue_size": u"4096"}
-                ]
-        :type environment: str
-        :type client_profile: str
-        :type users: list
-        :type testmode: bool
-        :type create_queues: bool
-        :type shutdown_on_apply: bool
-
-        :param vpn_dict: vpn dictionary
-        :param queue_dict: queue dictionary list
-        :param environment: name of environment
-        :param client_profile: name of client_profile, default='glassfish'
-        :param users: list of user dictionaries to provision
-            eg: [{'username': u'dev_marcom3', 'password': u'dev_marcompass'}]
-        :param testmode: only test, dont apply changes
-        :param create_queues: disable queue creation, default = True
-        :param shutdown_on_apply: force shutdown Queue and User for config change, default = False
-
-        """
+        if kwargs == {}:
+            return
 
         try:
             self.vpn_dict = kwargs['vpn_dict']
@@ -157,20 +156,6 @@ class SolaceProvision:
             self.create_queues = False
             raise
 
-        # create the client users
-        # for user in self.users_dict:
-        #     logging.info("Provision user: %s for vpn %s" % (user, self.vpn_name))
-        #     self.users.append(self.connection.manage("SolaceUser",
-        #                                  username = user['username'],
-        #                                  password = user['password'],
-        #                                  vpn_name = self.vpn_name,
-        #                                  client_profile = self.client_profile.name,
-        #                                  acl_profile = self.acl_profile.name,
-        #                                  testmode=self.testmode,
-        #                                  shutdown_on_apply = self.shutdown_on_apply))
-        #
-        # logging.info("self.users: %s" % self.users)
-
         logging.info("Create Client Profile")
         # Provision profile now already since we need to link to it.
         for cmd in self.client_profile.commands.commands:
@@ -183,13 +168,6 @@ class SolaceProvision:
             logging.debug(str(cmd))
             if not self.testmode:
                 self.connection.rpc(str(cmd[0]), **cmd[1])
-
-        # for user in self.users:
-        #     logging.info("Create user: %s for vpn %s" % (user.username, self.vpn_name))
-        #     for cmd in user.commands.commands:
-        #         logging.info(str(cmd))
-        #         if not self.testmode:
-        #             self.connection.rpc(str(cmd))
 
         logging.info("Creating users for vpn %s" % self.vpn_name)
         for cmd in self.userMgr.commands.commands:
@@ -205,13 +183,7 @@ class SolaceProvision:
                 if not self.testmode:
                     self.connection.rpc(str(cmd[0]), **cmd[1])
 
-    # def _get_version_from_appliance(self):
-    #     self.xmlbuilder = SolaceXMLBuilder()
-    #     self.xmlbuilder.show.version
-    #     result = self.connection.rpc(str(self.xmlbuilder))
-    #     return result[0]['rpc-reply']['@semp-version']
-
-    def _set_vpn_confg(self):
+    def __set_vpn_confg__(self):
         try:
             # Check if there is environment overide for VPN
             for e in self.vpn_dict.env:

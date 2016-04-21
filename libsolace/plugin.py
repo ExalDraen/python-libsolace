@@ -3,15 +3,13 @@ The plugin architecture
 """
 
 import logging
-
+from collections import OrderedDict
 
 from libsolace.util import get_calling_module
 
 
 class PluginClass(type):
-    """
-    This is a metaclass for construction only.
-    """
+    """This is a metaclass for construction only, see Plugin rather"""
 
     def __new__(cls, clsname, bases, dct):
         new_object = super(PluginClass, cls).__new__(cls, clsname, bases, dct)
@@ -19,43 +17,35 @@ class PluginClass(type):
 
 
 class Plugin(object):
-    """
-    This is the plugin core object where all pluggables should extend from and register too.
+    """This is the plugin core object where all pluggables should extend from and register too.
 
-    Example:
-
-    import pprint
-    import libsolace
-    from libsolace.plugin import Plugin
-    # Startup the plugin system
-    libsolace.plugin_registry = Plugin()
-
-
-    @libsolace.plugin_registry.register
-    class Bar(Plugin):
-        # must have a name for the plugin, helps calling it by name later.
-        plugin_name = "BarPlugin"
-
-        # Instance methods work!
-        def hello(self, name):
-            print("Hello %s from %s" % (name, self))
-
-        # Static methods work too!
-        @staticmethod
-        def gbye():
-            print("Cheers!")
-
-
-    libsolace.plugin_registry('BarPlugin').hello("dude")
-    libsolace.plugin_registry('BarPlugin').gbye()
-    pprint.pprint(dir(libsolace.plugin_registry('BarPlugin')))
-
+Example:
+```python
+>>> import pprint
+>>> import libsolace
+>>> from libsolace.plugin import Plugin
+>>> libsolace.plugin_registry = Plugin()
+>>> @libsolace.plugin_registry.register
+>>> class Bar(Plugin):
+>>>     # must have a name for the plugin, helps calling it by name later.
+>>>     plugin_name = "BarPlugin"
+>>>     # Instance methods work!
+>>>     def hello(self, name):
+>>>         print("Hello %s from %s" % (name, self))
+>>>     # Static methods work too!
+>>>     @staticmethod
+>>>     def gbye():
+>>>         print("Cheers!")
+>>> libsolace.plugin_registry('BarPlugin').hello("dude")
+>>> libsolace.plugin_registry('BarPlugin').gbye()
+>>> pprint.pprint(dir(libsolace.plugin_registry('BarPlugin')))
+```
 
     """
     __metaclass__ = PluginClass
     plugins = []
-    plugins_dict = {}
-    plugin_name = None
+    plugins_dict = OrderedDict()
+    plugin_name = "Plugin"
 
     def __init__(self, *args, **kwargs):
         logging.debug("Plugin Init: %s, %s" % (args, kwargs))
@@ -100,8 +90,9 @@ class Plugin(object):
             raise
 
     def set_exists(self, state):
-        """Exists bool is used to cut down on using SEMP queries to validate existence of items.
-
+        """set_exists is used to cut down on SEMP queries to validate existence of items. For example, if you create a
+new VPN in Batch mode, After the "create-vpn" XML is generated, set_exists is set to True so subsequent provision
+requests decorated with the `only_if_exists` decorator need to be have this set in order to fire.
 
     :param state: exists or not boolean
     :type state: bool

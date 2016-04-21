@@ -5,10 +5,12 @@ except ImportError, e:
 
 import re
 
+
 class SolaceNode:
     """
     A data node / leaf. recursive implemented creating keys on demand.
     """
+
     def __init__(self):
         self.__dict__ = OrderedDict()
 

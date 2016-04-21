@@ -1,20 +1,25 @@
 import libsolace
 import logging
 
-"""
-This method is responsible for handing off Naming work to the configured naming standard. The Plugin for the standard
+__doc__ = """This method is responsible for handing off Naming work to the configured naming standard. The Plugin for the standard
 is specified in the NAMEHOOK property of the libsolace.yaml file.
 
 example while ZoinksNamingStandard set as NAMEHOOK in libsolace.yaml:
+```python
 >>> from libsolace.plugins.NamingStandard import name
 >>> name("%s_something", "dev")
 'dev_something'
+```
 
 example while DefaultNaming set as NAMEHOOK
+```python
 >>> name("something", "dev")
 'dev_something'
+```
 
 """
+
+# plugin_name = "Naming"
 
 
 def name(*args, **kwargs):

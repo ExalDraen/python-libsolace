@@ -4,27 +4,43 @@ from functools import wraps
 from libsolace.Exceptions import MissingException, MissingClientUser
 from libsolace.util import get_calling_module
 
+# plugin_name = "Decorators"
 
-def no_owned_endpoints():
-    def wrap(f):
-        @wraps(f)
-        def wrapped_f(*args, **kwargs):
-            api = getattr(args[0], "api")
-            api.rpc(str(getattr(args[0], "shutdown")(**kwargs)))
-            return f(*args, **kwargs)
-        return wrapped_f
-    return wrap
+__doc__ = """
+Some decorators which are used within the Plugins in order to control / limit execution.
+"""
+
+# def no_owned_endpoints():
+#     """Not Used / Implemented"""
+#     def wrap(f):
+#         @wraps(f)
+#         def wrapped_f(*args, **kwargs):
+#             api = getattr(args[0], "api")
+#             api.rpc(str(getattr(args[0], "shutdown")(**kwargs)))
+#             return f(*args, **kwargs)
+#
+#         return wrapped_f
+#
+#     return wrap
 
 
 def before(method_name):
-    """
-    call named method before the decorated method
-
-    This is typically used to tell a object to shutdown so some modification can be made.
+    """Call a named method before the decorated method. This is typically used to tell a object to shutdown so some
+modification can be made.
 
     :param method_name: name of the method to call on object
-    :return:
+    :return: method
+
+Example:
+```python
+>>> def shutdown(self, **kwargs):
+>>>    # shutdown some object
+>>> @before("shutdown")
+>>> def delete(self, **kwargs):
+>>>    # delete object since its shutdown
+```
     """
+
     def wrap(f):
         @wraps(f)
         def wrapped_f(*args, **kwargs):
@@ -32,22 +48,42 @@ def before(method_name):
             logging.info("calling object %s's shutdown hook" % api)
             api.rpc(str(getattr(args[0], method_name)(**kwargs)))
             return f(*args, **kwargs)
+
         return wrapped_f
+
     return wrap
 
 
 def only_on_shutdown(entity):
-    """
-
-    If shutdown is True | b | u for a "user" entity, then allow the method to run.
-    If shutdown is True | b | q for a "queue" entity, then allow the method to run.
-
-    methods decorated with this can optionally be decorated with the @shutdown decorator if you are needing to
-    shutdown the object at the same time. If the object is not shutdown, the appliance will throw a error.
+    """Only calls the method if the shutdown byte permits it. The entity is one of `queue` or `user` and both have
+differnent trigger scenarios and commons ones too..
 
     :param entity: (str) "queue" or "user"
-    :return:
+    :return: method
+
+#### User:
+If shutdown is True | b | u for a "user" entity, then allow the method to run.
+
+#### Queue:
+If shutdown is True | b | q for a "queue" entity, then allow the method to run.
+
+methods decorated with this can optionally be decorated with the @shutdown decorator if you are needing to
+shutdown the object at the same time. If the object is not shutdown, the appliance will throw a error.
+
+Example:
+
+```python
+>>> @only_on_shutdown('user')
+>>> def delete_user(**kwargs):
+>>>    return True
+>>> delete_user(shutdown_on_apply='u')
+True
+>>> delete_user(shutdown_on_apply='q')
+None
+```
+
     """
+
     def wrap(f):
         @wraps(f)
         def wrapped_f(*args, **kwargs):
@@ -58,8 +94,8 @@ def only_on_shutdown(entity):
                 return f(*args, **kwargs)
             module = get_calling_module()
             logging.info(
-                "Package %s requires shutdown of this object, shutdown_on_apply is not set for this object type, bypassing %s for entity %s" % (
-                    module, f.__name__, entity))
+                    "Package %s requires shutdown of this object, shutdown_on_apply is not set for this object type, bypassing %s for entity %s" % (
+                        module, f.__name__, entity))
 
         return wrapped_f
 
@@ -67,20 +103,28 @@ def only_on_shutdown(entity):
 
 
 def only_if_not_exists(entity, data_path, primaryOnly=False, backupOnly=False):
-    """
-    Return method if the item does NOT exist in the Solace appliance, setting the kwarg for which appliance needs
-    the method run.
-
-    if the object's exists caching bit is False, return the method
-    If the object does not exist, return the method and set the exists bit to False
-    If the object exists in the appliance, set the exists bit to True
+    """Return method if the item does NOT exist in the Solace appliance, setting the kwarg for which appliance needs
+the method run.
 
     :param entity: the "getter" to call
-    :param data_path: a dot name spaced string which will be used to decend into the response document to verify exist
+    :param data_path: a dot name spaced string which will be used to descend into the response document to verify exist
     :param primaryOnly: run the "getter" only against primary
     :param backupOnly: run the "getter" only against backup
-    :return:
+    :return: method
+
+if the object's exists caching bit is False, return the method
+If the object does not exist, return the method and set the exists bit to False
+If the object exists in the appliance, set the exists bit to True
+
+Example
+```python
+>>> @only_if_not_exists('get', 'rpc-reply.rpc.show.client-username.client-usernames.client-username')
+>>> def create_user(**kwargs):
+>>>    return True
+>>> create_user()
+```
     """
+
     def wrap(f):
         @wraps(f)
         def wrapped_f(*args, **kwargs):
@@ -161,7 +205,7 @@ def only_if_not_exists(entity, data_path, primaryOnly=False, backupOnly=False):
                 # if we reach here, the object exists
                 logging.info(
                         "Package %s - %s, the requested object already exists, ignoring creation" % (
-                        module, f.__name__))
+                            module, f.__name__))
                 args[0].set_exists(exists)
 
         return wrapped_f
@@ -170,16 +214,20 @@ def only_if_not_exists(entity, data_path, primaryOnly=False, backupOnly=False):
 
 
 def only_if_exists(entity, data_path, primaryOnly=False, backupOnly=False):
-    """
-    If object exists bit set, return the method
-    If object exists bit not set, query the object, return the method if succes
-    If object does not exist, dont return the method.
+    """ Return method only if item exists.
 
     :param entity: the "getter" to call
     :param data_path: a dot name spaced string which will be used to decend into the response document to verify exist
     :param primaryOnly: run the "getter" only against primary
     :param backupOnly: run the "getter" only against backup
-    :return:
+    :return: method
+
+If object exists bit set, return the method
+If object exists bit not set, query the object, return the method if succes
+If object does not exist, dont return the method.
+
+For Example see only_if_not_exists
+
     """
 
     def wrap(f):
@@ -250,7 +298,7 @@ def only_if_exists(entity, data_path, primaryOnly=False, backupOnly=False):
                 module = get_calling_module()
                 logging.info(
                         "Package %s - the requested object exists, calling method %s, check entity was: %s" % (
-                        module, f.__name__, entity))
+                            module, f.__name__, entity))
                 args[0].set_exists(True)
                 return f(*args, **kwargs)
 
@@ -260,10 +308,10 @@ def only_if_exists(entity, data_path, primaryOnly=False, backupOnly=False):
 
 
 def primary():
-    """
-    Set the primaryOnly kwarg, call the method
+    """ Sets the primaryOnly kwarg before calling the method. Use this to force a method onto a specific router.
+Note, this does NOT unset backupOnly kwarg, so you can actualy double target.
 
-    :return:
+    :return: method
     """
 
     def wrap(f):
@@ -280,10 +328,10 @@ def primary():
 
 
 def backup():
-    """
-    Set the backupOnly kwarg, call the method
+    """ Sets the backupOnly kwarg before calling the method. Use this to force a method onto a specific router.
+Note, this does NOT unset primaryOnly kwarg, so you can actualy double target.
 
-    :return:
+    :return: method
     """
 
     def wrap(f):
