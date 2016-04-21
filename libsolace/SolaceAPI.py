@@ -187,7 +187,7 @@ class SolaceAPI:
             raise
 
     def __restcall(self, request, primaryOnly=False, backupOnly=False, **kwargs):
-        logging.debug("%s user requesting: %s kwargs:%s primaryOnly:%s backupOnly:%s"
+        logging.info("%s user requesting: %s kwargs:%s primaryOnly:%s backupOnly:%s"
                       % (self.config['USER'], request, kwargs, primaryOnly, backupOnly))
         self.kwargs = kwargs
 
@@ -485,6 +485,10 @@ class SolaceAPI:
     #     except:
     #         raise
 
+    # def rpc(self, xml_and_kwargs):
+    #     logging.info("Unpacking tuple")
+    #     self.rpc(xml_and_kwargs[0], **xml_and_kwargs[1])
+
     def rpc(self, xml, allowfail=False, primaryOnly=False, backupOnly=False, **kwargs):
         """
         Execute a SEMP command on the appliance(s), call with a string representation
@@ -509,12 +513,25 @@ class SolaceAPI:
             <type 'list'>
 
         """
+
+        logging.debug(type(xml))
+
+        if (type(xml) == type(())):
+            kwargs = xml[1]
+            xml = xml[0]
+
         responses = None
         mywargs = kwargs
         logging.debug("Kwargs: %s" % mywargs)
         logging.info("Request SEMP: %s" % xml)
         logging.debug("primaryOnly: %s" % primaryOnly)
         logging.debug("backupOnly: %s" % backupOnly)
+
+        if "primaryOnly" in mywargs:
+            primaryOnly = mywargs.pop("primaryOnly")
+
+        if "backupOnly" in mywargs:
+            backupOnly = mywargs.pop("backupOnly")
 
         try:
             data = []
