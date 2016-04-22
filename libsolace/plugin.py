@@ -1,7 +1,7 @@
 """
 The plugin architecture
 """
-
+import functools
 import logging
 from collections import OrderedDict
 
@@ -17,29 +17,42 @@ class PluginClass(type):
 
 
 class Plugin(object):
-    """This is the plugin core object where all pluggables should extend from and register too.
+    """This is the plugin core object where all plugins should extend from and register too.
 
-Example:
-```python
->>> import pprint
->>> import libsolace
->>> from libsolace.plugin import Plugin
->>> libsolace.plugin_registry = Plugin()
->>> @libsolace.plugin_registry.register
->>> class Bar(Plugin):
->>>     # must have a name for the plugin, helps calling it by name later.
->>>     plugin_name = "BarPlugin"
->>>     # Instance methods work!
->>>     def hello(self, name):
->>>         print("Hello %s from %s" % (name, self))
->>>     # Static methods work too!
->>>     @staticmethod
->>>     def gbye():
->>>         print("Cheers!")
->>> libsolace.plugin_registry('BarPlugin').hello("dude")
->>> libsolace.plugin_registry('BarPlugin').gbye()
->>> pprint.pprint(dir(libsolace.plugin_registry('BarPlugin')))
-```
+    Plugin Example:
+
+    >>> import pprint
+    >>> import libsolace
+    >>> from libsolace.plugin import Plugin
+    >>> libsolace.plugin_registry = Plugin()
+    >>> @libsolace.plugin_registry.register
+    >>> class Bar(Plugin):
+    >>>     # must have a name for the plugin, helps calling it by name later.
+    >>>     plugin_name = "BarPlugin"
+    >>>     # Instance methods work!
+    >>>     def hello(self, name):
+    >>>         print("Hello %s from %s" % (name, self))
+    >>>     # Static methods work too!
+    >>>     @staticmethod
+    >>>     def gbye():
+    >>>         print("Cheers!")
+    >>> libsolace.plugin_registry('BarPlugin').hello("dude")
+    >>> libsolace.plugin_registry('BarPlugin').gbye()
+    >>> pprint.pprint(dir(libsolace.plugin_registry('BarPlugin')))
+
+    Plugin Instantiation:
+
+    >>> import libsolace.settingsloader as settings
+    >>> from libsolace.SolaceAPI import SolaceAPI
+    >>> api = SolaceAPI("dev")
+    >>> api.manage("BarPlugin")
+
+    Direct Instantiation:
+
+    >>> import libsolace.settingsloader as settings
+    >>> import libsolace
+    >>> my_clazz = libsolace.plugin_registry("BarPlugin", settings=settings)
+    >>> my_instance = clazz(settings=settings)
 
     """
     __metaclass__ = PluginClass
@@ -61,6 +74,10 @@ Example:
         o = object_class
         self.plugins.append(o)
         self.plugins_dict[object_class.plugin_name] = o
+        def _d(fn):
+            return functools.update_wrapper(d(fn), fn)
+        functools.update_wrapper(_d, object_class)
+        return _d
 
     def __call__(self, *args, **kwargs):
         """
@@ -86,7 +103,7 @@ Example:
         except:
             logging.warn("No plugin named: %s found, available plugins are: %s" % (args[0], self.plugins_dict))
             logging.warn(
-                "Please check the plugin is listed in the yaml config and that you have @libsolace.plugin_registry.register in the class")
+                    "Please check the plugin is listed in the yaml config and that you have @libsolace.plugin_registry.register in the class")
             raise
 
     def set_exists(self, state):
@@ -101,3 +118,15 @@ requests decorated with the `only_if_exists` decorator need to be have this set 
         module = get_calling_module(point=3)
         logging.info("Calling module: %s, Setting Exists bit: %s" % (module, state))
         self.exists = state
+
+
+class PluginResponse(object):
+    def __init__(self, xml, **kwargs):
+        """Plugin Response holder
+        @param xml: xml string
+        @param kwargs: any kwargs
+        @rtype: PluginResponse
+        @returns: the instance
+        """
+        self.xml = xml
+        self.kwargs = kwargs

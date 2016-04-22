@@ -6,6 +6,7 @@ import libsolace
 from libsolace.SolaceXMLBuilder import SolaceXMLBuilder
 from libsolace.SolaceCommandQueue import SolaceCommandQueue
 from libsolace import xml2dict
+from libsolace.plugin import PluginResponse
 
 try:
     from collections import OrderedDict
@@ -190,7 +191,7 @@ class SolaceAPI:
 
     def __restcall(self, request, primaryOnly=False, backupOnly=False, **kwargs):
         logging.info("%s user requesting: %s kwargs:%s primaryOnly:%s backupOnly:%s"
-                      % (self.config['USER'], request, kwargs, primaryOnly, backupOnly))
+                     % (self.config['USER'], request, kwargs, primaryOnly, backupOnly))
         self.kwargs = kwargs
 
         # appliances in the query
@@ -523,13 +524,25 @@ class SolaceAPI:
 
         logging.debug(type(xml))
 
-        if (type(xml) == type(None)):
+        if type(xml) == type(None):
             logging.warn("Ignoring empty request")
             return
 
-        if (type(xml) == type(())):
+        elif isinstance(xml, PluginResponse):
+            logging.info("Plugin Response")
+            kwargs = xml.kwargs
+            xml = xml.xml
+
+        elif type(xml) == type(()):
             kwargs = xml[1]
             xml = xml[0]
+
+        elif isinstance(xml, str):
+            pass
+
+        else:
+            logging.warn("I dont recognize this type of rpc: %s" % xml)
+            raise Exception("Not a valid RPC argument")
 
         responses = None
         mywargs = kwargs

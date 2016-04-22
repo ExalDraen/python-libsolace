@@ -2,6 +2,8 @@ import os
 from lxml import etree
 import logging
 
+from libsolace.plugin import PluginResponse
+
 
 class SolaceCommandQueue:
     """ Solace Command Queue Class
@@ -34,10 +36,15 @@ and then puts returns the commands list object.
     def enqueue(self, command, **kwargs):
         """ Validate and append a command onto the command list.
 
-    :type command: SolaceXMLBuilder
-    :param command: SEMP command to validate
-    :return: None
+        :type command: SolaceXMLBuilder
+        :param command: SEMP command to validate
+        :return: None
         """
+
+        # support being passed a PluginResponse
+        if isinstance(command, PluginResponse):
+            kwargs = command.kwargs
+            command = command.xml
 
         logging.debug("command %s" % str(command))
         logging.debug("kwargs: %s" % kwargs)
@@ -54,11 +61,11 @@ and then puts returns the commands list object.
     def enqueueV2(self, command, **kwargs):
         """ Validate and append a command onto the command list.
 
-    :type command: SolaceXMLBuilder
-    :type kwargs: kwargs
-    :param command: SEMP command to validate
-    :param kwargs: primaryOnly = True, backupOnly = True
-    :return: None
+        :type command: SolaceXMLBuilder
+        :type kwargs: kwargs
+        :param command: SEMP command to validate
+        :param kwargs: primaryOnly = True, backupOnly = True
+        :return: None
         """
 
         logging.debug("command %s" % str(command))

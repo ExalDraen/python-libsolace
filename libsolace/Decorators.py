@@ -1,3 +1,4 @@
+import functools
 import logging
 from functools import wraps
 
@@ -9,6 +10,7 @@ from libsolace.util import get_calling_module
 __doc__ = """
 Some decorators which are used within the Plugins in order to control / limit execution.
 """
+
 
 # def no_owned_endpoints():
 #     """Not Used / Implemented"""
@@ -22,6 +24,33 @@ Some decorators which are used within the Plugins in order to control / limit ex
 #         return wrapped_f
 #
 #     return wrap
+
+# def decorator(d):
+#     """Make function d a decorator: d wraps a function fn.
+#     Authors: Peter Norvig and Darius Bacon"""
+#     def _d(fn):
+#         return functools.update_wrapper(d(fn), fn)
+#     functools.update_wrapper(_d, d)
+#     return _d
+#
+# @decorator
+# def memo(f):
+#     # by Peter Norvig
+#     """Decorator that caches the return value for each call to f(args).
+#     Then when called again with same args, we can just look it up."""
+#     cache = {}
+#
+#     def _f(*args):
+#         try:
+#             return cache[args]
+#         except KeyError:
+#             cache[args] = result = f(*args)
+#             return result
+#         except TypeError:
+#             # some element of args can't be a dict key
+#             return f(*args)
+#     _f.cache = cache
+#     return _f
 
 
 def before(method_name):

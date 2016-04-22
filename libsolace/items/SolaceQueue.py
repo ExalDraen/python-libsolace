@@ -12,17 +12,14 @@ from libsolace.util import get_key_from_kwargs
 class SolaceQueue(Plugin):
     """Manage a Solace Queue
 
-This plugin creates / manages properties of queues. As with other plugins, passing in only the "api" or no kwargs returns the plugin in "query" mode.
 
-    :param api: The instance of SolaceAPI if not called from SolaceAPI.manage
-    :param queue_name: the queue name
-    :param vpn_name: name of the VPN to scope the ACL to
-    :param defaults: dictionary of queue properties, see `defaults` in SolaceQueue class
-    :type api: SolaceAPI
-    :type queue_name: str
-    :type vpn_name: str
-    :type defaults: dict
-    :rtype SolaceQueue
+    Description
+    ===========
+        This plugin manages Queues within Solace. Typically you should invoke this plugin via L{SolaceAPI.SolaceAPI}.
+
+        Please see L{plugin.Plugin} for how plugins are instantiated and used.
+
+
 
 Example:
 
@@ -47,6 +44,18 @@ Example:
     }
 
     def __init__(self, *args, **kwargs):
+        """
+        @keyword api: The instance of SolaceAPI if not called from SolaceAPI.manage
+        @keyword queue_name: the queue name
+        @keyword vpn_name: name of the VPN to scope the ACL to
+        @keyword defaults: dictionary of queue properties, see `defaults` in SolaceQueue class
+        @type api: SolaceAPI
+        @type queue_name: str
+        @type vpn_name: str
+        @type defaults: dict
+        @returns: instance with batch requests on SolaceACLProfile.commands.commands
+        @rtype: SolaceClientProfile
+        """
         self.api = get_key_from_kwargs("api", kwargs)
         self.commands = SolaceCommandQueue(version=self.api.version)
         kwargs.pop("api")
@@ -90,10 +99,10 @@ Example:
     def get(self, **kwargs):
         """Fetch a queue from the appliance
 
-    :type queue_name: str
-    :type vpn_name: str
-    :param queue_name: Queue name filter
-    :param vpn_name: name of the VPN to scope the ACL to
+    @type queue_name: str
+    @type vpn_name: str
+    @keyword queue_name: Queue name filter
+    @keyword vpn_name: name of the VPN to scope the ACL to
     :rtype list
 
 Examples:
@@ -121,7 +130,7 @@ Examples:
     def get_queue_config(self, queue, **kwargs):
         """ Returns a queue config for the queue and overrides where neccesary
 
-        :param queue: single queue dictionary e.g.
+        @keyword queue: single queue dictionary e.g.
             {
                 "name": "foo",
                 "env": [
@@ -180,10 +189,10 @@ Examples:
     def create_queue(self, **kwargs):
         """Create a queue / endpoint only if it doesnt exist.
 
-    :param queue_name: the queue name
-    :param vpn_name: the vpn name
-    :type queue_name: str
-    :type vpn_name: str
+    @keyword queue_name: the queue name
+    @keyword vpn_name: the vpn name
+    @type queue_name: str
+    @type vpn_name: str
     :return: tuple SEMP request and kwargs
 
 Example 1: Create Request, then Execute
@@ -218,12 +227,12 @@ Example 2: One Shot
     def shutdown_egress(self, **kwargs):
         """Shutdown egress for a queue
 
-    :param shutdown_on_apply: is shutdown permitted boolean or char
-    :param vpn_name: name of the vpn
-    :param queue_name: name of the queue
-    :type shutdown_on_apply: char or bool
-    :type queue_name: str
-    :type vpn_name: str
+    @keyword shutdown_on_apply: is shutdown permitted boolean or char
+    @keyword vpn_name: name of the vpn
+    @keyword queue_name: name of the queue
+    @type shutdown_on_apply: char or bool
+    @type queue_name: str
+    @type vpn_name: str
     :return: tuple SEMP request and kwargs
 
 Example 1: One Shot
@@ -262,12 +271,12 @@ Example 2: Create Request, then Execute
     def shutdown_ingress(self, **kwargs):
         """Shutdown the ingress of a queue
 
-    :param shutdown_on_apply: is shutdown permitted boolean or char
-    :param vpn_name: name of the vpn
-    :param queue_name: name of the queue
-    :type shutdown_on_apply: char or bool
-    :type queue_name: str
-    :type vpn_name: str
+    @keyword shutdown_on_apply: is shutdown permitted boolean or char
+    @keyword vpn_name: name of the vpn
+    @keyword queue_name: name of the queue
+    @type shutdown_on_apply: char or bool
+    @type queue_name: str
+    @type vpn_name: str
     :return: tuple SEMP request and kwargs
 
 Example 1: Instant Execution:
@@ -306,12 +315,12 @@ Example 2: Create Request, then Execute
     def exclusive(self, **kwargs):
         """Set queue exclusivity
 
-    :param vpn_name: the name of the vpn
-    :param queue_name: the queue name
-    :param exclusive: state
-    :type vpn_name: str
-    :type queue_name: str
-    :type exclusive: bool
+    @keyword vpn_name: the name of the vpn
+    @keyword queue_name: the queue name
+    @keyword exclusive: state
+    @type vpn_name: str
+    @type queue_name: str
+    @type exclusive: bool
     :return: tuple SEMP request and kwargs
 
 Example: Shutdown, Set Exclusive, Start
@@ -350,12 +359,12 @@ Example: Shutdown, Set Exclusive, Start
     def owner(self, **kwargs):
         """ Set the owner
 
-    :param vpn_name: the name of the vpn
-    :param queue_name: the queue name
-    :param owner: the owner client-username
-    :type vpn_name: str
-    :type queue_name: str
-    :type owner: str
+    @keyword vpn_name: the name of the vpn
+    @keyword queue_name: the queue name
+    @keyword owner: the owner client-username
+    @type vpn_name: str
+    @type queue_name: str
+    @type owner: str
     :return: tuple SEMP request and kwargs
 
 Example:
@@ -389,12 +398,12 @@ Example:
     def max_bind_count(self, **kwargs):
         """Limit the max bind count
 
-    :param vpn_name: the name of the vpn
-    :param queue_name: the queue name
-    :param max_bind_count: max bind count
-    :type vpn_name: str
-    :type queue_name: str
-    :type max_bind_count: int
+    @keyword vpn_name: the name of the vpn
+    @keyword queue_name: the queue name
+    @keyword max_bind_count: max bind count
+    @type vpn_name: str
+    @type queue_name: str
+    @type max_bind_count: int
     :return: tuple SEMP request and kwargs
 
 Example:
@@ -423,12 +432,12 @@ Example:
     def consume(self, **kwargs):
         """Sets consume permission. add `consume` kwarg to allow non-owner users to consume.
 
-    :param vpn_name: the name of the vpn
-    :param queue_name: the queue name
-    :param consume: set to "all" to allow ALL appliance client-users to "consume"
-    :type vpn_name: str
-    :type queue_name: str
-    :type consume: str
+    @keyword vpn_name: the name of the vpn
+    @keyword queue_name: the queue name
+    @keyword consume: set to "all" to allow ALL appliance client-users to "consume"
+    @type vpn_name: str
+    @type queue_name: str
+    @type consume: str
     :return: tuple SEMP request and kwargs
 
 Example:
@@ -459,12 +468,12 @@ Example:
     def spool_size(self, **kwargs):
         """Set the spool size
 
-    :param vpn_name: the name of the vpn
-    :param queue_name: the queue name
-    :param queue_size: size of the spool in mb
-    :type vpn_name: str
-    :type queue_name: str
-    :type queue_size: int
+    @keyword vpn_name: the name of the vpn
+    @keyword queue_name: the queue name
+    @keyword queue_size: size of the spool in mb
+    @type vpn_name: str
+    @type queue_name: str
+    @type queue_size: int
     :return: tuple SEMP request and kwargs
 
 Example
@@ -492,12 +501,12 @@ Example
     def retries(self, **kwargs):
         """Delivery retries before failing the message
 
-    :param vpn_name: the name of the vpn
-    :param queue_name: the queue name
-    :param retries: number of retries
-    :type vpn_name: str
-    :type queue_name: str
-    :type retries: int
+    @keyword vpn_name: the name of the vpn
+    @keyword queue_name: the queue name
+    @keyword retries: number of retries
+    @type vpn_name: str
+    @type queue_name: str
+    @type retries: int
     :return: tuple SEMP request and kwargs
 
 Example:
@@ -524,10 +533,10 @@ Example:
     def enable(self, **kwargs):
         """Enable a the queue
 
-    :param vpn_name: the name of the vpn
-    :param queue_name: the queue name
-    :type vpn_name: str
-    :type queue_name: str
+    @keyword vpn_name: the name of the vpn
+    @keyword queue_name: the queue name
+    @type vpn_name: str
+    @type queue_name: str
     :return: tuple SEMP request and kwargs
 
 Example:
@@ -554,10 +563,10 @@ Example:
     def reject_on_discard(self, **kwargs):
         """ Reject to sender on discard
 
-    :param vpn_name: the name of the vpn
-    :param queue_name: the queue name
-    :type vpn_name: str
-    :type queue_name: str
+    @keyword vpn_name: the name of the vpn
+    @keyword queue_name: the queue name
+    @type vpn_name: str
+    @type queue_name: str
     :return: tuple SEMP request and kwargs
 
 Example:

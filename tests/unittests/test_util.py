@@ -10,3 +10,7 @@ class TestUtil(unittest.TestCase):
         self.assertFalse(version_equal_or_greater_than('soltr/7_1', 'soltr/6_2'))
         with self.assertRaisesRegexp(Exception, "Failed to parse version 6_2") as cm:
             version_equal_or_greater_than('6_2', 'soltr/7_0')
+
+
+def get_plugin_from_api(api, plugin_name, **kwargs):
+    return api.manage(plugin_name, **kwargs)

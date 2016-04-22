@@ -11,36 +11,38 @@ from libsolace.Exceptions import *
 
 @libsolace.plugin_registry.register
 class SolaceUser(Plugin):
-    """ Manage client-user within Solace """
+    """ Manage the SolaceUser ( client-username )
+
+    :type client_username: str
+    :type password: str
+    :type vpn_name: str
+    :type client_profile: str
+    :type acl_profile: str
+    :type shutdown_on_apply: bool / char b / char u
+    :type options: Options
+    :type version: str
+    :type api: SolaceAPI
+
+Example:
+```python
+>>> connection = SolaceAPI("dev")
+>>> self.users = [connection.manage("SolaceUser",
+                        client_username = "%s_testuser",
+                        password = "mypassword",
+                        vpn_name = "%s_testvpn",
+                        client_profile = "glassfish",
+                        acl_profile = "%s_testvpn",
+                        testmode = True,
+                        shutdown_on_apply = False
+                        version = self.version)]
+```
+        """
 
     plugin_name = "SolaceUser"
     api = "None"
 
     def __init__(self, **kwargs):
-        """ Init user object
 
-        :type client_username: str
-        :type password: str
-        :type vpn_name: str
-        :type client_profile: str
-        :type acl_profile: str
-        :type shutdown_on_apply: bool / char b / char u
-        :type options: Options
-        :type version: str
-        :type api: SolaceAPI
-
-        Example:
-            >>> connection = SolaceAPI("dev")
-            >>> self.users = [connection.manage("SolaceUser",
-                                    client_username = "%s_testuser",
-                                    password = "mypassword",
-                                    vpn_name = "%s_testvpn",
-                                    client_profile = "glassfish",
-                                    acl_profile = "%s_testvpn",
-                                    testmode = True,
-                                    shutdown_on_apply = False
-                                    version = self.version)]
-        """
 
         logging.info("SolaceUser: kwargs: %s " % kwargs)
 
@@ -93,7 +95,7 @@ class SolaceUser(Plugin):
                     "OptionParser instance")
             try:
                 # Check if user already exists, if not then shutdown immediately after creating the user
-                self.get(**kwargs)['reply'].show.client_username.client_usernames.client_username
+                self.get(**kwargs)[0]['rpc-reply']['rpc']['show']['client-username']['client-usernames']['client-username']
             except (AttributeError, KeyError, MissingClientUser):
                 logging.info("User %s doesn't exist, using shutdown_on_apply to True for user" % self.username)
                 kwargs['shutdown_on_apply'] = True
@@ -108,26 +110,24 @@ class SolaceUser(Plugin):
             self.no_shutdown(**kwargs)
 
     def requirements(self, **kwargs):
-        """
-        Call the tests before create is attempted, checks for profiles in this case
-        """
+        """ Call the tests before create is attempted, checks for profiles in this case """
         logging.info('Pre-Provision Tests')
         self.check_client_profile_exists(**kwargs)
         self.check_acl_profile_exists(**kwargs)
 
     def get(self, **kwargs):
-        """
-        Get a username from solace, return a dict
+        """ Get a username from solace, return a dict
 
-        Example
-        >>> connection = SolaceAPI("dev")
-        >>> connection.manage("SolaceUser").get(client_username="dev_testvpn", vpn_name="dev_testvpn")
-        {'reply': {'show': {'client-username': {'client-usernames': {'client-username': {'profile': 'glassfish',
-        'acl-profile': 'dev_testvpn', 'max-endpoints': '16000', 'client-username': 'dev_testvpn', 'enabled': 'true',
-        'message-vpn': 'dev_testvpn', 'password-configured': 'true', 'num-clients': '0', 'num-endpoints': '5',
-        'subscription-manager': 'false', 'max-connections': '500', 'guaranteed-endpoint-permission-override': 'false'}}}
-        }}}
-
+Example
+```python
+>>> connection = SolaceAPI("dev")
+>>> connection.manage("SolaceUser").get(client_username="dev_testvpn", vpn_name="dev_testvpn")
+{'reply': {'show': {'client-username': {'client-usernames': {'client-username': {'profile': 'glassfish',
+'acl-profile': 'dev_testvpn', 'max-endpoints': '16000', 'client-username': 'dev_testvpn', 'enabled': 'true',
+'message-vpn': 'dev_testvpn', 'password-configured': 'true', 'num-clients': '0', 'num-endpoints': '5',
+'subscription-manager': 'false', 'max-connections': '500', 'guaranteed-endpoint-permission-override': 'false'}}}
+}}}
+```
         """
 
         client_username = get_key_from_kwargs("client_username", kwargs)

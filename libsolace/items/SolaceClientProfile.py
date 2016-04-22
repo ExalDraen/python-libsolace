@@ -1,7 +1,7 @@
 import logging
 import libsolace
 from libsolace.SolaceReply import SolaceReplyHandler
-from libsolace.plugin import Plugin
+from libsolace.plugin import Plugin, PluginResponse
 from libsolace.SolaceCommandQueue import SolaceCommandQueue
 from libsolace.SolaceXMLBuilder import SolaceXMLBuilder
 from libsolace.util import version_equal_or_greater_than
@@ -12,44 +12,32 @@ from libsolace.util import get_key_from_kwargs
 class SolaceClientProfile(Plugin):
     """Create / Manage client profiles
 
-If only the `api` kwarg is passed, initializes in Query mode. Else name, vpn_name should be provided to enter
-provision mode.
+    Description
+    ===========
+        This plugin manages Client Profiles within Solace. Typically you should invoke this plugin via L{SolaceAPI.SolaceAPI}.
 
-    :param api: The instance of SolaceAPI if not called from SolaceAPI.manage
-    :param name: the name of the profile
-    :param vpn_name: name of the VPN to scope the ACL to
-    :param defaults: dictionary of defaults
-    :param max_clients: max clients sharing a username connection limit
-    :type api: SolaceAPI
-    :type name: str
-    :type vpn_name: str
-    :type defaults: dict
-    :type max_clients: int
+        Please see L{plugin.Plugin} for how plugins are instantiated and used.
 
-Example 1:
+    Example 1:
 
-```python
->>> import libsolace.settingsloader as settings
->>> import libsolace
->>> from libsolace.SolaceAPI import SolaceAPI
->>> clazz = libsolace.plugin_registry("SolaceClientProfile", settings=settings)
->>> api = SolaceAPI("dev")
->>> scp = clazz(settings=settings, api=api)
->>> client_dict = scp.get(api=api, name="default", vpn_name="default")
-```
+    >>> import libsolace.settingsloader as settings
+    >>> import libsolace
+    >>> from libsolace.SolaceAPI import SolaceAPI
+    >>> clazz = libsolace.plugin_registry("SolaceClientProfile", settings=settings)
+    >>> api = SolaceAPI("dev")
+    >>> scp = clazz(settings=settings, api=api)
+    >>> client_dict = scp.get(api=api, name="default", vpn_name="default")
 
-Example 2, using SolaceAPI.manage:
+    Example 2, using SolaceAPI.manage:
 
-```python
->>> import libsolace.settingsloader as settings
->>> from libsolace.SolaceAPI import SolaceAPI
->>> api = SolaceAPI("dev")
->>> scp = api.manage("SolaceClientProfile")
->>> client_dict = scp.get(api=api, name="default", vpn_name="default")
->>> list_xml = api.manage("SolaceClientProfile", name="myprofile", vpn_name="dev_testvpn").commands.commands
->>> for xml in list_xml:
->>>    api.rpc(str(xml[0]), **xml[1])
-```
+    >>> import libsolace.settingsloader as settings
+    >>> from libsolace.SolaceAPI import SolaceAPI
+    >>> api = SolaceAPI("dev")
+    >>> scp = api.manage("SolaceClientProfile")
+    >>> client_dict = scp.get(api=api, name="default", vpn_name="default")
+    >>> list_xml = api.manage("SolaceClientProfile", name="myprofile", vpn_name="dev_testvpn").commands.commands
+    >>> for xml in list_xml:
+    >>>    api.rpc(str(xml[0]), **xml[1])
 
     """
 
@@ -59,7 +47,33 @@ Example 2, using SolaceAPI.manage:
         "max_clients": 1000
     }
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, **kwargs):
+        """Initialize in Query or Batch mode
+
+        Example:
+
+        >>> import libsolace.settingsloader as settings
+        >>> from libsolace.SolaceAPI import SolaceAPI
+        >>> client = SolaceAPI("dev")
+        >>> client.manage("SolaceClientProfile", name="myprofile", vpn_name="testvpn").commands.commands
+        [XML, XML, XML]
+
+        @keyword api: The instance of SolaceAPI if not called from SolaceAPI.manage
+
+        Optional (Batch/Provision) Mode
+
+        @keyword name: the name of the profile
+        @keyword vpn_name: name of the VPN to scope the ACL to
+        @keyword defaults: dictionary of defaults
+        @keyword max_clients: max clients sharing a username connection limit
+        @type api: SolaceAPI
+        @type name: str
+        @type vpn_name: str
+        @type defaults: dict
+        @type max_clients: int
+        @returns: instance with batch requests on SolaceACLProfile.commands.commands
+        @rtype: SolaceClientProfile
+        """
 
         self.api = get_key_from_kwargs("api", kwargs)
         self.commands = SolaceCommandQueue(version=self.api.version)
@@ -89,22 +103,22 @@ Example 2, using SolaceAPI.manage:
     def get(self, **kwargs):
         """Returns a ClientProfile immediately
 
-    :param name: name of the profile
-    :param vpn_name: the name of the vpn to scope the request to
-    :param details: more details?
-    :type name: str
-    :type vpn_name: str
-    :type details: bool
-    :return: dictionary representation of client profile
+        Example:
 
-Example:
+        >>> import libsolace.settingsloader as settings
+        >>> from libsolace.SolaceAPI import SolaceAPI
+        >>> api = SolaceAPI("dev")
+        >>> response = api.manage("SolaceClientProfile").get(name="default", vpn_name="default")
 
-```python
->>> import libsolace.settingsloader as settings
->>> from libsolace.SolaceAPI import SolaceAPI
->>> api = SolaceAPI("dev")
->>> scp = api.manage("SolaceClientProfile").get(name="default", vpn_name="default")
-```
+        @keyword name: name of the profile
+        @keyword vpn_name: the name of the vpn to scope the request to
+        @keyword details: get more details boolean
+        @type name: str
+        @type vpn_name: str
+        @type details: bool
+        @rtype: libsolace.SolaceReplyHandler
+        @returns: dictionary representation of client profile
+
         """
         name = get_key_from_kwargs("name", kwargs)
         vpn_name = get_key_from_kwargs("vpn_name", kwargs)
@@ -117,31 +131,29 @@ Example:
         if details:
             self.api.x.show.client_profile.details
         # enqueue to validate
-        self.commands.enqueue(self.api.x)
-
+        self.commands.enqueue(PluginResponse(str(self.api.x), **kwargs))
         return SolaceReplyHandler(self.api.rpc(str(self.api.x)))
 
     # @only_if_not_exists('get', 'rpc-reply.rpc.show.message-vpn.vpn')
     def new_client_profile(self, **kwargs):
         """Create a new client profile
 
-Enqueues the semp request in self.commands and returns the SolaceXMLBuilder
-instance.
+        Enqueues the request in self.commands and returns the SEMP request via PluginResponse.
 
-    :param name: name of the profile
-    :param vpn_name: the name of the vpn to scope the request to
-    :type name: str
-    :type vpn_name: str
-    :return: dictionary representation of client profile
+        Example:
 
-Example:
+        >>> import libsolace.settingsloader as settings
+        >>> from libsolace.SolaceAPI import SolaceAPI
+        >>> api = SolaceAPI("dev")
+        >>> plugin_response = api.manage("SolaceClientProfile").new_client_profile(name="default", vpn_name="default")
 
-```python
->>> import libsolace.settingsloader as settings
->>> from libsolace.SolaceAPI import SolaceAPI
->>> api = SolaceAPI("dev")
->>> str_xml = api.manage("SolaceClientProfile").new_client_profile(name="default", vpn_name="default")
-```
+        @keyword name: name of the profile
+        @keyword vpn_name: the name of the vpn to scope the request to
+        @type name: str
+        @type vpn_name: str
+        @returns: dictionary representation of client profile
+        @rtype: plugin.PluginResponse
+
         """
         name = get_key_from_kwargs("name", kwargs)
         vpn_name = get_key_from_kwargs("vpn_name", kwargs)
@@ -150,26 +162,25 @@ Example:
         self.api.x.create.client_profile.name = name
         if version_equal_or_greater_than('soltr/6_2', self.api.version):
             self.api.x.create.client_profile.vpn_name = vpn_name
-        self.commands.enqueue(self.api.x)
-        return self.api.x
+        self.commands.enqueue(PluginResponse(str(self.api.x), **kwargs))
+        return PluginResponse(str(self.api.x), **kwargs)
 
     def delete(self, **kwargs):
         """Delete a client profile
 
-    :param name: name of the profile
-    :param vpn_name: the name of the vpn to scope the request to
-    :type name: str
-    :type vpn_name: str
-    :return: SEMP request
+        Example:
 
-Example:
+        >>> import libsolace.settingsloader as settings
+        >>> from libsolace.SolaceAPI import SolaceAPI
+        >>> api = SolaceAPI("dev")
+        >>> plugin_response = api.manage("SolaceClientProfile").delete(name="default", vpn_name="default")
 
-```python
->>> import libsolace.settingsloader as settings
->>> from libsolace.SolaceAPI import SolaceAPI
->>> api = SolaceAPI("dev")
->>> str_xml = api.manage("SolaceClientProfile").delete(name="default", vpn_name="default")
-```
+        @keyword name: name of the profile
+        @keyword vpn_name: the name of the vpn to scope the request to
+        @type name: str
+        @type vpn_name: str
+        @returns: SEMP request
+        @rtype: plugin.PluginResponse
         """
         name = get_key_from_kwargs("name", kwargs)
         vpn_name = get_key_from_kwargs("vpn_name", kwargs)
@@ -177,26 +188,26 @@ Example:
         self.api.x.no.client_profile.name = name
         if version_equal_or_greater_than('soltr/6_2', self.api.version):
             self.api.x.no.client_profile.vpn_name = vpn_name
-        self.commands.enqueue(self.api.x)
-        return self.api.x
+        self.commands.enqueue(PluginResponse(str(self.api.x), **kwargs))
+        return PluginResponse(str(self.api.x), **kwargs)
 
     def allow_consume(self, **kwargs):
         """Allow consume permission
 
-    :param name: name of the profile
-    :param vpn_name: the name of the vpn to scope the request to
-    :type name: str
-    :type vpn_name: str
-    :return: SEMP request
+        Example:
 
-Example:
+        >>> import libsolace.settingsloader as settings
+        >>> from libsolace.SolaceAPI import SolaceAPI
+        >>> api = SolaceAPI("dev")
+        >>> plugin_response = api.manage("SolaceClientProfile").allow_consume(name="default", vpn_name="default")
 
-```python
->>> import libsolace.settingsloader as settings
->>> from libsolace.SolaceAPI import SolaceAPI
->>> api = SolaceAPI("dev")
->>> str_xml = api.manage("SolaceClientProfile").allow_consume(name="default", vpn_name="default")
-```
+        @keyword name: name of the profile
+        @keyword vpn_name: the name of the vpn to scope the request to
+        @type name: str
+        @type vpn_name: str
+        @returns: SEMP request
+        @rtype: plugin.PluginResponse
+
         """
         name = get_key_from_kwargs("name", kwargs)
         vpn_name = get_key_from_kwargs("vpn_name", kwargs)
@@ -206,26 +217,26 @@ Example:
         if version_equal_or_greater_than('soltr/6_2', self.api.version):
             self.api.x.client_profile.vpn_name = vpn_name
         self.api.x.client_profile.message_spool.allow_guaranteed_message_receive
-        self.commands.enqueue(self.api.x)
-        return self.api.x
+        self.commands.enqueue(PluginResponse(str(self.api.x), **kwargs))
+        return PluginResponse(str(self.api.x), **kwargs)
 
     def allow_send(self, **kwargs):
         """Allow send permission
 
-    :param name: name of the profile
-    :param vpn_name: the name of the vpn to scope the request to
-    :type name: str
-    :type vpn_name: str
-    :return: SEMP request
+        Example:
 
-Example:
+        >>> import libsolace.settingsloader as settings
+        >>> from libsolace.SolaceAPI import SolaceAPI
+        >>> api = SolaceAPI("dev")
+        >>> plugin_response = api.manage("SolaceClientProfile").allow_send(name="default", vpn_name="default")
 
-```python
->>> import libsolace.settingsloader as settings
->>> from libsolace.SolaceAPI import SolaceAPI
->>> api = SolaceAPI("dev")
->>> str_xml = api.manage("SolaceClientProfile").allow_send(name="default", vpn_name="default")
-```
+        @keyword name: name of the profile
+        @keyword vpn_name: the name of the vpn to scope the request to
+        @type name: str
+        @type vpn_name: str
+        @returns: SEMP request
+        @rtype: plugin.PluginResponse
+
         """
         name = get_key_from_kwargs("name", kwargs)
         vpn_name = get_key_from_kwargs("vpn_name", kwargs)
@@ -235,26 +246,26 @@ Example:
         if version_equal_or_greater_than('soltr/6_2', self.api.version):
             self.api.x.client_profile.vpn_name = vpn_name
         self.api.x.client_profile.message_spool.allow_guaranteed_message_send
-        self.commands.enqueue(self.api.x)
-        return self.api.x
+        self.commands.enqueue(PluginResponse(str(self.api.x), **kwargs))
+        return PluginResponse(str(self.api.x), **kwargs)
 
     def allow_endpoint_create(self, **kwargs):
         """Allow endpoint creation permission
 
-    :param name: name of the profile
-    :param vpn_name: the name of the vpn to scope the request to
-    :type name: str
-    :type vpn_name: str
-    :return: SEMP request
+        Example:
 
-Example:
+        >>> import libsolace.settingsloader as settings
+        >>> from libsolace.SolaceAPI import SolaceAPI
+        >>> api = SolaceAPI("dev")
+        >>> plugin_response = api.manage("SolaceClientProfile").allow_endpoint_create(name="default", vpn_name="default")
 
-```python
->>> import libsolace.settingsloader as settings
->>> from libsolace.SolaceAPI import SolaceAPI
->>> api = SolaceAPI("dev")
->>> str_xml = api.manage("SolaceClientProfile").allow_endpoint_create(name="default", vpn_name="default")
-```
+        @keyword name: name of the profile
+        @keyword vpn_name: the name of the vpn to scope the request to
+        @type name: str
+        @type vpn_name: str
+        @returns: SEMP request
+        @rtype: plugin.PluginResponse
+
         """
         name = get_key_from_kwargs("name", kwargs)
         vpn_name = get_key_from_kwargs("vpn_name", kwargs)
@@ -264,26 +275,26 @@ Example:
         if version_equal_or_greater_than('soltr/6_2', self.api.version):
             self.api.x.client_profile.vpn_name = vpn_name
         self.api.x.client_profile.message_spool.allow_guaranteed_endpoint_create
-        self.commands.enqueue(self.api.x)
-        return self.api.x
+        self.commands.enqueue(PluginResponse(str(self.api.x), **kwargs))
+        return PluginResponse(str(self.api.x), **kwargs)
 
     def allow_transacted_sessions(self, **kwargs):
         """Allow transaction sessions permission
 
-    :param name: name of the profile
-    :param vpn_name: the name of the vpn to scope the request to
-    :type name: str
-    :type vpn_name: str
-    :return: SEMP request
+        Example:
 
-Example:
+        >>> import libsolace.settingsloader as settings
+        >>> from libsolace.SolaceAPI import SolaceAPI
+        >>> api = SolaceAPI("dev")
+        >>> plugin_response = api.manage("SolaceClientProfile").allow_transacted_sessions(name="default", vpn_name="default")
 
-```python
->>> import libsolace.settingsloader as settings
->>> from libsolace.SolaceAPI import SolaceAPI
->>> api = SolaceAPI("dev")
->>> str_xml = api.manage("SolaceClientProfile").allow_transacted_sessions(name="default", vpn_name="default")
-```
+        @keyword name: name of the profile
+        @keyword vpn_name: the name of the vpn to scope the request to
+        @type name: str
+        @type vpn_name: str
+        @returns: SEMP request
+        @rtype: plugin.PluginResponse
+
         """
         name = get_key_from_kwargs("name", kwargs)
         vpn_name = get_key_from_kwargs("vpn_name", kwargs)
@@ -293,28 +304,28 @@ Example:
         if version_equal_or_greater_than('soltr/6_2', self.api.version):
             self.api.x.client_profile.vpn_name = vpn_name
         self.api.x.client_profile.message_spool.allow_transacted_sessions
-        self.commands.enqueue(self.api.x)
-        return self.api.x
+        self.commands.enqueue(PluginResponse(str(self.api.x), **kwargs))
+        return PluginResponse(str(self.api.x), **kwargs)
 
     def set_max_clients(self, **kwargs):
         """Set max clients for profile
 
-    :param name: name of the profile
-    :param vpn_name: the name of the vpn to scope the request to
-    :param max_clients: max number of clients
-    :type name: str
-    :type vpn_name: str
-    :type max_clients: int
-    :return: SEMP request
+        Example:
 
-Example:
+        >>> import libsolace.settingsloader as settings
+        >>> from libsolace.SolaceAPI import SolaceAPI
+        >>> api = SolaceAPI("dev")
+        >>> plugin_response = api.manage("SolaceClientProfile").set_max_clients(name="default", vpn_name="default", max_clients=500)
 
-```python
->>> import libsolace.settingsloader as settings
->>> from libsolace.SolaceAPI import SolaceAPI
->>> api = SolaceAPI("dev")
->>> str_xml = api.manage("SolaceClientProfile").set_max_clients(name="default", vpn_name="default", max_clients=500)
-```
+        @keyword name: name of the profile
+        @keyword vpn_name: the name of the vpn to scope the request to
+        @keyword max_clients: max number of clients
+        @type name: str
+        @type vpn_name: str
+        @type max_clients: int
+        @returns: SEMP request
+        @rtype: plugin.PluginResponse
+
         """
         name = get_key_from_kwargs("name", kwargs)
         vpn_name = get_key_from_kwargs("vpn_name", kwargs)
@@ -325,26 +336,25 @@ Example:
         if version_equal_or_greater_than('soltr/6_2', self.api.version):
             self.api.x.client_profile.vpn_name = vpn_name
         self.api.x.client_profile.max_connections_per_client_username.value = max_clients
-        self.commands.enqueue(self.api.x)
-        return self.api.x
+        self.commands.enqueue(PluginResponse(str(self.api.x), **kwargs))
+        return PluginResponse(str(self.api.x), **kwargs)
 
     def allow_bridging(self, **kwargs):
         """Allow bridging
 
-    :param name: name of the profile
-    :param vpn_name: the name of the vpn to scope the request to
-    :type name: str
-    :type vpn_name: str
-    :return: SEMP request
+        Example:
 
-Example:
+        >>> import libsolace.settingsloader as settings
+        >>> from libsolace.SolaceAPI import SolaceAPI
+        >>> api = SolaceAPI("dev")
 
-```python
->>> import libsolace.settingsloader as settings
->>> from libsolace.SolaceAPI import SolaceAPI
->>> api = SolaceAPI("dev")
->>> str_xml = api.manage("SolaceClientProfile").allow_bridging(name="default", vpn_name="default")
-```
+        @keyword name: name of the profile
+        @keyword vpn_name: the name of the vpn to scope the request to
+        @type name: str
+        @type vpn_name: str
+        @returns: SEMP request
+        @rtype: plugin.PluginResponse
+
         """
         name = get_key_from_kwargs("name", kwargs)
         vpn_name = get_key_from_kwargs("vpn_name", kwargs)
@@ -354,5 +364,5 @@ Example:
         if version_equal_or_greater_than('soltr/6_2', self.api.version):
             self.api.x.client_profile.vpn_name = vpn_name
         self.api.x.client_profile.allow_bridge_connections
-        self.commands.enqueue(self.api.x)
-        return self.api.x
+        self.commands.enqueue(PluginResponse(str(self.api.x), **kwargs))
+        return PluginResponse(str(self.api.x), **kwargs)
