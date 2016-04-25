@@ -53,30 +53,57 @@ Some decorators which are used within the Plugins in order to control / limit ex
 #     return _f
 
 
+
+def deprecation_warning(warning_msg):
+    def wrap(f):
+        @wraps(f)
+        def wrapped_f(*args, **kwargs):
+            module = get_calling_module()
+            logging.warning("Deprecation Warning: %s: %s %s" % (warning_msg, module, f.__name__))
+            return f(*args, **kwargs)
+
+        return wrapped_f
+
+    return wrap
+
+
 def before(method_name):
     """Call a named method before the decorated method. This is typically used to tell a object to shutdown so some
-modification can be made.
+    modification can be made.
 
-    :param method_name: name of the method to call on object
-    :return: method
+    Example:
 
-Example:
-```python
->>> def shutdown(self, **kwargs):
->>>    # shutdown some object
->>> @before("shutdown")
->>> def delete(self, **kwargs):
->>>    # delete object since its shutdown
-```
+    >>> def shutdown(self, **kwargs):
+    >>>    # shutdown some object
+    >>> @before("shutdown")
+    >>> def delete(self, **kwargs):
+    >>>    # delete object since its shutdown
+
+    @parameter method_name: the method name to call
+    @type parameter: str
+    @keyword skip_before: skips the before hook
+    @type skip_before: bool
+    @returns: the method
+    @rtype: obj
+
     """
 
     def wrap(f):
         @wraps(f)
         def wrapped_f(*args, **kwargs):
+
+            # force kwarg, just return the method to allow exec
+            if "skip_before" in kwargs:
+                if kwargs["skip_before"]:
+                    return f(*args, **kwargs)
+
             api = getattr(args[0], "api")
             logging.info("calling object %s's shutdown hook" % api)
-            api.rpc(str(getattr(args[0], method_name)(**kwargs)))
-            return f(*args, **kwargs)
+            try:
+                api.rpc(str(getattr(args[0], method_name)(**kwargs)))
+                return f(*args, **kwargs)
+            except Exception, e:
+                raise BaseException("Error calling @before(%s) method in %s kwargs: %s" % (method_name, args[0], kwargs))
 
         return wrapped_f
 
@@ -85,37 +112,42 @@ Example:
 
 def only_on_shutdown(entity):
     """Only calls the method if the shutdown byte permits it. The entity is one of `queue` or `user` and both have
-differnent trigger scenarios and commons ones too..
+    differnent trigger scenarios and commons ones too..
 
-    :param entity: (str) "queue" or "user"
-    :return: method
+        :param entity: (str) "queue" or "user"
+        :return: method
 
-#### User:
-If shutdown is True | b | u for a "user" entity, then allow the method to run.
+    #### User:
+    If shutdown is True | b | u for a "user" entity, then allow the method to run.
 
-#### Queue:
-If shutdown is True | b | q for a "queue" entity, then allow the method to run.
+    #### Queue:
+    If shutdown is True | b | q for a "queue" entity, then allow the method to run.
 
-methods decorated with this can optionally be decorated with the @shutdown decorator if you are needing to
-shutdown the object at the same time. If the object is not shutdown, the appliance will throw a error.
+    methods decorated with this can optionally be decorated with the @shutdown decorator if you are needing to
+    shutdown the object at the same time. If the object is not shutdown, the appliance will throw a error.
 
-Example:
+    Example:
 
-```python
->>> @only_on_shutdown('user')
->>> def delete_user(**kwargs):
->>>    return True
->>> delete_user(shutdown_on_apply='u')
-True
->>> delete_user(shutdown_on_apply='q')
-None
-```
+    >>> @only_on_shutdown('user')
+    >>> def delete_user(**kwargs):
+    >>>    return True
+    >>> delete_user(shutdown_on_apply='u')
+    True
+    >>> delete_user(shutdown_on_apply='q')
+    None
 
     """
 
     def wrap(f):
         @wraps(f)
         def wrapped_f(*args, **kwargs):
+
+            # force kwarg, just return the method to allow exec
+            if "force" in kwargs:
+                if kwargs["force"]:
+                    args[0].set_exists(True)
+                    return f(*args, **kwargs)
+
             mode = kwargs.get('shutdown_on_apply', None)
             if entity == 'queue' and mode in ['b', 'q', True]:
                 return f(*args, **kwargs)
@@ -133,7 +165,7 @@ None
 
 def only_if_not_exists(entity, data_path, primaryOnly=False, backupOnly=False):
     """Return method if the item does NOT exist in the Solace appliance, setting the kwarg for which appliance needs
-the method run.
+    the method run.
 
     :param entity: the "getter" to call
     :param data_path: a dot name spaced string which will be used to descend into the response document to verify exist
@@ -141,17 +173,17 @@ the method run.
     :param backupOnly: run the "getter" only against backup
     :return: method
 
-if the object's exists caching bit is False, return the method
-If the object does not exist, return the method and set the exists bit to False
-If the object exists in the appliance, set the exists bit to True
+    if the object's exists caching bit is False, return the method
+    If the object does not exist, return the method and set the exists bit to False
+    If the object exists in the appliance, set the exists bit to True
 
-Example
-```python
->>> @only_if_not_exists('get', 'rpc-reply.rpc.show.client-username.client-usernames.client-username')
->>> def create_user(**kwargs):
->>>    return True
->>> create_user()
-```
+    Example
+
+    >>> @only_if_not_exists('get', 'rpc-reply.rpc.show.client-username.client-usernames.client-username')
+    >>> def create_user(**kwargs):
+    >>>    return True
+    >>> create_user()
+
     """
 
     def wrap(f):
@@ -159,6 +191,12 @@ Example
         def wrapped_f(*args, **kwargs):
 
             logging.info(kwargs)
+
+            # force kwarg, just return the method to allow exec
+            if "force" in kwargs:
+                if kwargs["force"]:
+                    args[0].set_exists(True)
+                    return f(*args, **kwargs)
 
             # default false
             check_primary = False
@@ -213,7 +251,7 @@ Example
                 if check_primary:
                     try:
                         res[0] = res[0][p]
-                    except (TypeError, IndexError):
+                    except (KeyError,TypeError, IndexError):
                         logging.info("Object not found on PRIMARY, key:%s setting primaryOnly" % p)
                         logging.info(o_res)
                         kwargs['primaryOnly'] = True
@@ -221,7 +259,7 @@ Example
                 if check_backup:
                     try:
                         res[1] = res[1][p]
-                    except (TypeError, IndexError):
+                    except (KeyError,TypeError, IndexError):
                         logging.info("Object not found on BACKUP, key:%s setting backupOnly" % p)
                         logging.info(o_res)
                         kwargs['backupOnly'] = True
@@ -269,6 +307,12 @@ For Example see only_if_not_exists
 
             # extract package name
             module = get_calling_module()
+
+            # force kwarg, just return the method to allow exec
+            if "force" in kwargs:
+                if kwargs["force"]:
+                    args[0].set_exists(True)
+                    return f(*args, **kwargs)
 
             # determine if were checking both or a single node
             if primaryOnly:

@@ -1,10 +1,10 @@
 import logging
 
 import libsolace
-from libsolace.Decorators import only_on_shutdown, only_if_not_exists, only_if_exists, primary
+from libsolace.Decorators import only_on_shutdown, only_if_not_exists, only_if_exists, primary, deprecation_warning
 from libsolace.SolaceCommandQueue import SolaceCommandQueue
 from libsolace.SolaceXMLBuilder import SolaceXMLBuilder
-from libsolace.plugin import Plugin
+from libsolace.plugin import Plugin, PluginResponse
 from libsolace.util import get_key_from_kwargs
 
 
@@ -12,23 +12,11 @@ from libsolace.util import get_key_from_kwargs
 class SolaceQueue(Plugin):
     """Manage a Solace Queue
 
-
     Description
     ===========
         This plugin manages Queues within Solace. Typically you should invoke this plugin via L{SolaceAPI.SolaceAPI}.
 
         Please see L{plugin.Plugin} for how plugins are instantiated and used.
-
-
-
-Example:
-
-```python
->>> api = SolaceAPI("dev")
->>> sq = api.manage("SolaceQueue")
->>> dict_queue = sq.get(vpn_name="dev_testvpn", queue_name="testqueue1")
->>> api.rpc(sq.max_bind_count(vpn_name="dev_testvpn", queue_name="testqueue1", max_bind_count=10))
-```
     """
 
     plugin_name = "SolaceQueue"
@@ -46,7 +34,8 @@ Example:
     def __init__(self, *args, **kwargs):
         """
         @keyword api: The instance of SolaceAPI if not called from SolaceAPI.manage
-        @keyword queue_name: the queue name
+        @keyword queue_name: the queue name in Query mode
+        @keyword queues: list of queue dictionaries with keys: name, queue_config
         @keyword vpn_name: name of the VPN to scope the ACL to
         @keyword defaults: dictionary of queue properties, see `defaults` in SolaceQueue class
         @type api: SolaceAPI
@@ -55,15 +44,24 @@ Example:
         @type defaults: dict
         @returns: instance with batch requests on SolaceACLProfile.commands.commands
         @rtype: SolaceClientProfile
+
+        Example:
+
+        >>> api = SolaceAPI("dev")
+        >>> sq = api.manage("SolaceQueue")
+        >>> dict_queue = sq.get(vpn_name="dev_testvpn", queue_name="testqueue1")
+        >>> api.rpc(sq.max_bind_count(vpn_name="dev_testvpn", queue_name="testqueue1", max_bind_count=10))
+
         """
         self.api = get_key_from_kwargs("api", kwargs)
         self.commands = SolaceCommandQueue(version=self.api.version)
         kwargs.pop("api")
 
         if kwargs == {}:
-            logging.debug("Query Mode")
+            logging.info("Query Mode")
             return
 
+        logging.info("Provision mode: %s" % kwargs)
         self.vpn_name = get_key_from_kwargs("vpn_name", kwargs, default="default")
         self.testmode = get_key_from_kwargs("testmode", kwargs, default=False)
         self.queues = get_key_from_kwargs("queues", kwargs, default={})
@@ -99,18 +97,18 @@ Example:
     def get(self, **kwargs):
         """Fetch a queue from the appliance
 
-    @type queue_name: str
-    @type vpn_name: str
-    @keyword queue_name: Queue name filter
-    @keyword vpn_name: name of the VPN to scope the ACL to
-    :rtype list
+        @type queue_name: str
+        @type vpn_name: str
+        @keyword queue_name: Queue name filter
+        @keyword vpn_name: name of the VPN to scope the ACL to
+        @rtype: list
+        @returns: the queue(s)
 
-Examples:
+        Examples:
 
-```python
->>> api = SolaceAPI("dev")
->>> list_queues = api.manage("SolaceQueue").get(queue_name='*', vpn_name='dev_testvpn')
-```
+        >>> api = SolaceAPI("dev")
+        >>> list_queues = api.manage("SolaceQueue").get(queue_name='*', vpn_name='dev_testvpn')
+
         """
         queue_name = get_key_from_kwargs("queue_name", kwargs)
         vpn_name = get_key_from_kwargs("vpn_name", kwargs)
@@ -125,10 +123,11 @@ Examples:
         self.api.x.show.queue.vpn_name = vpn_name
         if detail:
             self.api.x.show.queue.detail
-        return self.api.rpc(str(self.api.x), **kwargs)
+        self.commands.enqueue(PluginResponse(str(self.api.x), **kwargs))
+        return self.api.rpc(PluginResponse(str(self.api.x), **kwargs))
 
     def get_queue_config(self, queue, **kwargs):
-        """ Returns a queue config for the queue and overrides where neccesary
+        """ Returns a queue config for the queue and overrides where neccessary
 
         @keyword queue: single queue dictionary e.g.
             {
@@ -189,24 +188,21 @@ Examples:
     def create_queue(self, **kwargs):
         """Create a queue / endpoint only if it doesnt exist.
 
-    @keyword queue_name: the queue name
-    @keyword vpn_name: the vpn name
-    @type queue_name: str
-    @type vpn_name: str
-    :return: tuple SEMP request and kwargs
+        @keyword queue_name: the queue name
+        @keyword vpn_name: the vpn name
+        @type queue_name: str
+        @type vpn_name: str
+        @type: plugin.PluginResponse
+        @returns: single SEMP request
 
-Example 1: Create Request, then Execute
-```python
->>> api = SolaceAPI("dev")
->>> tuple_xml = api.manage("SolaceQueue").create_queue(vpn_name="dev_testvpn", queue_name="my_test_queue")
->>> api.rpc(tuple_xml)
-```
+        Example 1: Create Request, then Execute
+        >>> api = SolaceAPI("dev")
+        >>> plugin_response = api.manage("SolaceQueue").create_queue(vpn_name="dev_testvpn", queue_name="my_test_queue")
+        >>> api.rpc(plugin_response)
 
-Example 2: One Shot
-```python
->>> api = SolaceAPI("dev")
->>> api.rpc(api.manage("SolaceQueue").create_queue(vpn_name="dev_testvpn", queue_name="my_test_queue2"))
-```
+        Example 2: One Shot
+        >>> api = SolaceAPI("dev")
+        >>> api.rpc(api.manage("SolaceQueue").create_queue(vpn_name="dev_testvpn", queue_name="my_test_queue2"))
 
         """
         queue_name = get_key_from_kwargs("queue_name", kwargs)
@@ -216,9 +212,8 @@ Example 2: One Shot
         self.api.x = SolaceXMLBuilder("Creating Queue %s in vpn: %s" % (queue_name, vpn_name), version=self.api.version)
         self.api.x.message_spool.vpn_name = vpn_name
         self.api.x.message_spool.create.queue.name = queue_name
-        self.commands.enqueue(self.api.x, **kwargs)
-        self.set_exists(True)
-        return (str(self.api.x), kwargs)
+        self.commands.enqueue(PluginResponse(str(self.api.x), **kwargs))
+        return PluginResponse(str(self.api.x), **kwargs)
 
     # perform the if_exists on the primary only
     @only_if_exists('get', 'rpc-reply.rpc.show.queue.queues.queue.info', primaryOnly=True)
@@ -227,26 +222,23 @@ Example 2: One Shot
     def shutdown_egress(self, **kwargs):
         """Shutdown egress for a queue
 
-    @keyword shutdown_on_apply: is shutdown permitted boolean or char
-    @keyword vpn_name: name of the vpn
-    @keyword queue_name: name of the queue
-    @type shutdown_on_apply: char or bool
-    @type queue_name: str
-    @type vpn_name: str
-    :return: tuple SEMP request and kwargs
+        @keyword shutdown_on_apply: is shutdown permitted boolean or char
+        @keyword vpn_name: name of the vpn
+        @keyword queue_name: name of the queue
+        @type shutdown_on_apply: char or bool
+        @type queue_name: str
+        @type vpn_name: str
+        @rtype: plugin.PluginResponse
+        @returns: single SEMP request
 
-Example 1: One Shot
-```python
->>> api = SolaceAPI("dev")
->>> api.rpc(api.manage("SolaceQueue").shutdown_egress(shutdown_on_apply=True, vpn_name="dev_testvpn", queue_name="testqueue1"))
-```
+        Example 1: One Shot
+        >>> api = SolaceAPI("dev")
+        >>> api.rpc(api.manage("SolaceQueue").shutdown_egress(shutdown_on_apply=True, vpn_name="dev_testvpn", queue_name="testqueue1"))
 
-Example 2: Create Request, then Execute
-```python
->>> api = SolaceAPI("dev")
->>> tuple_request = api.manage("SolaceQueue").shutdown_egress(shutdown_on_apply=True, vpn_name="dev_testvpn", queue_name="testqueue1")
->>> api.rpc(tuple_request)
-```
+        Example 2: Create Request, then Execute
+        >>> api = SolaceAPI("dev")
+        >>> plugin_request = api.manage("SolaceQueue").shutdown_egress(shutdown_on_apply=True, vpn_name="dev_testvpn", queue_name="testqueue1")
+        >>> api.rpc(plugin_request)
         """
 
         shutdown_on_apply = get_key_from_kwargs("shutdown_on_apply", kwargs)
@@ -259,8 +251,8 @@ Example 2: Create Request, then Execute
             self.api.x.message_spool.vpn_name = vpn_name
             self.api.x.message_spool.queue.name = queue_name
             self.api.x.message_spool.queue.shutdown.egress
-            self.commands.enqueue(self.api.x, **kwargs)
-            return (str(self.api.x), kwargs)
+            self.commands.enqueue(PluginResponse(str(self.api.x), **kwargs))
+            return PluginResponse(str(self.api.x), **kwargs)
         else:
             logging.warning("Not disabling Queue, commands could fail since shutdown_on_apply = %s" % shutdown_on_apply)
 
@@ -271,26 +263,27 @@ Example 2: Create Request, then Execute
     def shutdown_ingress(self, **kwargs):
         """Shutdown the ingress of a queue
 
-    @keyword shutdown_on_apply: is shutdown permitted boolean or char
-    @keyword vpn_name: name of the vpn
-    @keyword queue_name: name of the queue
-    @type shutdown_on_apply: char or bool
-    @type queue_name: str
-    @type vpn_name: str
-    :return: tuple SEMP request and kwargs
+        @keyword shutdown_on_apply: is shutdown permitted boolean or char
+        @keyword vpn_name: name of the vpn
+        @keyword queue_name: name of the queue
+        @type shutdown_on_apply: char or bool
+        @type queue_name: str
+        @type vpn_name: str
+        @rtype: plugin.PluginResponse
+        @returns: single SEMP request
 
-Example 1: Instant Execution:
-```python
->>> api = SolaceAPI("dev")
->>> api.rpc(api.manage("SolaceQueue").shutdown_ingress(shutdown_on_apply=True, vpn_name="dev_testvpn", queue_name="testqueue1"))
-```
+        Example 1: Instant Execution:
 
-Example 2: Create Request, then Execute
-```python
->>> api = SolaceAPI("dev")
->>> tuple_request = api.manage("SolaceQueue").shutdown_ingress(shutdown_on_apply=True, vpn_name="dev_testvpn", queue_name="testqueue1")
->>> api.rpc(tuple_request)
-```
+        >>> api = SolaceAPI("dev")
+        >>> api.rpc(api.manage("SolaceQueue").shutdown_ingress(shutdown_on_apply=True, vpn_name="dev_testvpn", queue_name="testqueue1"))
+
+
+        Example 2: Create Request, then Execute
+
+        >>> api = SolaceAPI("dev")
+        >>> plugin_request = api.manage("SolaceQueue").shutdown_ingress(shutdown_on_apply=True, vpn_name="dev_testvpn", queue_name="testqueue1")
+        >>> api.rpc(plugin_request)
+
         """
 
         shutdown_on_apply = get_key_from_kwargs("shutdown_on_apply", kwargs)
@@ -303,8 +296,8 @@ Example 2: Create Request, then Execute
             self.api.x.message_spool.vpn_name = vpn_name
             self.api.x.message_spool.queue.name = queue_name
             self.api.x.message_spool.queue.shutdown.ingress
-            self.commands.enqueue(self.api.x, **kwargs)
-            return (str(self.api.x), kwargs)
+            self.commands.enqueue(PluginResponse(str(self.api.x), **kwargs))
+            return PluginResponse(str(self.api.x), **kwargs)
         else:
             logging.warning("Not disabling Queue, commands could fail since shutdown_on_apply = %s" % shutdown_on_apply)
 
@@ -315,21 +308,22 @@ Example 2: Create Request, then Execute
     def exclusive(self, **kwargs):
         """Set queue exclusivity
 
-    @keyword vpn_name: the name of the vpn
-    @keyword queue_name: the queue name
-    @keyword exclusive: state
-    @type vpn_name: str
-    @type queue_name: str
-    @type exclusive: bool
-    :return: tuple SEMP request and kwargs
+        @keyword vpn_name: the name of the vpn
+        @keyword queue_name: the queue name
+        @keyword exclusive: state
+        @type vpn_name: str
+        @type queue_name: str
+        @type exclusive: bool
+        @rtype: plugin.PluginResponse
+        @returns: single SEMP request
 
-Example: Shutdown, Set Exclusive, Start
-```python
->>> api = SolaceAPI("dev")
->>> api.rpc(api.manage("SolaceQueue").shutdown_ingress(queue_name="testqueue1", vpn_name="dev_testvpn", shutdown_on_apply=True))
->>> api.rpc(api.manage("SolaceQueue").exclusive(queue_name="testqueue1", vpn_name="dev_testvpn", exclusive=False, shutdown_on_apply=True))
->>> api.rpc(api.manage("SolaceQueue").enable(queue_name="testqueue1", vpn_name="dev_testvpn", shutdown_on_apply=True))
-```
+        Example: Shutdown, Set Exclusive, Start
+
+        >>> api = SolaceAPI("dev")
+        >>> api.rpc(api.manage("SolaceQueue").shutdown_ingress(queue_name="testqueue1", vpn_name="dev_testvpn", shutdown_on_apply=True))
+        >>> api.rpc(api.manage("SolaceQueue").exclusive(queue_name="testqueue1", vpn_name="dev_testvpn", exclusive=False, shutdown_on_apply=True))
+        >>> api.rpc(api.manage("SolaceQueue").enable(queue_name="testqueue1", vpn_name="dev_testvpn", shutdown_on_apply=True))
+
         """
 
         vpn_name = get_key_from_kwargs("vpn_name", kwargs)
@@ -342,16 +336,14 @@ Example: Shutdown, Set Exclusive, Start
             self.api.x.message_spool.vpn_name = vpn_name
             self.api.x.message_spool.queue.name = queue_name
             self.api.x.message_spool.queue.access_type.non_exclusive
-            self.commands.enqueue(self.api.x, **kwargs)
-            return (str(self.api.x), kwargs)
         else:
             # Non Exclusive queue
             self.api.x = SolaceXMLBuilder("Set Queue %s to Exclusive " % queue_name, version=self.api.version)
             self.api.x.message_spool.vpn_name = vpn_name
             self.api.x.message_spool.queue.name = queue_name
             self.api.x.message_spool.queue.access_type.exclusive
-            self.commands.enqueue(self.api.x, **kwargs)
-            return (str(self.api.x), kwargs)
+        self.commands.enqueue(PluginResponse(str(self.api.x), **kwargs))
+        return PluginResponse(str(self.api.x), **kwargs)
 
     @only_if_exists('get', 'rpc-reply.rpc.show.queue.queues.queue.info', primaryOnly=True)
     @only_on_shutdown('queue')
@@ -359,22 +351,23 @@ Example: Shutdown, Set Exclusive, Start
     def owner(self, **kwargs):
         """ Set the owner
 
-    @keyword vpn_name: the name of the vpn
-    @keyword queue_name: the queue name
-    @keyword owner: the owner client-username
-    @type vpn_name: str
-    @type queue_name: str
-    @type owner: str
-    :return: tuple SEMP request and kwargs
+        @keyword vpn_name: the name of the vpn
+        @keyword queue_name: the queue name
+        @keyword owner: the owner client-username
+        @type vpn_name: str
+        @type queue_name: str
+        @type owner: str
+        @rtype: plugin.PluginResponse
+        @returns: single SEMP request
 
-Example:
-```python
->>> api = SolaceAPI("dev")
->>> api.rpc(api.manage("SolaceQueue").shutdown_ingress(queue_name="testqueue1", vpn_name="dev_testvpn", shutdown_on_apply=True))
->>> api.rpc(api.manage("SolaceQueue").shutdown_egress(queue_name="testqueue1", vpn_name="dev_testvpn", shutdown_on_apply=True))
->>> api.rpc(api.manage("SolaceQueue").owner(vpn_name="dev_testvpn", queue_name="testqueue1", owner_username="dev_testproductA"))
->>> api.rpc(api.manage("SolaceQueue").enable(queue_name="testqueue1", vpn_name="dev_testvpn"))
-```
+        Example:
+
+        >>> api = SolaceAPI("dev")
+        >>> api.rpc(api.manage("SolaceQueue").shutdown_ingress(queue_name="testqueue1", vpn_name="dev_testvpn", shutdown_on_apply=True))
+        >>> api.rpc(api.manage("SolaceQueue").shutdown_egress(queue_name="testqueue1", vpn_name="dev_testvpn", shutdown_on_apply=True))
+        >>> api.rpc(api.manage("SolaceQueue").owner(vpn_name="dev_testvpn", queue_name="testqueue1", owner_username="dev_testproductA"))
+        >>> api.rpc(api.manage("SolaceQueue").enable(queue_name="testqueue1", vpn_name="dev_testvpn"))
+
         """
 
         vpn_name = get_key_from_kwargs("vpn_name", kwargs)
@@ -390,27 +383,27 @@ Example:
         self.api.x.message_spool.vpn_name = vpn_name
         self.api.x.message_spool.queue.name = queue_name
         self.api.x.message_spool.queue.owner.owner = owner
-        self.commands.enqueue(self.api.x, **kwargs)
-        return (str(self.api.x), kwargs)
+        self.commands.enqueue(PluginResponse(str(self.api.x), **kwargs))
+        return PluginResponse(str(self.api.x), **kwargs)
 
     @only_if_exists('get', 'rpc-reply.rpc.show.queue.queues.queue.info', primaryOnly=True)
     @primary()
     def max_bind_count(self, **kwargs):
         """Limit the max bind count
 
-    @keyword vpn_name: the name of the vpn
-    @keyword queue_name: the queue name
-    @keyword max_bind_count: max bind count
-    @type vpn_name: str
-    @type queue_name: str
-    @type max_bind_count: int
-    :return: tuple SEMP request and kwargs
+        @keyword vpn_name: the name of the vpn
+        @keyword queue_name: the queue name
+        @keyword max_bind_count: max bind count
+        @type vpn_name: str
+        @type queue_name: str
+        @type max_bind_count: int
+        @rtype: plugin.PluginResponse
+        @returns: single SEMP request
 
-Example:
-```python
->>> api = SolaceAPI("dev")
->>> api.rpc(api.manage("SolaceQueue").max_bind_count(vpn_name="dev_testvpn", queue_name="testqueue1", max_bind_count=50))
-```
+        Example:
+
+        >>> api = SolaceAPI("dev")
+        >>> api.rpc(api.manage("SolaceQueue").max_bind_count(vpn_name="dev_testvpn", queue_name="testqueue1", max_bind_count=50))
 
         """
 
@@ -423,30 +416,33 @@ Example:
         self.api.x.message_spool.vpn_name = vpn_name
         self.api.x.message_spool.queue.name = queue_name
         self.api.x.message_spool.queue.max_bind_count.value = max_bind_count
-        self.commands.enqueue(self.api.x, **kwargs)
-        return (str(self.api.x), kwargs)
+        self.commands.enqueue(PluginResponse(str(self.api.x), **kwargs))
+        return PluginResponse(str(self.api.x), **kwargs)
 
     @only_if_exists('get', 'rpc-reply.rpc.show.queue.queues.queue.info', primaryOnly=True, backupOnly=False)
     @only_on_shutdown('queue')
     @primary()
+    @deprecation_warning("Please implement the use of the 'permission' method instead of relying on this")
     def consume(self, **kwargs):
         """Sets consume permission. add `consume` kwarg to allow non-owner users to consume.
 
-    @keyword vpn_name: the name of the vpn
-    @keyword queue_name: the queue name
-    @keyword consume: set to "all" to allow ALL appliance client-users to "consume"
-    @type vpn_name: str
-    @type queue_name: str
-    @type consume: str
-    :return: tuple SEMP request and kwargs
+        @keyword vpn_name: the name of the vpn
+        @keyword queue_name: the queue name
+        @keyword consume: set to "all" to allow ALL appliance client-users to "consume"
+        @type vpn_name: str
+        @type queue_name: str
+        @type consume: str
+        @rtype: plugin.PluginResponse
+        @returns: single SEMP request
+        @deprecated: Please see permission instead
 
-Example:
-```python
->>> api = SolaceAPI("dev")
->>> tuple_request = api.manage("SolaceQueue").consume(queue_name="testqueue1",\\
->>>     vpn_name="dev_testvpn", shutdown_on_apply=True, consume="all")
->>> api.rpc(tuple_request)
-```
+        Example:
+
+        >>> api = SolaceAPI("dev")
+        >>> plugin_request = api.manage("SolaceQueue").consume(queue_name="testqueue1",\\
+        >>>     vpn_name="dev_testvpn", shutdown_on_apply=True, consume="all")
+        >>> api.rpc(plugin_request)
+
         """
 
         vpn_name = get_key_from_kwargs("vpn_name", kwargs)
@@ -460,27 +456,73 @@ Example:
         if consume == "all":
             self.api.x.message_spool.queue.permission.all
         self.api.x.message_spool.queue.permission.consume
-        self.commands.enqueue(self.api.x, **kwargs)
-        return (str(self.api.x), kwargs)
+        self.commands.enqueue(PluginResponse(str(self.api.x), **kwargs))
+        return PluginResponse(str(self.api.x), **kwargs)
+
+    @only_if_exists('get', 'rpc-reply.rpc.show.queue.queues.queue.info', primaryOnly=True, backupOnly=False)
+    @only_on_shutdown('queue')
+    @primary()
+    def permission(self, **kwargs):
+        """Sets permission on a queue
+
+        @keyword vpn_name: the name of the vpn
+        @keyword queue_name: the queue name
+        @keyword permission: which permission to grant non-owner users. e.g. "consume", "delete", "modify-topic", "read-only"
+        @type vpn_name: str
+        @type queue_name: str
+        @type permission: str
+        @rtype: plugin.PluginResponse
+        @returns: single SEMP request
+
+        Example:
+
+        >>> api = SolaceAPI("dev")
+        >>> plugin_request = api.manage("SolaceQueue").consume(queue_name="testqueue1",\\
+        >>>     vpn_name="dev_testvpn", shutdown_on_apply=True, permission="consume")
+        >>> api.rpc(plugin_request)
+
+        """
+
+        vpn_name = get_key_from_kwargs("vpn_name", kwargs)
+        queue_name = get_key_from_kwargs("queue_name", kwargs)
+        permission = get_key_from_kwargs("permission", kwargs)
+
+        # Open Access
+        self.api.x = SolaceXMLBuilder("Settings Queue %s Permission to %s" % (queue_name, permission),
+                                      version=self.api.version)
+        self.api.x.message_spool.vpn_name = vpn_name
+        self.api.x.message_spool.queue.name = queue_name
+        self.api.x.message_spool.queue.permission.all
+        if permission == "consume":
+            self.api.x.message_spool.queue.permission.consume
+        elif permission == "delete":
+            self.api.x.message_spool.queue.permission.delete
+        elif permission == "modify-topic":
+            self.api.x.message_spool.queue.permission.modify_topic
+        elif permission == "read-only":
+            self.api.x.message_spool.queue.permission.read_only
+        self.commands.enqueue(PluginResponse(str(self.api.x), **kwargs))
+        return PluginResponse(str(self.api.x), **kwargs)
 
     @only_if_exists('get', 'rpc-reply.rpc.show.queue.queues.queue.info', primaryOnly=True)
     @primary()
     def spool_size(self, **kwargs):
         """Set the spool size
 
-    @keyword vpn_name: the name of the vpn
-    @keyword queue_name: the queue name
-    @keyword queue_size: size of the spool in mb
-    @type vpn_name: str
-    @type queue_name: str
-    @type queue_size: int
-    :return: tuple SEMP request and kwargs
+        @keyword vpn_name: the name of the vpn
+        @keyword queue_name: the queue name
+        @keyword queue_size: size of the spool in mb
+        @type vpn_name: str
+        @type queue_name: str
+        @type queue_size: int
+        @rtype: plugin.PluginResponse
+        @returns: single SEMP request
 
-Example
-```python
->>> api = SolaceAPI("dev")
->>> api.rpc(api.manage("SolaceQueue").spool_size(vpn_name="dev_testvpn", queue_name="testqueue1", queue_size=64))
-```
+        Example:
+
+        >>> api = SolaceAPI("dev")
+        >>> api.rpc(api.manage("SolaceQueue").spool_size(vpn_name="dev_testvpn", queue_name="testqueue1", queue_size=64))
+
         """
 
         vpn_name = get_key_from_kwargs("vpn_name", kwargs)
@@ -493,27 +535,28 @@ Example
         self.api.x.message_spool.vpn_name = vpn_name
         self.api.x.message_spool.queue.name = queue_name
         self.api.x.message_spool.queue.max_spool_usage.size = queue_size
-        self.commands.enqueue(self.api.x, **kwargs)
-        return (str(self.api.x), kwargs)
+        self.commands.enqueue(PluginResponse(str(self.api.x), **kwargs))
+        return PluginResponse(str(self.api.x), **kwargs)
 
     @only_if_exists('get', 'rpc-reply.rpc.show.queue.queues.queue.info', primaryOnly=True)
     @primary()
     def retries(self, **kwargs):
         """Delivery retries before failing the message
 
-    @keyword vpn_name: the name of the vpn
-    @keyword queue_name: the queue name
-    @keyword retries: number of retries
-    @type vpn_name: str
-    @type queue_name: str
-    @type retries: int
-    :return: tuple SEMP request and kwargs
+        @keyword vpn_name: the name of the vpn
+        @keyword queue_name: the queue name
+        @keyword retries: number of retries
+        @type vpn_name: str
+        @type queue_name: str
+        @type retries: int
+        @rtype: plugin.PluginResponse
+        @returns: single SEMP request
 
-Example:
-```python
->>> api = SolaceAPI("dev")
->>> api.rpc(api.manage("SolaceQueue").retries(vpn_name="dev_testvpn", queue_name="testqueue1", retries=5))
-```
+        Example:
+
+        >>> api = SolaceAPI("dev")
+        >>> api.rpc(api.manage("SolaceQueue").retries(vpn_name="dev_testvpn", queue_name="testqueue1", retries=5))
+
         """
 
         vpn_name = get_key_from_kwargs("vpn_name", kwargs)
@@ -525,26 +568,27 @@ Example:
         self.api.x.message_spool.vpn_name = vpn_name
         self.api.x.message_spool.queue.name = queue_name
         self.api.x.message_spool.queue.max_redelivery.value = retries
-        self.commands.enqueue(self.api.x, **kwargs)
-        return (str(self.api.x), kwargs)
+        self.commands.enqueue(PluginResponse(str(self.api.x), **kwargs))
+        return PluginResponse(str(self.api.x), **kwargs)
 
     @only_if_exists('get', 'rpc-reply.rpc.show.queue.queues.queue.info', primaryOnly=True)
     @primary()
     def enable(self, **kwargs):
         """Enable a the queue
 
-    @keyword vpn_name: the name of the vpn
-    @keyword queue_name: the queue name
-    @type vpn_name: str
-    @type queue_name: str
-    :return: tuple SEMP request and kwargs
+        @keyword vpn_name: the name of the vpn
+        @keyword queue_name: the queue name
+        @type vpn_name: str
+        @type queue_name: str
+        @rtype: plugin.PluginResponse
+        @returns: single SEMP request
 
-Example:
-```python
->>> api = SolaceAPI("dev")
->>> tuple_request = api.manage("SolaceQueue").enable(queue_name="testqueue1", vpn_name="dev_testvpn")
->>> api.rpc(tuple_request)
-```
+        Example:
+
+        >>> api = SolaceAPI("dev")
+        >>> plugin_request = api.manage("SolaceQueue").enable(queue_name="testqueue1", vpn_name="dev_testvpn")
+        >>> api.rpc(plugin_request)
+
         """
 
         vpn_name = get_key_from_kwargs("vpn_name", kwargs)
@@ -555,25 +599,26 @@ Example:
         self.api.x.message_spool.vpn_name = vpn_name
         self.api.x.message_spool.queue.name = queue_name
         self.api.x.message_spool.queue.no.shutdown.full
-        self.commands.enqueue(self.api.x, **kwargs)
-        return (str(self.api.x), kwargs)
+        self.commands.enqueue(PluginResponse(str(self.api.x), **kwargs))
+        return PluginResponse(str(self.api.x), **kwargs)
 
     @only_if_exists('get', 'rpc-reply.rpc.show.queue.queues.queue.info', primaryOnly=True)
     @primary()
     def reject_on_discard(self, **kwargs):
         """ Reject to sender on discard
 
-    @keyword vpn_name: the name of the vpn
-    @keyword queue_name: the queue name
-    @type vpn_name: str
-    @type queue_name: str
-    :return: tuple SEMP request and kwargs
+        @keyword vpn_name: the name of the vpn
+        @keyword queue_name: the queue name
+        @type vpn_name: str
+        @type queue_name: str
+        @rtype: plugin.PluginResponse
+        @returns: single SEMP request
 
-Example:
-```python
->>> api = SolaceAPI("dev")
->>> api.rpc(api.manage("SolaceQueue").reject_on_discard(vpn_name="dev_testvpn", queue_name="testqueue1"))
-```
+        Example:
+
+        >>> api = SolaceAPI("dev")
+        >>> api.rpc(api.manage("SolaceQueue").reject_on_discard(vpn_name="dev_testvpn", queue_name="testqueue1"))
+
         """
 
         vpn_name = get_key_from_kwargs("vpn_name", kwargs)
@@ -583,5 +628,5 @@ Example:
         self.api.x.message_spool.vpn_name = vpn_name
         self.api.x.message_spool.queue.name = queue_name
         self.api.x.message_spool.queue.reject_msg_to_sender_on_discard
-        self.commands.enqueue(self.api.x, **kwargs)
-        return (str(self.api.x), kwargs)
+        self.commands.enqueue(PluginResponse(str(self.api.x), **kwargs))
+        return PluginResponse(str(self.api.x), **kwargs)

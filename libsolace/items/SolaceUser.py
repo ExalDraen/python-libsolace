@@ -2,7 +2,7 @@ import sys
 import logging
 import libsolace
 from libsolace.Decorators import only_on_shutdown, before, only_if_not_exists
-from libsolace.plugin import Plugin
+from libsolace.plugin import Plugin, PluginResponse
 from libsolace.SolaceCommandQueue import SolaceCommandQueue
 from libsolace.SolaceXMLBuilder import SolaceXMLBuilder
 from libsolace.util import get_key_from_kwargs
@@ -11,38 +11,54 @@ from libsolace.Exceptions import *
 
 @libsolace.plugin_registry.register
 class SolaceUser(Plugin):
-    """ Manage the SolaceUser ( client-username )
+    """Manage a Solace Client User
 
-    :type client_username: str
-    :type password: str
-    :type vpn_name: str
-    :type client_profile: str
-    :type acl_profile: str
-    :type shutdown_on_apply: bool / char b / char u
-    :type options: Options
-    :type version: str
-    :type api: SolaceAPI
+    Description
+    ===========
+        This plugin manages Client Users within Solace. Typically you should invoke this plugin via L{SolaceAPI.SolaceAPI}.
 
-Example:
-```python
->>> connection = SolaceAPI("dev")
->>> self.users = [connection.manage("SolaceUser",
-                        client_username = "%s_testuser",
-                        password = "mypassword",
-                        vpn_name = "%s_testvpn",
-                        client_profile = "glassfish",
-                        acl_profile = "%s_testvpn",
-                        testmode = True,
-                        shutdown_on_apply = False
-                        version = self.version)]
-```
-        """
+        Please see L{plugin.Plugin} for how plugins are instantiated and used.
+    """
 
     plugin_name = "SolaceUser"
     api = "None"
 
     def __init__(self, **kwargs):
+        """ Manage the SolaceUser ( client-username )
 
+        @keyword client_username: the username of the client
+        @type client_username: str
+        @keyword password: the password to set ( plaintext )
+        @type password: str
+        @keyword vpn_name: the vpn name
+        @type vpn_name: str
+        @keyword client_profile: the client profile name to associate with, must exist!
+        @type client_profile: str
+        @keyword acl_profile: the acl_profile to associate with, must exist!
+        @type acl_profile: str
+        @keyword shutdown_on_apply: is shutdown permitted boolean or char
+        @type shutdown_on_apply: bool or char b or char u
+        @keyword options: not implemented yet
+        @type options: Options
+        @keyword version: if you want to override the SEMP version for some reason
+        @type version: str
+        @keyword api: the instance of the SolaceAPI if not instantiated via SolaceAPI.manage
+        @type api: SolaceAPI
+        @rtype: list
+        @returns: list of requests that can be performed in a for loop.
+
+        Example:
+        >>> connection = SolaceAPI("dev")
+        >>> self.users = [connection.manage("SolaceUser",
+                                client_username = "%s_testuser",
+                                password = "mypassword",
+                                vpn_name = "%s_testvpn",
+                                client_profile = "glassfish",
+                                acl_profile = "%s_testvpn",
+                                testmode = True,
+                                shutdown_on_apply = False
+                                version = self.version)]
+        """
 
         logging.info("SolaceUser: kwargs: %s " % kwargs)
 
@@ -97,7 +113,7 @@ Example:
                 # Check if user already exists, if not then shutdown immediately after creating the user
                 self.get(**kwargs)[0]['rpc-reply']['rpc']['show']['client-username']['client-usernames']['client-username']
             except (AttributeError, KeyError, MissingClientUser):
-                logging.info("User %s doesn't exist, using shutdown_on_apply to True for user" % self.username)
+                logging.info("User %s doesn't exist, using shutdown_on_apply to True for user" % self.client_username)
                 kwargs['shutdown_on_apply'] = True
 
             self.create_user(**kwargs)
@@ -110,24 +126,32 @@ Example:
             self.no_shutdown(**kwargs)
 
     def requirements(self, **kwargs):
-        """ Call the tests before create is attempted, checks for profiles in this case """
+        """ Call the tests before create is attempted, checks for profiles in this case
+
+        @rtype: None
+        @returns: nothing
+
+        """
         logging.info('Pre-Provision Tests')
         self.check_client_profile_exists(**kwargs)
         self.check_acl_profile_exists(**kwargs)
 
     def get(self, **kwargs):
-        """ Get a username from solace, return a dict
+        """ Get a username from the appliance, return a dict
 
-Example
-```python
->>> connection = SolaceAPI("dev")
->>> connection.manage("SolaceUser").get(client_username="dev_testvpn", vpn_name="dev_testvpn")
-{'reply': {'show': {'client-username': {'client-usernames': {'client-username': {'profile': 'glassfish',
-'acl-profile': 'dev_testvpn', 'max-endpoints': '16000', 'client-username': 'dev_testvpn', 'enabled': 'true',
-'message-vpn': 'dev_testvpn', 'password-configured': 'true', 'num-clients': '0', 'num-endpoints': '5',
-'subscription-manager': 'false', 'max-connections': '500', 'guaranteed-endpoint-permission-override': 'false'}}}
-}}}
-```
+        Example
+
+        >>> connection = SolaceAPI("dev")
+        >>> connection.manage("SolaceUser").get(client_username="dev_testvpn", vpn_name="dev_testvpn")
+        [{'HOST': 'http://solace1.swe1.unibet.com/SEMP', u'rpc-reply': {u'rpc': {u'show': {u'client-username': {u'client-usernames': {u'num-total-client-usernames': u'752', u'max-num-total-client-usernames': u'9002', u'num-dynamic-client-usernames': u'0', u'num-configured-client-usernames': u'752', u'client-username': {u'profile': u'default', u'dynamically-configured': u'false', u'acl-profile': u'default', u'max-endpoints': u'16000', u'client-username': u'default', u'max-connections-service-smf': u'9000', u'enabled': u'false', u'message-vpn': u'default', u'password-configured': u'false', u'num-clients': u'0', u'max-connections-service-web': u'9000', u'num-endpoints': u'0', u'subscription-manager': u'false', u'authorization-group': None, u'max-connections': u'9000', u'num-clients-service-web': u'0', u'guaranteed-endpoint-permission-override': u'false', u'num-clients-service-smf': u'0'}}}}}, u'execute-result': {u'@code': u'ok'}, u'@semp-version': u'soltr/7_1_1'}}, {'HOST': 'http://solace2.swe1.unibet.com/SEMP', u'rpc-reply': {u'rpc': {u'show': {u'client-username': {u'client-usernames': {u'num-total-client-usernames': u'744', u'max-num-total-client-usernames': u'9002', u'num-dynamic-client-usernames': u'0', u'num-configured-client-usernames': u'744', u'client-username': {u'profile': u'default', u'dynamically-configured': u'false', u'acl-profile': u'default', u'max-endpoints': u'16000', u'client-username': u'default', u'max-connections-service-smf': u'9000', u'enabled': u'false', u'message-vpn': u'default', u'password-configured': u'false', u'num-clients': u'0', u'max-connections-service-web': u'9000', u'num-endpoints': u'0', u'subscription-manager': u'false', u'authorization-group': None, u'max-connections': u'9000', u'num-clients-service-web': u'0', u'guaranteed-endpoint-permission-override': u'false', u'num-clients-service-smf': u'0'}}}}}, u'execute-result': {u'@code': u'ok'}, u'@semp-version': u'soltr/7_1_1'}}]
+
+        @keyword client_username: the username
+        @type client_username: str
+        @keyword vpn_name: the vpn name
+        @type vpn_name: str
+        @rtype: list
+        @returns: the user as a dict from the appliance
+
         """
 
         client_username = get_key_from_kwargs("client_username", kwargs)
@@ -140,9 +164,13 @@ Example
         self.api.x.show.client_username.vpn_name = vpn_name
         self.api.x.show.client_username.detail
 
+        # enqueue to validate
+        self.commands.enqueue(PluginResponse(str(self.api.x), **kwargs))
+        self.commands.commands.pop()
+
         # do the request now
-        response = self.api.rpc(str(self.api.x), **kwargs)
-        logging.info("SRH: %s" % response[0])
+        response = self.api.rpc(PluginResponse(str(self.api.x), **kwargs))
+        logging.debug("SRH: %s" % response[0])
 
         if response[0]['rpc-reply']['rpc']['show']['client-username']['client-usernames'] == 'None':
             raise MissingClientUser("Primary: No such user %s" % client_username)
@@ -155,7 +183,7 @@ Example
     @before("shutdown")
     def delete(self, **kwargs):
         """
-        Delete user XML / enqueue command on connection instance
+        Delete a client user
 
         Example
         >>> connection = SolaceAPI("dev")
@@ -163,31 +191,41 @@ Example
         <rpc semp-version="soltr/6_0"><create><client-username><username>foo</username><vpn-name>bar</vpn-name>
         </client-username></create></rpc>
 
+        @keyword client_username: the username
+        @type client_username: str
+        @keyword vpn_name: the vpn name
+        @type vpn_name: str
+        @rtype: plugin.PluginResponse
+        @returns: SEMP request
+
         """
-        client_username = kwargs.get('client_username')
-        vpn_name = kwargs.get('vpn_name')
+        client_username = get_key_from_kwargs("client_username", kwargs)
+        vpn_name = get_key_from_kwargs("vpn_name", kwargs)
 
         self.api.x = SolaceXMLBuilder("Delete User %s" % client_username, version=self.api.version)
         self.api.x.no.client_username.username = client_username
         self.api.x.no.client_username.vpn_name = vpn_name
-        self.commands.enqueue(self.api.x)
-        return self.api.x
+        self.commands.enqueue(PluginResponse(str(self.api.x), **kwargs))
+        return PluginResponse(str(self.api.x), **kwargs)
 
     def check_client_profile_exists(self, **kwargs):
         """
-        Checks if a client_profile exists on the appliance for linking.
+        Checks if a client_profile exists on the appliance.
 
         Example:
-            >>> foo = SolaceUser(client_username="joe", environment="dev", client_profile="glassfish")
-            >>> foo.check_client_profile_exists()
-            >>> from libsolace.SolaceAPI import SolaceAPI
-            >>> apic = SolaceAPI("dev")
-            >>> foo = SolaceUser(api=apic)
-            >>> foo.check_client_profile_exists(client_profile="glassfish")
+
+        >>> api = SolaceAPI("dev")
+        >>> client = api.manage("SolaceUser")
+        >>> client.check_client_profile_exists(client_profile="glassfish")
+
+        @keyword client_profile: the client profile to check
+        @type client_profile: str
+        @rtype: bool
+        @returns: true or false
 
         """
 
-        client_profile = kwargs.get('client_profile')
+        client_profile = get_key_from_kwargs("client_profile", kwargs)
 
         logging.info('Checking if client_profile is present on devices')
         self.api.x = SolaceXMLBuilder("Checking client_profile %s is present on device" % client_profile,
@@ -195,62 +233,92 @@ Example
         self.api.x.show.client_profile.name = client_profile
         response = self.api.rpc(str(self.api.x), allowfail=False)
         for v in response:
-            if v['rpc-reply']['execute-result']['@code'] == 'fail':
+            if v['rpc-reply']['rpc']['show']['client-profile'] == None:
                 logging.warning('client_profile: %s missing from appliance' % client_profile)
-                raise BaseException("no such client_profile %s" % client_profile)
                 return False
         return True
 
     def check_acl_profile_exists(self, **kwargs):
-        acl_profile = kwargs.get('acl_profile')
+        """
+        Checks if a acl_profiles exists on the appliance.
+
+        Example:
+
+        >>> api = SolaceAPI("dev")
+        >>> client = api.manage("SolaceUser")
+        >>> client.check_acl_profile_exists(acl_profile="myacl")
+
+        @keyword acl_profile: the client profile to check
+        @type acl_profile: str
+        @rtype: bool
+        @returns: true or false
+        """
+        acl_profile = get_key_from_kwargs('acl_profile', kwargs)
 
         logging.info('Checking if acl_profile is present on devices')
         self.api.x = SolaceXMLBuilder("Checking acl_profile %s is present on device" % acl_profile,
                                       version=self.api.version)
-        self.api.x.show.acl_profile.name = kwargs.get('acl_profile')
+        self.api.x.show.acl_profile.name = acl_profile
         response = self.api.rpc(str(self.api.x), allowfail=False)
+        # logging.info(response)
         for v in response:
-            if v['rpc-reply']['execute-result']['@code'] == 'fail':
+            if v['rpc-reply']['rpc']['show']['acl-profile']['acl-profiles'] == None:
                 logging.warning('acl_profile: %s missing from appliance' % acl_profile)
-                raise BaseException("no such acl_profile")
                 return False
         return True
 
     @only_if_not_exists('get', 'rpc-reply.rpc.show.client-username.client-usernames.client-username')
     def create_user(self, **kwargs):
         """
-        Create user XML / enqueue command on connection instance
+        Create client-user
 
         Example
-        >>> connection = SolaceAPI("dev")
-        >>> xml = connection.manage("SolaceUser").create_user(client_username="foo", vpn_name="bar")
+        >>> api = SolaceAPI("dev")
+        >>> xml = api.manage("SolaceUser").create_user(client_username="foo", vpn_name="bar")
         <rpc semp-version="soltr/6_0"><create><client-username><username>foo</username><vpn-name>bar</vpn-name>
         </client-username></create></rpc>
 
+        @keyword client_username: the username
+        @type client_username: str
+        @keyword vpn_name: the vpn name
+        @type vpn_name:str
+        @rtype: plugin.PluginResponse
+        @returns: SEMP request
+
         """
-        client_username = kwargs.get('client_username')
-        vpn_name = kwargs.get('vpn_name')
+        client_username = get_key_from_kwargs('client_username', kwargs)
+        vpn_name = get_key_from_kwargs('vpn_name', kwargs)
 
         self.api.x = SolaceXMLBuilder("New User %s" % client_username, version=self.api.version)
         self.api.x.create.client_username.username = client_username
         self.api.x.create.client_username.vpn_name = vpn_name
-        self.commands.enqueue(self.api.x)
-        return self.api.x
+        self.commands.enqueue(PluginResponse(str(self.api.x), **kwargs))
+        return PluginResponse(str(self.api.x), **kwargs)
 
     def shutdown(self, **kwargs):
         """
-        Disable the user, this method would be called by anything decorated with @shutdown
-        the kwarg shutdown_on_apply needs to be either True or 'u' or 'b' for this to take effect.
+        Shutdown the user, this method will be called by anything decorated with the @shutdown decorator.
+        The kwarg shutdown_on_apply needs to be either True or 'u' or 'b' for this method to fire.
 
         Example
         >>> connection.manage("SolaceUser").shutdown(client_username="foo", vpn_name="bar", shutdown_on_apply=True)
         <rpc semp-version="soltr/6_0"><client-username><username>foo</username><vpn-name>bar</vpn-name><shutdown/>
         </client-username></rpc>
+
+        @keyword client_username: the username
+        @type client_username: str
+        @keyword vpn_name: the vpn name
+        @type vpn_name: str
+        @keyword shutdown_on_apply: bool / char
+        @type shutdown_on_apply: bool / char
+        @rtype: plugin.PluginResponse
+        @returns: SEMP request
+
         """
 
-        client_username = kwargs.get('client_username')
-        vpn_name = kwargs.get('vpn_name')
-        shutdown_on_apply = kwargs.get('shutdown_on_apply')
+        client_username = get_key_from_kwargs('client_username', kwargs)
+        vpn_name = get_key_from_kwargs('vpn_name', kwargs)
+        shutdown_on_apply = get_key_from_kwargs('shutdown_on_apply', kwargs)
 
         # b = both, u = user, True = forced
         if (shutdown_on_apply == 'b') or (shutdown_on_apply == 'u') or (shutdown_on_apply == True):
@@ -258,13 +326,14 @@ Example
             self.api.x.client_username.username = client_username
             self.api.x.client_username.vpn_name = vpn_name
             self.api.x.client_username.shutdown
-            self.commands.enqueue(self.api.x)
-            return self.api.x
+            self.commands.enqueue(PluginResponse(str(self.api.x), **kwargs))
+            return PluginResponse(str(self.api.x), **kwargs)
         else:
             logging.warning(
-                    "Not disabling User, commands could fail since shutdown_on_apply = %s" % self.shutdown_on_apply)
+                    "Not disabling User, commands could fail since shutdown_on_apply = %s" % shutdown_on_apply)
             return None
 
+    @only_on_shutdown('user')
     def set_client_profile(self, **kwargs):
         """
         Set the ClientProfile
@@ -277,10 +346,22 @@ Example
         >>> xml.append(connection.manage("SolaceUser").no_shutdown(client_username="foo", vpn_name="bar", shutdown_on_apply=True))
         >>> for x in xml:
         >>>     connection.rpc(str(x))
+
+        @keyword client_username: the username
+        @type client_username: str
+        @keyword vpn_name: the vpn name
+        @type vpn_name: str
+        @keyword client_profile: the client profile to check
+        @type client_profile: str
+        @keyword shutdown_on_apply: bool / char
+        @type shutdown_on_apply: bool / char
+        @rtype: plugin.PluginResponse
+        @returns: SEMP request
+
         """
-        client_username = kwargs.get('client_username')
-        vpn_name = kwargs.get('vpn_name')
-        client_profile = kwargs.get('client_profile')
+        client_username = get_key_from_kwargs('client_username', kwargs)
+        vpn_name = get_key_from_kwargs('vpn_name', kwargs)
+        client_profile = get_key_from_kwargs('client_profile', kwargs)
 
         # Client Profile
         self.api.x = SolaceXMLBuilder("Setting User %s client profile to %s" % (client_username, client_profile),
@@ -288,14 +369,38 @@ Example
         self.api.x.client_username.username = client_username
         self.api.x.client_username.vpn_name = vpn_name
         self.api.x.client_username.client_profile.name = client_profile
-        self.commands.enqueue(self.api.x)
-        return self.api.x
+        self.commands.enqueue(PluginResponse(str(self.api.x), **kwargs))
+        return PluginResponse(str(self.api.x), **kwargs)
 
+    @only_on_shutdown('user')
     def set_acl_profile(self, **kwargs):
 
-        client_username = kwargs.get('client_username')
-        vpn_name = kwargs.get('vpn_name')
-        acl_profile = kwargs.get('acl_profile')
+        """
+        Set the acl profile
+
+        >>> connection = SolaceAPI("dev")
+        >>> xml = []
+        >>> xml.append(connection.manage("SolaceUser").shutdown(client_username="foo", vpn_name="bar", shutdown_on_apply=True))
+        >>> xml.append(connection.manage("SolaceUser").set_acl_profile(client_username="foo", vpn_name="bar", acl_profile="myprofile"))
+        >>> xml.append(connection.manage("SolaceUser").no_shutdown(client_username="foo", vpn_name="bar", shutdown_on_apply=True))
+        >>> for x in xml:
+        >>>     connection.rpc(str(x))
+
+        @keyword client_username: the username
+        @type client_username: str
+        @keyword vpn_name: the vpn name
+        @type vpn_name: str
+        @keyword client_profile: the client profile to check
+        @type client_profile: str
+        @keyword shutdown_on_apply: bool / char
+        @type shutdown_on_apply: bool / char
+        @rtype: plugin.PluginResponse
+        @returns: SEMP request
+        """
+
+        client_username = get_key_from_kwargs('client_username', kwargs)
+        vpn_name = get_key_from_kwargs('vpn_name', kwargs)
+        acl_profile = get_key_from_kwargs('acl_profile', kwargs)
 
         # Set client user profile
         self.api.x = SolaceXMLBuilder("Set User %s ACL Profile to %s" % (client_username, vpn_name),
@@ -303,13 +408,28 @@ Example
         self.api.x.client_username.username = client_username
         self.api.x.client_username.vpn_name = vpn_name
         self.api.x.client_username.acl_profile.name = acl_profile
-        self.commands.enqueue(self.api.x)
-        return self.api.x
+        self.commands.enqueue(PluginResponse(str(self.api.x), **kwargs))
+        return PluginResponse(str(self.api.x), **kwargs)
 
     def no_guarenteed_endpoint(self, **kwargs):
+        """
+        No guaranteed endpoint permission override
 
-        client_username = kwargs.get('client_username')
-        vpn_name = kwargs.get('vpn_name')
+        Example:
+
+        >>> api = SolaceAPI("dev")
+        >>> api.manage("SolaceUser").no_guarenteed_endpoint(client_username="foo", vpn_name="bar")
+
+        @keyword client_username: the username
+        @type client_username: str
+        @keyword vpn_name: the vpn name
+        @type vpn_name: str
+        @rtype: plugin.PluginResponse
+        @returns: SEMP request
+        """
+
+        client_username = get_key_from_kwargs('client_username', kwargs)
+        vpn_name = get_key_from_kwargs('vpn_name', kwargs)
 
         # No Guarenteed Endpoint
         self.api.x = SolaceXMLBuilder("Default User %s guaranteed endpoint override" % client_username,
@@ -317,13 +437,28 @@ Example
         self.api.x.client_username.username = client_username
         self.api.x.client_username.vpn_name = vpn_name
         self.api.x.client_username.no.guaranteed_endpoint_permission_override
-        self.commands.enqueue(self.api.x)
-        return self.api.x
+        self.commands.enqueue(PluginResponse(str(self.api.x), **kwargs))
+        return PluginResponse(str(self.api.x), **kwargs)
 
     def no_subscription_manager(self, **kwargs):
+        """
+        No subscription manager
 
-        client_username = kwargs.get('client_username')
-        vpn_name = kwargs.get('vpn_name')
+        Example:
+
+        >>> api = SolaceAPI("dev")
+        >>> api.manage("SolaceUser").no_subscription_manager(client_username="foo", vpn_name="bar")
+
+        @keyword client_username: the username
+        @type client_username: str
+        @keyword vpn_name: the vpn name
+        @type vpn_name: str
+        @rtype: plugin.PluginResponse
+        @returns: SEMP request
+        """
+
+        client_username = get_key_from_kwargs('client_username', kwargs)
+        vpn_name = get_key_from_kwargs('vpn_name', kwargs)
 
         # No Subscription Managemer
         self.api.x = SolaceXMLBuilder("Default User %s subscription manager" % client_username,
@@ -331,25 +466,46 @@ Example
         self.api.x.client_username.username = client_username
         self.api.x.client_username.vpn_name = vpn_name
         self.api.x.client_username.no.subscription_manager
-        self.commands.enqueue(self.api.x)
-        return self.api.x
+        self.commands.enqueue(PluginResponse(str(self.api.x), **kwargs))
+        return PluginResponse(str(self.api.x), **kwargs)
 
     def set_password(self, **kwargs):
+        """
+        Sets the client-user's password
 
-        client_username = kwargs.get('client_username')
-        vpn_name = kwargs.get('vpn_name')
-        password = kwargs.get('password')
+        @keyword client_username: the username
+        @type client_username: str
+        @keyword vpn_name: the vpn name
+        @type vpn_name: str
+        @keyword password: the vpn name
+        @type password: str
+        @rtype: plugin.PluginResponse
+        @returns: SEMP request
+        """
+
+        client_username = get_key_from_kwargs('client_username', kwargs)
+        vpn_name = get_key_from_kwargs('vpn_name', kwargs)
+        password = get_key_from_kwargs('password', kwargs)
 
         # Set User Password
         self.api.x = SolaceXMLBuilder("Set User %s password" % client_username, version=self.api.version)
         self.api.x.client_username.username = client_username
         self.api.x.client_username.vpn_name = vpn_name
         self.api.x.client_username.password.password = password
-        self.commands.enqueue(self.api.x)
-        return self.api.x
+        self.commands.enqueue(PluginResponse(str(self.api.x), **kwargs))
+        return PluginResponse(str(self.api.x), **kwargs)
 
     def no_shutdown(self, **kwargs):
+        """
+        Enable the client-user
 
+        @keyword client_username: the username
+        @type client_username: str
+        @keyword vpn_name: the vpn name
+        @type vpn_name: str
+        @rtype: plugin.PluginResponse
+        @returns: SEMP request
+        """
         client_username = kwargs.get('client_username')
         vpn_name = kwargs.get('vpn_name')
 
@@ -358,8 +514,8 @@ Example
         self.api.x.client_username.username = client_username
         self.api.x.client_username.vpn_name = vpn_name
         self.api.x.client_username.no.shutdown
-        self.commands.enqueue(self.api.x)
-        return self.api.x
+        self.commands.enqueue(PluginResponse(str(self.api.x), **kwargs))
+        return PluginResponse(str(self.api.x), **kwargs)
 
 
 if __name__ == "__main__":

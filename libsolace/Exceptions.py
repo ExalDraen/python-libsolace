@@ -11,3 +11,10 @@ class MissingProperty(MissingException):
 
 class MissingClientUser(MissingException):
     pass
+
+
+class MissingClientProfile(MissingException):
+    pass
+
+class MissingACLProfileException(MissingException):
+    pass

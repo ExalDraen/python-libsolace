@@ -46,7 +46,7 @@ and then puts returns the commands list object.
             kwargs = command.kwargs
             command = command.xml
 
-        logging.debug("command %s" % str(command))
+        logging.info("command %s" % str(command))
         logging.debug("kwargs: %s" % kwargs)
 
         try:
@@ -54,7 +54,7 @@ and then puts returns the commands list object.
             logging.debug('XML Validated')
             self.commands.append((command, kwargs))
         except:
-            logging.error('XML failed to validate, the XML was:')
+            logging.error('XML failed to validate, the XML was: %s' % str(command))
             logging.error(command)
             raise
 

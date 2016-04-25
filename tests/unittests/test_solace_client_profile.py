@@ -7,14 +7,16 @@ import libsolace
 from libsolace.SolaceAPI import SolaceAPI
 from test_util import get_plugin_from_api
 
+__plugin_name__ = "SolaceClientProfile"
+
 
 class TestSolaceClientProfile(unittest.TestCase):
     def setUp(self):
         self.api = SolaceAPI("dev")
-        self.plugin = get_plugin_from_api(self.api, "SolaceClientProfile")
+        self.plugin = get_plugin_from_api(self.api, __plugin_name__)
 
     def test_batch_mode(self):
-        self.plugin = get_plugin_from_api(self.api, "SolaceClientProfile", name="default", vpn_name="bar")
+        self.plugin = get_plugin_from_api(self.api, __plugin_name__, name="default", vpn_name="bar")
         self.assertTrue(isinstance(self.plugin.commands.commands, list))
 
     def test_get_profile(self):
