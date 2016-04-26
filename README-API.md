@@ -3,6 +3,29 @@
 libsolace is a python library to manage the configuration of Solace messaging appliances. This project has a modular
 design which provides the basic features required to manage your Solace infrastructure.
 
+## Basic Principles
+
+Managed items within Solace are managed through Plugins. These plugins in general do not actually alter state on the
+appliances, they tend to return single or multiple SEMP commands which can then be posted to the appliance.
+
+SEMP requests that are created through plugins are validated against the appropriate XSD for the version of appliance being
+managed.
+
+Example:
+```
+import libsolace.settingsloader as settings
+from libsolace.SolaceAPI import SolaceAPI
+client = SolaceAPI("dev")
+# generate batch of commands to provision a ACL Profile
+list_tuple_request = client.manage("SolaceACLProfile", name="myprofile", vpn_name="testvpn")
+for req in list_tuple_request:
+    api.rpc(str(req[0], **req[1])
+# create only a profile
+tuple_request = client.manage("SolaceACLProfile").new_acl(name="myprofile, vpn_name="dev_testvpn")
+    api.rpc(tuple_request)
+```
+
+
 Table of Contents
 =================
 
@@ -253,7 +276,32 @@ requests decorated with the `only_if_exists` decorator need to be have this set 
         
 
 ## SolaceUser
- Manage client-user within Solace 
+ Manage the SolaceUser ( client-username )
+
+    :type client_username: str
+    :type password: str
+    :type vpn_name: str
+    :type client_profile: str
+    :type acl_profile: str
+    :type shutdown_on_apply: bool / char b / char u
+    :type options: Options
+    :type version: str
+    :type api: SolaceAPI
+
+Example:
+```python
+>>> connection = SolaceAPI("dev")
+>>> self.users = [connection.manage("SolaceUser",
+                        client_username = "%s_testuser",
+                        password = "mypassword",
+                        vpn_name = "%s_testvpn",
+                        client_profile = "glassfish",
+                        acl_profile = "%s_testvpn",
+                        testmode = True,
+                        shutdown_on_apply = False
+                        version = self.version)]
+```
+        
 
 ### SolaceUser.check_acl_profile_exists
 Document me!
@@ -301,18 +349,18 @@ Document me!
 
 ### SolaceUser.get
 
+ Get a username from solace, return a dict
 
-        Get a username from solace, return a dict
-
-        Example
-        >>> connection = SolaceAPI("dev")
-        >>> connection.manage("SolaceUser").get(client_username="dev_testvpn", vpn_name="dev_testvpn")
-        {'reply': {'show': {'client-username': {'client-usernames': {'client-username': {'profile': 'glassfish',
-        'acl-profile': 'dev_testvpn', 'max-endpoints': '16000', 'client-username': 'dev_testvpn', 'enabled': 'true',
-        'message-vpn': 'dev_testvpn', 'password-configured': 'true', 'num-clients': '0', 'num-endpoints': '5',
-        'subscription-manager': 'false', 'max-connections': '500', 'guaranteed-endpoint-permission-override': 'false'}}}
-        }}}
-
+Example
+```python
+>>> connection = SolaceAPI("dev")
+>>> connection.manage("SolaceUser").get(client_username="dev_testvpn", vpn_name="dev_testvpn")
+{'reply': {'show': {'client-username': {'client-usernames': {'client-username': {'profile': 'glassfish',
+'acl-profile': 'dev_testvpn', 'max-endpoints': '16000', 'client-username': 'dev_testvpn', 'enabled': 'true',
+'message-vpn': 'dev_testvpn', 'password-configured': 'true', 'num-clients': '0', 'num-endpoints': '5',
+'subscription-manager': 'false', 'max-connections': '500', 'guaranteed-endpoint-permission-override': 'false'}}}
+}}}
+```
         
 
 ### SolaceUser.no_guarenteed_endpoint
@@ -334,9 +382,7 @@ Registers a object with the plugin registry
 
 ### SolaceUser.requirements
 
-
-        Call the tests before create is attempted, checks for profiles in this case
-        
+ Call the tests before create is attempted, checks for profiles in this case 
 
 ### SolaceUser.set_acl_profile
 Document me!

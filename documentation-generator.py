@@ -67,7 +67,7 @@ for plugin in classes_list:
     clazz = classes_list[plugin]
     plugin_name = getattr(clazz, "plugin_name", plugin).lower()
     for method in get_callable_methods(clazz):
-        name = "%s.%s" % (plugin_name, method)
+        name = "%s%s" % (plugin_name, method)
         logging.info("Toc Item: %s" % name)
         if name not in ignore_list:
             print("   * [%s](#%s)" % (method, name.lower()))
