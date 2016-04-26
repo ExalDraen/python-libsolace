@@ -99,6 +99,8 @@ class SolaceAPI:
 
     """
 
+    # __name__ = "SolaceAPI"
+
     def __init__(self, environment, version=None, detect_status=True, testmode=False, **kwargs):
         """
 
@@ -497,7 +499,9 @@ class SolaceAPI:
     #     logging.info("Unpacking tuple")
     #     self.rpc(xml_and_kwargs[0], **xml_and_kwargs[1])
 
-    def rpc(self, xml, allowfail=False, primaryOnly=False, backupOnly=False, **kwargs):
+
+
+    def rpc(self, xml, allowfail=False, primaryOnly=False, backupOnly=False, xml_response=False, **kwargs):
         """
         Execute a SEMP command on the appliance(s), call with a string representation
         of a SolaceXMLBuilder instance.
@@ -560,6 +564,8 @@ class SolaceAPI:
         try:
             data = []
             responses, codes = self.__restcall(xml, primaryOnly=primaryOnly, backupOnly=backupOnly, **mywargs)
+            if xml_response:
+                return responses
             for k in responses:
                 response = xml2dict.parse(responses[k])
                 logging.debug("Response: %s" % response)

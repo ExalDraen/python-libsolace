@@ -1,12 +1,15 @@
-from libsolace.Exceptions import MissingClientProfile
-from libsolace.SolaceAPI import SolaceAPI
-from libsolace.plugin import PluginResponse
-from tests.unittests.test_util import get_plugin_from_api
-
 __author__ = 'keghol'
 
+import libsolace.settingsloader as settings
+from libsolace.SolaceAPI import SolaceAPI
+from libsolace.plugin import PluginResponse
+from tests.unittests.test_util import get_plugin_from_api, get_test_logger
+
+
 import unittest2 as unittest
-from libsolace.util import get_plugin
+
+
+logging = get_test_logger()
 
 __plugin_name__ = "SolaceUser"
 
@@ -80,7 +83,7 @@ class TestSolaceUser(unittest.TestCase):
         self.assertFalse(get_plugin_from_api(self.api, __plugin_name__).check_acl_profile_exists(**test_bad_kwargs))
 
     def test_create_user(self):
-        xml = get_plugin_from_api(self.api, __plugin_name__).create_user(**test_kwargs)
+        xml = get_plugin_from_api(self.api, __plugin_name__).create_user(force=True, **test_kwargs)
         self.assertIsInstance(xml, PluginResponse)
         self.assertEqual(xml.xml,
                          '<rpc semp-version="%s"><create><client-username><username>my_componenet</username><vpn-name>default</vpn-name></client-username></create></rpc>' % self.api.version)

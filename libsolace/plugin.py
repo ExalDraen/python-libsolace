@@ -108,12 +108,12 @@ class Plugin(object):
 
     def set_exists(self, state):
         """set_exists is used to cut down on SEMP queries to validate existence of items. For example, if you create a
-new VPN in Batch mode, After the "create-vpn" XML is generated, set_exists is set to True so subsequent provision
-requests decorated with the `only_if_exists` decorator need to be have this set in order to fire.
+        new VPN in Batch mode, After the "create-vpn" XML is generated, set_exists is set to True so subsequent provision
+        requests decorated with the `only_if_exists` decorator need to be have this set in order to fire.
 
-    :param state: exists or not boolean
-    :type state: bool
-    :return:
+        :param state: exists or not boolean
+        :type state: bool
+        :return:
         """
         module = get_calling_module(point=3)
         logging.info("Calling module: %s, Setting Exists bit: %s" % (module, state))

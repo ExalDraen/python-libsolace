@@ -21,14 +21,35 @@ logging.getLogger().setLevel(logging.INFO)
 logging = logging.getLogger(__name__)
 yaml_loaded = False
 
+# defaults which are set / could not be present
+defaults = {
+    "UPDATE_MOCK_TESTS": False,
+    "CMDB_URL": "http://someurl/site.xml",
+    "CMDB_FILE": "provision-example.yaml",
+    "CMDB_USER": "",
+    "CMDB_PASS": ""
+}
+
 for yaml_file in __yamlfiles__:
     if not os.path.exists(yaml_file):
         continue
     logging.info("Using yaml file %s" % yaml_file)
     stream = open(yaml_file, 'r')
     yaml_settings = yaml.load(stream)
+
+    # set the defaults
+    for default in defaults:
+        logging.info("Setting default %s:%s" % (default, defaults[default]))
+        globals()[default] = defaults[default]
+
+    # TODO FIXME
+    # get each plugins "default" variables and add to globals
+
+    # get the real values if any
     for variable in yaml_settings.keys():
+        logging.info("Setting config %s:%s" % (variable, yaml_settings[variable]))
         globals()[variable] = yaml_settings[variable]
+
     yaml_loaded = True
     logging.debug("Yaml loaded successful")
 
