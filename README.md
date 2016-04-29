@@ -137,7 +137,7 @@ libsolace is pluggable, and you can register your own classes to customize the a
 
 # bin
 
-See the <a href="libsolace/bin/">bin</a> for examples of various activities.
+See the <a href="bin/">bin</a> for examples of various activities.
 
 # Classes
 
