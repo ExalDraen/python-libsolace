@@ -26,9 +26,17 @@ class ZoinksNamingStandard(Plugin):
     plugin_name = "ZoinksNamingStandard"
 
     def solve(self, *args, **kwargs):
+        """ Substitute arg[1] into arg[0]'s %s place holder
+
+        Example:
+        >>> solace("test_%s_test", "dev")
+        'test_dev_test'
+
+
+        """
         logging.debug("Solving name for: %s" % str(args))
         try:
             return args[0] % args[1]
-        except:
+        except TypeError, e:
             logging.error("Unable to solve naming of object: %s" % args)
             raise

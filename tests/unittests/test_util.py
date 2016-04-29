@@ -1,13 +1,13 @@
 import sys
-from functools import wraps
 
 import unittest2 as unittest
 from types import MethodType
 
-from libsolace.plugin import PluginResponse
 import libsolace.settingsloader as settings
-import inspect
+from libsolace.plugin import PluginResponse
 from libsolace.util import *
+
+import yaml
 
 
 def get_test_logger():
@@ -34,19 +34,24 @@ class PrePostCaller:
         self.api = api
 
     def pre(self, func, *args, **kwargs):
-        logging.info('pre func: %s, args: %s kwargs: %s' % (func, args, kwargs))
+        if settings.UPDATE_MOCK_TESTS:
+            logging.info('pre func: %s, args: %s kwargs: %s' % (func, args, kwargs))
 
     def post(self, request, *args, **kwargs):
-        logging.info('post result: %s, args: %s kwargs: %s' % (request, args, kwargs))
-        if isinstance(request, PluginResponse):
-            logger.info("Dumping Plugin Request %s: %s" % (request.xml, request.kwargs))
-            response = self.api.rpc(request, xml_response=True)
-            logger.info("Dumping Response: %s" % response)
+        if settings.UPDATE_MOCK_TESTS:
+            logging.info('post result: %s, args: %s kwargs: %s' % (request, args, kwargs))
+            if isinstance(request, PluginResponse):
+                logger.info("Dumping Plugin Request %s: %s" % (request.xml, request.kwargs))
+                response = self.api.rpc(request, xml_response=True)
+                logger.info("Dumping Response: %s" % yaml.dump(response, default_flow_style=False))
 
     def __getattr__(self, name):
         if hasattr(self.other, name):
             func = getattr(self.other, name)
-            return lambda *args, **kwargs: self._wrap(func, args, kwargs)
+            if callable(func):
+                return lambda *args, **kwargs: self._wrap(func, args, kwargs)
+            else:
+                return func
         logger.warn("Unable to find attribute: %s in %s" % (name, self.other))
         raise AttributeError(name)
 

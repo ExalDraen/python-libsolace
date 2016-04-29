@@ -28,11 +28,12 @@ class SolaceACLProfile(Plugin):
         """Initialize in Query or Batch mode
 
         Example:
-            >>> import libsolace.settingsloader as settings
-            >>> from libsolace.SolaceAPI import SolaceAPI
-            >>> client = SolaceAPI("dev")
-            >>> client.manage("SolaceACLProfile", name="myprofile", vpn_name="testvpn").commands.commands
-            [XML, XML, XML]
+
+        >>> import libsolace.settingsloader as settings
+        >>> from libsolace.SolaceAPI import SolaceAPI
+        >>> client = SolaceAPI("dev")
+        >>> client.manage("SolaceACLProfile", name="myprofile", vpn_name="testvpn").commands.commands
+        [XML, XML, XML]
 
         @type api: SolaceAPI
         @keyword api: the api (passed in automatically if instantiated via SolaceAPI.manage

@@ -12,48 +12,6 @@ Some decorators which are used within the Plugins in order to control / limit ex
 """
 
 
-# def no_owned_endpoints():
-#     """Not Used / Implemented"""
-#     def wrap(f):
-#         @wraps(f)
-#         def wrapped_f(*args, **kwargs):
-#             api = getattr(args[0], "api")
-#             api.rpc(str(getattr(args[0], "shutdown")(**kwargs)))
-#             return f(*args, **kwargs)
-#
-#         return wrapped_f
-#
-#     return wrap
-
-# def decorator(d):
-#     """Make function d a decorator: d wraps a function fn.
-#     Authors: Peter Norvig and Darius Bacon"""
-#     def _d(fn):
-#         return functools.update_wrapper(d(fn), fn)
-#     functools.update_wrapper(_d, d)
-#     return _d
-#
-# @decorator
-# def memo(f):
-#     # by Peter Norvig
-#     """Decorator that caches the return value for each call to f(args).
-#     Then when called again with same args, we can just look it up."""
-#     cache = {}
-#
-#     def _f(*args):
-#         try:
-#             return cache[args]
-#         except KeyError:
-#             cache[args] = result = f(*args)
-#             return result
-#         except TypeError:
-#             # some element of args can't be a dict key
-#             return f(*args)
-#     _f.cache = cache
-#     return _f
-
-
-
 def deprecation_warning(warning_msg):
     def wrap(f):
         @wraps(f)
@@ -103,7 +61,8 @@ def before(method_name):
                 api.rpc(str(getattr(args[0], method_name)(**kwargs)))
                 return f(*args, **kwargs)
             except Exception, e:
-                raise BaseException("Error calling @before(%s) method in %s kwargs: %s" % (method_name, args[0], kwargs))
+                raise BaseException(
+                    "Error calling @before(%s) method in %s kwargs: %s" % (method_name, args[0], kwargs))
 
         return wrapped_f
 
@@ -251,7 +210,7 @@ def only_if_not_exists(entity, data_path, primaryOnly=False, backupOnly=False):
                 if check_primary:
                     try:
                         res[0] = res[0][p]
-                    except (KeyError,TypeError, IndexError):
+                    except (KeyError, TypeError, IndexError):
                         logging.info("Object not found on PRIMARY, key:%s setting primaryOnly" % p)
                         logging.info(o_res)
                         kwargs['primaryOnly'] = True
@@ -259,7 +218,7 @@ def only_if_not_exists(entity, data_path, primaryOnly=False, backupOnly=False):
                 if check_backup:
                     try:
                         res[1] = res[1][p]
-                    except (KeyError,TypeError, IndexError):
+                    except (KeyError, TypeError, IndexError):
                         logging.info("Object not found on BACKUP, key:%s setting backupOnly" % p)
                         logging.info(o_res)
                         kwargs['backupOnly'] = True

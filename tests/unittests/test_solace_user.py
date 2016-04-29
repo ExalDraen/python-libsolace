@@ -40,14 +40,9 @@ class TestSolaceUser(unittest.TestCase):
         self.plugin = get_plugin_from_api(self.api, __plugin_name__)
 
     def test_zzz_get_solace_client_profile_batch_provision(self):
-        self.plugin = get_plugin_from_api(self.api, __plugin_name__, **test_kwargs)
+        self.plugin = get_plugin_from_api(self.api, __plugin_name__, force=True, **test_kwargs)
         self.assertTrue(isinstance(self.plugin.commands.commands, list))
-        self.assertEqual(self.plugin.commands.commands[0], (
-            '<rpc semp-version="%s"><create><client-username><username>my_componenet</username><vpn-name>default</vpn-name></client-username></create></rpc>' % self.api.version,
-            {'primaryOnly': True, 'client_username': 'my_componenet', 'client_profile': 'default',
-             'vpn_name': 'default',
-             'backupOnly': True, 'testmode': False, 'shutdown_on_apply': True, 'password': 'passw',
-             'acl_profile': 'default'}))
+        self.assertEqual(self.plugin.commands.commands[0][0], '<rpc semp-version="%s"><create><client-username><username>my_componenet</username><vpn-name>default</vpn-name></client-username></create></rpc>' % self.api.version)
 
     def test_requirements(self):
         xml = get_plugin_from_api(self.api, __plugin_name__).requirements(**test_kwargs)
@@ -62,13 +57,14 @@ class TestSolaceUser(unittest.TestCase):
         self.assertEqual(xml[0]['rpc-reply']['rpc']['show']['client-username']['client-usernames']['client-username'][
                              'message-vpn'], 'default')
 
-    def test_delete(self):
-        xml = get_plugin_from_api(self.api, __plugin_name__).delete(client_username="some_user", vpn_name="default",
+    def test_zzx_delete(self):
+        self.api.rpc(get_plugin_from_api(self.api, __plugin_name__).create_user(force=True, **test_kwargs))
+        xml = get_plugin_from_api(self.api, __plugin_name__).delete(client_username="my_componenet", vpn_name="default",
                                                                     force=True, shutdown_on_apply=True,
                                                                     skip_before=True)
         self.assertIsInstance(xml, PluginResponse)
         self.assertEqual(xml.xml,
-                         '<rpc semp-version="%s"><no><client-username><username>some_user</username><vpn-name>default</vpn-name></client-username></no></rpc>' % self.api.version)
+                         '<rpc semp-version="%s"><no><client-username><username>my_componenet</username><vpn-name>default</vpn-name></client-username></no></rpc>' % self.api.version)
 
     def test_check_client_profile_exists(self):
         self.assertTrue(get_plugin_from_api(self.api, __plugin_name__).check_client_profile_exists(**test_kwargs))
@@ -82,27 +78,27 @@ class TestSolaceUser(unittest.TestCase):
     def test_check_acl_profile_not_exists(self):
         self.assertFalse(get_plugin_from_api(self.api, __plugin_name__).check_acl_profile_exists(**test_bad_kwargs))
 
-    def test_create_user(self):
+    def test_aaa_create_user(self):
         xml = get_plugin_from_api(self.api, __plugin_name__).create_user(force=True, **test_kwargs)
         self.assertIsInstance(xml, PluginResponse)
         self.assertEqual(xml.xml,
                          '<rpc semp-version="%s"><create><client-username><username>my_componenet</username><vpn-name>default</vpn-name></client-username></create></rpc>' % self.api.version)
 
-    def test_shutdown(self):
+    def test_ccc_shutdown(self):
         test_kwargs['shutdown_on_apply'] = True
         xml = get_plugin_from_api(self.api, __plugin_name__).shutdown(**test_kwargs)
         self.assertIsInstance(xml, PluginResponse)
         self.assertEqual(xml.xml,
                          '<rpc semp-version="%s"><client-username><username>my_componenet</username><vpn-name>default</vpn-name><shutdown/></client-username></rpc>' % self.api.version)
 
-    def test_set_client_profile(self):
+    def test_ccd_set_client_profile(self):
         test_kwargs['shutdown_on_apply'] = True
         xml = get_plugin_from_api(self.api, __plugin_name__).set_client_profile(**test_kwargs)
         self.assertIsInstance(xml, PluginResponse)
         self.assertEqual(xml.xml,
                          '<rpc semp-version="%s"><client-username><username>my_componenet</username><vpn-name>default</vpn-name><client-profile><name>default</name></client-profile></client-username></rpc>' % self.api.version)
 
-    def test_set_acl_profile(self):
+    def test_cce_set_acl_profile(self):
         test_kwargs['shutdown_on_apply'] = True
         xml = get_plugin_from_api(self.api, __plugin_name__).set_acl_profile(**test_kwargs)
         self.assertIsInstance(xml, PluginResponse)
@@ -124,7 +120,7 @@ class TestSolaceUser(unittest.TestCase):
         self.assertIsInstance(xml, PluginResponse)
         self.assertEqual(xml.xml, '<rpc semp-version="%s"><client-username><username>my_componenet</username><vpn-name>default</vpn-name><password><password>passw</password></password></client-username></rpc>' % self.api.version)
 
-    def test_no_shutdown(self):
+    def test_zzz_no_shutdown(self):
         xml = get_plugin_from_api(self.api, __plugin_name__).no_shutdown(**test_kwargs)
         self.assertIsInstance(xml, PluginResponse)
         self.assertEqual(xml.xml, '<rpc semp-version="%s"><client-username><username>my_componenet</username><vpn-name>default</vpn-name><no><shutdown/></no></client-username></rpc>' % self.api.version)

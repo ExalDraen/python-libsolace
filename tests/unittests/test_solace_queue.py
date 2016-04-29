@@ -80,7 +80,7 @@ class TestSolaceQueue(unittest.TestCase):
 
     def test_create_queue(self):
         xml = get_plugin_from_api(self.api, __plugin_name__).create_queue(queue_name="some_new_queue",
-                                                                          vpn_name="default")
+                                                                          vpn_name="default", force=True)
         self.assertIsInstance(xml, PluginResponse)
         self.assertEqual(xml.xml,
                          '<rpc semp-version="%s"><message-spool><vpn-name>default</vpn-name><create><queue><name>some_new_queue</name></queue></create></message-spool></rpc>' % self.api.version)

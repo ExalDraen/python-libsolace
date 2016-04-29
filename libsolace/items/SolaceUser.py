@@ -22,6 +22,7 @@ class SolaceUser(Plugin):
 
     plugin_name = "SolaceUser"
     api = "None"
+    commands = None
 
     def __init__(self, **kwargs):
         """ Manage the SolaceUser ( client-username )
@@ -174,7 +175,7 @@ class SolaceUser(Plugin):
 
         if response[0]['rpc-reply']['rpc']['show']['client-username']['client-usernames'] == 'None':
             raise MissingClientUser("Primary: No such user %s" % client_username)
-        elif response[1]['rpc-reply']['rpc']['show']['client-username']['client-usernames'] == 'None':
+        elif response[1] is not None and response[1]['rpc-reply']['rpc']['show']['client-username']['client-usernames'] == 'None':
             raise MissingClientUser("Backup: No such user %s" % client_username)
         else:
             return response

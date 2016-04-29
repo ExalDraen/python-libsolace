@@ -1,6 +1,6 @@
-
+---
 VPNS:
-  SolaceTest:
+  MySolaceEcosystem:
     -
       vpn_config:
         spool_size: 1024
@@ -8,7 +8,6 @@ VPNS:
       id: au_testvpn
       name: au_testvpn
     -
-      owner: SolaceTest
       vpn_config:
         spool_size: 1024
       password: d0nt_u5e_th1s

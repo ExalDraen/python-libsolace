@@ -9,7 +9,6 @@ from test_util import get_plugin_from_api
 
 __plugin_name__ = "SolaceClientProfile"
 
-
 class TestSolaceClientProfile(unittest.TestCase):
     def setUp(self):
         self.api = SolaceAPI("dev")
@@ -21,8 +20,9 @@ class TestSolaceClientProfile(unittest.TestCase):
 
     def test_get_profile(self):
         dict_response = self.plugin.get(name="default", vpn_name="default")
-        self.assertEqual(str(dict_response),
-                         "{'reply': {'show': {'client-profile': {'profiles': {'profile': {'name': 'default', 'num-users': '1', 'message-vpn': 'default'}}}}}, 'backup': {'show': {'client-profile': {'profiles': {'profile': {'name': 'default', 'num-users': '1', 'message-vpn': 'default'}}}}}, 'primary': {'show': {'client-profile': {'profiles': {'profile': {'name': 'default', 'num-users': '1', 'message-vpn': 'default'}}}}}}")
+        self.assertIsInstance(dict_response, dict)
+        self.assertEqual(dict['reply']['show']['client-profile']['profiles']['profile'['name']], 'default')
+                         # "{'reply': {'show': {'client-profile': {'profiles': {'profile': {'name': 'default', 'num-users': '1', 'message-vpn': 'default'}}}}}, 'backup': {'show': {'client-profile': {'profiles': {'profile': {'name': 'default', 'num-users': '1', 'message-vpn': 'default'}}}}}, 'primary': {'show': {'client-profile': {'profiles': {'profile': {'name': 'default', 'num-users': '1', 'message-vpn': 'default'}}}}}}")
 
     def test_new_client_profile(self):
         xml = self.plugin.new_client_profile(name="default", vpn_name="default")

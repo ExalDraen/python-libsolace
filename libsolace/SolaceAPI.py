@@ -55,14 +55,14 @@ class SolaceAPI:
         SolaceAPI: instance of SolaceAPI
 
     Examples:
-
+        >>> from libsolace.SolaceAPI import SolaceAPI
         >>> api = SolaceAPI("dev")
         >>> api.x = SolaceXMLBuilder("My Something something", version=api.version)
         >>> api.x.show.message_spool.detail
         OrderedDict()
         >>> api.cq.enqueueV2(str(api.x))
 
-        Set version on primary cluster node only:
+        Single Appliance only version of the API to use if using the VMR
 
         >>> api = SolaceAPI("dev", version="soltr/7_1_1")
         >>> api.x = SolaceXMLBuilder("My Something something", version=api.version)
@@ -148,6 +148,7 @@ class SolaceAPI:
                 if self.backupRouter is None:
                     raise Exception("Failed to detect backup router")
                 if self.primaryRouter == self.backupRouter:
+                    # impossible to test, but possible to happen...
                     raise Exception("Error, detected router %s to be both primary and backup" % self.primaryRouter)
                 logging.info("Detected primary Router: %s" % self.primaryRouter)
                 logging.info("Detected backup Router: %s" % self.backupRouter)
@@ -156,7 +157,7 @@ class SolaceAPI:
                 logging.info("Not detecting statuses, using config")
                 try:
                     self.primaryRouter = self.config['MGMT'][0]
-                except IndexError, e:
+                except Exception, e:
                     logging.error("No routers")
                     raise
                 try:
@@ -241,7 +242,7 @@ class SolaceAPI:
                                                                  verifySsl=self.config['VERIFY_SSL'])
                 logging.debug("response: %s" % response)
                 data[host] = response
-                logging.debug("code: %s" % code)
+                logging.info("code: %s" % code)
                 codes[host] = code
             logging.debug(data)
 
@@ -264,7 +265,8 @@ class SolaceAPI:
                 except Exception, e:
                     logging.error("Error decoding response from appliance")
                     logging.error("Response Codes: %s" % codes)
-                    raise (Exception("Appliance Communication Failure"))
+                    logging.error("Data Object: key: %s, data: %s " % (k, data))
+                    raise # (Exception("Appliance Communication Failure"))
             logging.debug("Returning Data from rest_call")
             return data, codes
 
@@ -275,12 +277,9 @@ class SolaceAPI:
 
     def get_redundancy(self):
         """ Return redundancy status """
-        try:
-            request = SolaceXMLBuilder(version=self.version)
-            request.show.redundancy
-            return self.rpc(str(request))
-        except:
-            raise
+        request = SolaceXMLBuilder(version=self.version)
+        request.show.redundancy
+        return self.rpc(str(request))
 
     def get_memory(self):
         """ Returns the Memory Usage
@@ -583,6 +582,8 @@ class SolaceAPI:
                         data.append(response)
                 else:
                     data.append(response)
+            if len(data) is 1:
+                data.append(None)
             return data
         except:
             logging.error("responses: %s" % responses)
@@ -609,13 +610,12 @@ class SolaceAPI:
         logging.debug("Setting up the plugin instance with api and kwargs")
         return plugin(api=self, **kwargs)
 
-
-if __name__ == "__main__":
-    import doctest
-    import logging
-    import sys
-
-    logging.basicConfig(format='[%(module)s] %(filename)s:%(lineno)s %(asctime)s %(levelname)s %(message)s',
-                        stream=sys.stdout)
-    logging.getLogger().setLevel(logging.INFO)
-    doctest.testmod()
+# if __name__ == "__main__":
+#     import doctest
+#     import logging
+#     import sys
+#
+#     logging.basicConfig(format='[%(module)s] %(filename)s:%(lineno)s %(asctime)s %(levelname)s %(message)s',
+#                         stream=sys.stdout)
+#     logging.getLogger().setLevel(logging.INFO)
+#     doctest.testmod()
