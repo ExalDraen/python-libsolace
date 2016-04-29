@@ -131,13 +131,13 @@ See <a href="libsolace.yaml.template">libsolace.yaml.template</a> for more info.
 
 libsolace is pluggable, and you can register your own classes to customize the appliance management. You need to implement your own CMDBClient which should integrate with whatever configuration system you desire to populate solace.
 
-See <a href="libsolace/plugins/CMDBClient.py">CMDBClient</a>
-See <a href="libsolace/plugins/">All Plugins</a>
-See <a href="libsolace/items/">Item Plugins</a>
+* See <a href="libsolace/plugins/CMDBClient.py">CMDBClient</a>
+* See <a href="libsolace/plugins/">All Plugins</a>
+* See <a href="libsolace/items/">Item Plugins</a>
 
 # bin
 
-See the `bin` directory for examples of various activities.
+See the <a href="libsolace/bin/">bin</a> for examples of various activities.
 
 # Classes
 
