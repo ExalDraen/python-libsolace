@@ -117,6 +117,7 @@ environments. A single appliance can be part of multiple environments.
 
 The `libsolace.yaml` file is searched for in:
 
+* os.environ['LIBSOLACE_CONFIG']
 * 'libsolace.yaml'
 * '/etc/libsolace/libsolace.yaml'
 * '/opt/libsolace/libsolace.yaml'
@@ -141,7 +142,8 @@ See the <a href="bin/">bin</a> for examples of various activities.
 
 # Classes
 
-run `epydoc --config epydoc.conf` for all class documentation
+run `make html` to generate all sphinx docs. 
+make doctest -d to test docstrings
 
 # Site Management / Provisioning
 
