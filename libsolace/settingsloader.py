@@ -1,6 +1,19 @@
+import yaml
+import os
+import logging
+import sys
+
 __author__ = 'johlyh'
+
+primary_config = 'libsolace.yaml',
+
+try:
+    primary_config = os.environ['LIBSOLACE_CONFIG']
+except Exception, e:
+    pass
+
 __yamlfiles__ = [
-    'libsolace.yaml',
+    "%s" % primary_config,
     '/etc/libsolace/libsolace.yaml',
     '/opt/libsolace/libsolace.yaml'
 ]
@@ -8,14 +21,11 @@ __doc__ = """
 
 >>> import libsolace.settingsloader as settings
 >>> settings.CMDB_URL
-"http://mydomain.com/path"
+'http://mydomain.com/path'
 """
 
-import yaml
-import os
-import logging
-import sys
-logging.basicConfig(format='[%(module)s] %(filename)s:%(lineno)s %(asctime)s %(levelname)s %(message)s',stream=sys.stdout)
+logging.basicConfig(format='[%(module)s] %(filename)s:%(lineno)s %(asctime)s %(levelname)s %(message)s',
+                    stream=sys.stdout)
 logging.getLogger().setLevel(logging.INFO)
 
 logging = logging.getLogger(__name__)
@@ -27,12 +37,14 @@ defaults = {
     "CMDB_URL": "http://someurl/site.xml",
     "CMDB_FILE": "provision-example.yaml",
     "CMDB_USER": "",
-    "CMDB_PASS": ""
+    "CMDB_PASS": "",
+    "SOLACE_QUEUE_PLUGIN": "SolaceQueue"
 }
 
 for yaml_file in __yamlfiles__:
     if not os.path.exists(yaml_file):
         continue
+
     logging.info("Using yaml file %s" % yaml_file)
     stream = open(yaml_file, 'r')
     yaml_settings = yaml.load(stream)
@@ -66,3 +78,4 @@ if yaml_loaded is False:
     msg = "Failed to find libpipeline.yaml in any of these locations: %s" % ",".join(__yamlfiles__)
     logging.error(msg)
     raise Exception(msg)
+

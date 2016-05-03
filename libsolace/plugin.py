@@ -1,6 +1,9 @@
+__author__ = 'Kegan Holtzhausen <Kegan.Holtzhausen@unibet.com>'
+
 """
-The plugin architecture
+The plugin system
 """
+
 import functools
 import logging
 from collections import OrderedDict
@@ -21,83 +24,116 @@ class Plugin(object):
 
     Plugin Example:
 
-    >>> import pprint
-    >>> import libsolace
-    >>> from libsolace.plugin import Plugin
-    >>> libsolace.plugin_registry = Plugin()
-    >>> @libsolace.plugin_registry.register
-    >>> class Bar(Plugin):
-    >>>     # must have a name for the plugin, helps calling it by name later.
-    >>>     plugin_name = "BarPlugin"
-    >>>     # Instance methods work!
-    >>>     def hello(self, name):
-    >>>         print("Hello %s from %s" % (name, self))
-    >>>     # Static methods work too!
-    >>>     @staticmethod
-    >>>     def gbye():
-    >>>         print("Cheers!")
-    >>> libsolace.plugin_registry('BarPlugin').hello("dude")
-    >>> libsolace.plugin_registry('BarPlugin').gbye()
-    >>> pprint.pprint(dir(libsolace.plugin_registry('BarPlugin')))
+    .. doctest::
+        :options: +SKIP
+
+        >>> import pprint
+        >>> import libsolace
+        >>> from libsolace.plugin import Plugin
+        >>> libsolace.plugin_registry = Plugin()
+        >>> @libsolace.plugin_registry.register
+        >>> class Bar(Plugin):
+        >>>     plugin_name = "BarPlugin"
+        >>>     def __init__(self):
+        >>>         pass
+        >>>     # Instance methods work!
+        >>>     def hello(self, name):
+        >>>         print("Hello %s from %s" % (name, self))
+        >>>     # Static methods work too!
+        >>>     @staticmethod
+        >>>     def gbye():
+        >>>         print("Cheers!")
+        >>> libsolace.plugin_registry('BarPlugin').hello("dude")
+        >>> libsolace.plugin_registry('BarPlugin').gbye()
+        >>> pprint.pprint(dir(libsolace.plugin_registry('BarPlugin')))
 
     Plugin Instantiation:
 
     >>> import libsolace.settingsloader as settings
     >>> from libsolace.SolaceAPI import SolaceAPI
     >>> api = SolaceAPI("dev")
-    >>> api.manage("BarPlugin")
+    >>> my_plugin = api.manage("NullPlugin")
+    >>> type(my_plugin)
+    <class 'libsolace.items.NullPlugin.NullPlugin'>
 
     Direct Instantiation:
 
     >>> import libsolace.settingsloader as settings
     >>> import libsolace
-    >>> my_clazz = libsolace.plugin_registry("BarPlugin", settings=settings)
-    >>> my_instance = clazz(settings=settings)
+    >>> my_clazz = libsolace.plugin_registry("NullPlugin", settings=settings)
+    >>> my_instance = my_clazz(settings=settings)
 
     """
     __metaclass__ = PluginClass
     plugins = []
     plugins_dict = OrderedDict()
     plugin_name = "Plugin"
+    """ the plugin's name, override this in the derived class!"""
+    exists = False
 
     def __init__(self, *args, **kwargs):
         logging.debug("Plugin Init: %s, %s" % (args, kwargs))
 
     def register(self, object_class, *args, **kwargs):
-        """Registers a object with the plugin registry
-
-    :param object_class: object to register, should be a class
-    :return:
         """
-        logging.info("Registering Plugin id: %s from: %s " % (object_class.plugin_name, object_class))
-        # o = object_class(*args, **kwargs)
+        Registers a object with the plugin registry, typically used as a decorator.
+
+        :param object_class: the class to register as a plugin
+
+        Example:
+            .. doctest::
+                :options: +SKIP
+
+                >>> @libsolace.plugin_registry.register
+                >>> class Foo(Plugin)
+                >>> ...
+
+        """
+        logging.info("Registering Plugin id: %s from class: %s " % (object_class.plugin_name, object_class))
         o = object_class
         self.plugins.append(o)
         self.plugins_dict[object_class.plugin_name] = o
+
         def _d(fn):
-            return functools.update_wrapper(d(fn), fn)
+            logging.info("CALL CALL CALL CALL CALL CALL")
+            return functools.update_wrapper(object_class(fn), fn)
+
         functools.update_wrapper(_d, object_class)
         return _d
 
     def __call__(self, *args, **kwargs):
         """
-        When you call this with the name of a plugin eg: 'PipelineClientPlugin', this returns the class
-        from the plugin_registry. You might need to call sub methods on that to get it into the state you need,
-        for example the reconfigure(settings) method in PipelineClientPlugin.
+        When you call the registry with the name of a plugin eg: 'NullPlugin', as the first arg, this returns the class
+        from the plugin_registry. You can then instantiate the class in any way you need to.
+
+        Example
+        >>> import libsolace
+        >>> from libsolace.plugin import Plugin
+        >>> a = libsolace.plugin_registry("NullPlugin")
+        >>> type(a)
+        ""
+
 
         :param args: name of Plugin to return
         :param kwargs:
         :return: class
         """
 
-        module = get_calling_module(point=2)
+        try:
+            module = get_calling_module(point=2)
+        except:
+            module = "Unknown"
+
+        try:
+            module_parent = get_calling_module(point=3)
+        except:
+            module_parent = "Unknown"
 
         logging.debug(self.plugins_dict)
-        logging.info("Module %s Requesting Plugin %s" % (module, args[0]))
+        logging.info("Module %s->%s->%s" % (module_parent, module, args[0]))
+
         logging.debug("Plugin Request: args: %s, kwargs: %s" % (args, kwargs))
         try:
-            # logging.info("Class: %s" % self.plugins_dict[args[0]].__class__)
-            # return self.plugins_dict[args[0]].__class__
             logging.debug("Class: %s" % self.plugins_dict[args[0]])
             return self.plugins_dict[args[0]]
         except:
@@ -107,11 +143,12 @@ class Plugin(object):
             raise
 
     def set_exists(self, state):
-        """set_exists is used to cut down on SEMP queries to validate existence of items. For example, if you create a
-        new VPN in Batch mode, After the "create-vpn" XML is generated, set_exists is set to True so subsequent provision
-        requests decorated with the `only_if_exists` decorator need to be have this set in order to fire.
+        """set_exists is used as caching in order to cut down on SEMP queries to validate existence of items. For example,
+        if you create a new VPN in "batch" mode, After the "create-vpn" XML is generated, set_exists is set to True so
+        subsequent requests decorated with the `only_if_exists` will function correctly since set_exists states that the
+        object will exist.
 
-        :param state: exists or not boolean
+        :param state: the existence state of the object
         :type state: bool
         :return:
         """
@@ -121,12 +158,18 @@ class Plugin(object):
 
 
 class PluginResponse(object):
+    """
+    Encapsulating class for holding SEMP requests and their accompanying kwargs.
+
+    Example:
+
+    >>> request = PluginResponse('<rpc semp-version="soltr/7_1_1"><show><memory/></show></rpc>', primaryOnly=True)
+    >>> request.xml
+    '<rpc semp-version="soltr/7_1_1"><show><memory/></show></rpc>'
+
+    """
     def __init__(self, xml, **kwargs):
-        """Plugin Response holder
-        @param xml: xml string
-        @param kwargs: any kwargs
-        @rtype: PluginResponse
-        @returns: the instance
-        """
         self.xml = xml
+        """ the XML """
         self.kwargs = kwargs
+        """ the kwargs """

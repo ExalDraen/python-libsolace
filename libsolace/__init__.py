@@ -1,4 +1,28 @@
+"""libsolace is a python library to manage the configuration of Solace messaging appliances. This project has a modular
+design which provides the basic features required to manage pairs of Solace Appliances.
+
+Basics
+=========
+
+    Managed objects within Solace are managed through :class:`plugin.Plugin`. Plugins are used to create SEMP requests,
+    which can then be posted to the appliance through a :class:`SolaceAPI.SolaceAPI` instance.
+
+    During the creation of SEMP requests, Plugins will enqueue the request in a instance of L{SolaceCommandQueue<SolaceCommandQueue.SolaceCommandQueue>}
+    which will also validate the request against the appropriate XSD for the version of SolOS-TR the appliance is running.
+
+Example:
+
+    >>> import libsolace.settingsloader as settings
+    >>> from libsolace.SolaceAPI import SolaceAPI
+    >>> client = SolaceAPI("dev")
+    >>> list_requests = client.manage("NullPlugin", foo="bar", baz="jaz")
+    >>> type(list_requests)
+    <class 'libsolace.items.NullPlugin.NullPlugin'>
+
+"""
+
 import pkg_resources
+
 
 try:
     __version__ = pkg_resources.get_distribution(__name__).version
@@ -8,34 +32,9 @@ except pkg_resources.DistributionNotFound:
 
 __author__ = 'Kegan Holtzhausen <Kegan.Holtzhausen@unibet.com>'
 
-__doc__ = """
-libsolace is a python library to manage the configuration of Solace messaging appliances. This project has a modular
-design which provides the basic features required to manage your Solace infrastructure.
-
-## Basic Principles
-
-Managed items within Solace are managed through Plugins. These plugins in general do not actually alter state on the
-appliances, they tend to return single or multiple SEMP commands which can then be posted to the appliance.
-
-SEMP requests that are created through plugins are validated against the appropriate XSD for the version of appliance being
-managed.
-
-Example:
-```
-import libsolace.settingsloader as settings
-from libsolace.SolaceAPI import SolaceAPI
-client = SolaceAPI("dev")
-# generate batch of commands to provision a ACL Profile
-list_tuple_request = client.manage("SolaceACLProfile", name="myprofile", vpn_name="testvpn")
-for req in list_tuple_request:
-    api.rpc(str(req[0], **req[1])
-# create only a profile
-tuple_request = client.manage("SolaceACLProfile").new_acl(name="myprofile", vpn_name="dev_testvpn")
-api.rpc(tuple_request)
-```
-
-"""
 
 # registering the plugin system
 from libsolace.plugin import Plugin
+
+# the plugin registry instance
 plugin_registry = Plugin()

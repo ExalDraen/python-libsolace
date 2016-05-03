@@ -29,7 +29,7 @@ API on those devices.
 import os
 import sys
 import logging
-logging.basicConfig(format='%(filename)s:%(lineno)s %(levelname)s %(message)s',stream=sys.stdout)
+logging.basicConfig(format='%(filename)s:%(lineno)s %(levelname)s %(message)s', stream=sys.stdout)
 logging.getLogger("urllib3").setLevel(logging.WARNING)
 logging.getLogger().setLevel(logging.INFO)
 from optparse import OptionParser

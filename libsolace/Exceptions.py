@@ -1,5 +1,8 @@
 from exceptions import Exception
 
+__doc__ = """
+Various exception classes, nothing much to see here. move along...
+"""
 
 class MissingException(Exception):
     pass

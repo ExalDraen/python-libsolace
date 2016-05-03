@@ -1,4 +1,3 @@
-import sys
 import logging
 import libsolace
 from libsolace.Decorators import only_on_shutdown, before, only_if_not_exists
@@ -13,11 +12,10 @@ from libsolace.Exceptions import *
 class SolaceUser(Plugin):
     """Manage a Solace Client User
 
-    Description
-    ===========
-        This plugin manages Client Users within Solace. Typically you should invoke this plugin via L{SolaceAPI.SolaceAPI}.
+    This plugin manages Client Users within Solace. Typically you should invoke this plugin via L{SolaceAPI.SolaceAPI}.
 
-        Please see L{plugin.Plugin} for how plugins are instantiated and used.
+    Please see L{plugin.Plugin} for how plugins are instantiated and used.
+
     """
 
     plugin_name = "SolaceUser"
@@ -83,7 +81,7 @@ class SolaceUser(Plugin):
         self.acl_profile = get_key_from_kwargs("acl_profile", kwargs)
 
         self.client_profile = get_key_from_kwargs("client_profile", kwargs)
-        self.testmode = get_key_from_kwargs("testmode", kwargs)
+        self.testmode = get_key_from_kwargs("testmode", kwargs, default=False)
         self.shutdown_on_apply = get_key_from_kwargs("shutdown_on_apply", kwargs)
 
         logging.info("""UserCommands: %s, Environment: %s, Username: %s, Password: %s, vpn_name: %s,
@@ -520,9 +518,4 @@ class SolaceUser(Plugin):
 
 
 if __name__ == "__main__":
-    logging.basicConfig(format='[%(module)s] %(filename)s:%(lineno)s %(asctime)s %(levelname)s %(message)s',
-                        stream=sys.stdout)
-    logging.getLogger().setLevel(logging.INFO)
-    import doctest
-
-    doctest.testmod()
+    print("Bootstrapping")

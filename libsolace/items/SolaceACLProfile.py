@@ -7,8 +7,6 @@ from libsolace.SolaceXMLBuilder import SolaceXMLBuilder
 from libsolace.plugin import PluginResponse
 from libsolace.util import get_key_from_kwargs
 
-# __docformat__ = "restructuredtext en"
-
 
 @libsolace.plugin_registry.register
 class SolaceACLProfile(Plugin):
@@ -16,9 +14,9 @@ class SolaceACLProfile(Plugin):
 
     Description
     ===========
-        This plugin manages ACL Profiles within Solace. Typically you should invoke this plugin via L{SolaceAPI.SolaceAPI}.
+        This plugin manages ACL Profiles within Solace. Typically you should invoke this plugin via :class:`libsolace.SolaceAPI.SolaceAPI`
 
-        Please see L{plugin.Plugin} for how plugins are instantiated and used.
+        Please see :class:`libsolace.plugin.Plugin` for how plugins are instantiated and used.
 
     """
 
@@ -29,23 +27,22 @@ class SolaceACLProfile(Plugin):
 
         Example:
 
-        >>> import libsolace.settingsloader as settings
         >>> from libsolace.SolaceAPI import SolaceAPI
         >>> client = SolaceAPI("dev")
         >>> client.manage("SolaceACLProfile", name="myprofile", vpn_name="testvpn").commands.commands
         [XML, XML, XML]
 
-        @type api: SolaceAPI
-        @keyword api: the api (passed in automatically if instantiated via SolaceAPI.manage
+        :type api: SolaceAPI
+        :param api: the api (passed in automatically if instantiated via SolaceAPI.manage
 
         Optional (Batch/Provision) Mode
 
-        @type name: str
-        @keyword name: the name of the ACL Profile
-        @type vpn_name: str
-        @keyword vpn_name: the vpn name
-        @rtype: SolaceACLProfile
-        @returns: instance with batch requests on SolaceACLProfile.commands.commands
+        :type name: str
+        :param name: the name of the ACL Profile
+        :type vpn_name: str
+        :param vpn_name: the vpn name
+        :rtype: SolaceACLProfile
+        :returns: instance with batch requests on SolaceACLProfile.commands.commands
 
         """
         self.api = get_key_from_kwargs("api", kwargs)  #: SolaceAPI instance
@@ -69,11 +66,11 @@ class SolaceACLProfile(Plugin):
     def get(self, **kwargs):
         """Returns the ACL immediately as a dictionary
 
-        @keyword name: name of the profile
-        @keyword vpn_name: vpn name
-        @returns: tuple SEMP request and kwargs
-        @rtype: dict
-        @returns: the acl profile
+        :param name: name of the profile
+        :param vpn_name: vpn name
+        :returns: tuple SEMP request and kwargs
+        :rtype: dict
+        :returns: the acl profile
 
         """
 
@@ -95,10 +92,10 @@ class SolaceACLProfile(Plugin):
         >>> plugin_response = api.manage("SolaceACLProfile").new_acl(name="myprofile", vpn_name="dev_testvpn")
         >>> api.rpc(plugin_response)
 
-        @keyword name: name of the profile
-        @keyword vpn_name: vpn name
-        @rtype: plugin.PluginResponse
-        @returns: single SEMP request
+        :param name: name of the profile
+        :param vpn_name: vpn name
+        :rtype: PluginResponse
+        :returns: single SEMP request
 
         """
         name = get_key_from_kwargs("name", kwargs)
@@ -117,10 +114,10 @@ class SolaceACLProfile(Plugin):
             >>> api = SolaceAPI("dev")
             >>> api.rpc(api.manage("SolaceACLProfile").allow_publish(name="myprofile", vpn_name="dev_testvpn"))
 
-        @keyword name: name of the profile
-        @keyword vpn_name: vpn name
-        @rtype: plugin.PluginResponse
-        @returns: single SEMP request
+        :param name: name of the profile
+        :param vpn_name: vpn name
+        :rtype: PluginResponse
+        :returns: single SEMP request
 
         """
         name = get_key_from_kwargs("name", kwargs)
@@ -136,10 +133,10 @@ class SolaceACLProfile(Plugin):
     def allow_subscribe(self, **kwargs):
         """ Allow subscribe
 
-        @keyword name: name of the profile
-        @keyword vpn_name: vpn name
-        @rtype: plugin.PluginResponse
-        @returns: single SEMP request
+        :param name: name of the profile
+        :param vpn_name: vpn name
+        :rtype: PluginResponse
+        :returns: single SEMP request
 
         Example:
 
@@ -162,10 +159,10 @@ class SolaceACLProfile(Plugin):
     def allow_connect(self, **kwargs):
         """ Allow Connect
 
-        @keyword name: name of the profile
-        @keyword vpn_name: vpn name
-        @rtype: plugin.PluginResponse
-        @returns: single SEMP request
+        :param name: name of the profile
+        :param vpn_name: vpn name
+        :rtype: PluginResponse
+        :returns: single SEMP request
 
         Example:
             
@@ -184,6 +181,4 @@ class SolaceACLProfile(Plugin):
         self.commands.enqueue(PluginResponse(str(self.api.x), **kwargs))
         return PluginResponse(str(self.api.x), **kwargs)
 
-if __name__ == "__main__":
-    import doctest
-    doctest.testmod()
+

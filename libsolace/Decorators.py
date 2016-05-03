@@ -13,6 +13,14 @@ Some decorators which are used within the Plugins in order to control / limit ex
 
 
 def deprecation_warning(warning_msg):
+    """
+    Log a deprecation warning and carry on.
+
+    :param warning_msg: the warning text
+    :type warning_msg: str
+    :rtype: object
+    :returns: the decorated object
+    """
     def wrap(f):
         @wraps(f)
         def wrapped_f(*args, **kwargs):
@@ -25,24 +33,28 @@ def deprecation_warning(warning_msg):
     return wrap
 
 
-def before(method_name):
-    """Call a named method before the decorated method. This is typically used to tell a object to shutdown so some
-    modification can be made.
+def before(method_name, skip_before=False):
+    """
+    Call a named method before. This is typically used to tell a object to shutdown so some modification can be made.
+    This decorator passes all kwargs and args on to the "before" method so keep your params and keywords in sync!
 
     Example:
 
-    >>> def shutdown(self, **kwargs):
-    >>>    # shutdown some object
-    >>> @before("shutdown")
-    >>> def delete(self, **kwargs):
-    >>>    # delete object since its shutdown
+    .. doctest::
+        :options: +SKIP
 
-    @parameter method_name: the method name to call
-    @type parameter: str
-    @keyword skip_before: skips the before hook
-    @type skip_before: bool
-    @returns: the method
-    @rtype: obj
+        >>> def shutdown(self, **kwargs):
+        >>>    # shutdown some object
+        >>> @before("shutdown")
+        >>> def delete(self, **kwargs):
+        >>>    # delete object since its shutdown
+
+    :param method_name: the method name to call
+    :type method_name: str
+    :param skip_before: skips the before hook
+    :type skip_before: bool
+    :returns: the decorated object
+    :rtype: obj
 
     """
 
@@ -51,9 +63,8 @@ def before(method_name):
         def wrapped_f(*args, **kwargs):
 
             # force kwarg, just return the method to allow exec
-            if "skip_before" in kwargs:
-                if kwargs["skip_before"]:
-                    return f(*args, **kwargs)
+            if kwargs["skip_before"]:
+                return f(*args, **kwargs)
 
             api = getattr(args[0], "api")
             logging.info("calling object %s's shutdown hook" % api)
@@ -69,31 +80,40 @@ def before(method_name):
     return wrap
 
 
-def only_on_shutdown(entity):
-    """Only calls the method if the shutdown byte permits it. The entity is one of `queue` or `user` and both have
-    differnent trigger scenarios and commons ones too..
+def only_on_shutdown(entity, force=False):
+    """
+    Only calls the method if the shutdown_on_apply rules apply to the `entity` type. The entity can be either `queue` or
+    `user`.
 
-        :param entity: (str) "queue" or "user"
-        :return: method
-
-    #### User:
-    If shutdown is True | b | u for a "user" entity, then allow the method to run.
-
-    #### Queue:
-    If shutdown is True | b | q for a "queue" entity, then allow the method to run.
-
-    methods decorated with this can optionally be decorated with the @shutdown decorator if you are needing to
-    shutdown the object at the same time. If the object is not shutdown, the appliance will throw a error.
+    Methods decorated with this can optionally be decorated with the @shutdown decorator to actually call whatever method
+    is capable of shutting down the object. If the object is not shutdown correcty, the appliance can not change the property
+    and will raise an exception.
 
     Example:
 
-    >>> @only_on_shutdown('user')
-    >>> def delete_user(**kwargs):
-    >>>    return True
-    >>> delete_user(shutdown_on_apply='u')
-    True
-    >>> delete_user(shutdown_on_apply='q')
-    None
+    .. doctest::
+        :options: +SKIP
+
+        >>> @only_on_shutdown('user')
+        >>> def delete_user(**kwargs):
+        >>>    return True
+        >>> delete_user(shutdown_on_apply='u')
+        True
+        >>> delete_user(shutdown_on_apply='q')
+        None
+
+    :param entity: the type of entity were expecting for the following comparisons:
+
+        "user": If shutdown_on_apply is True | b | u for a "user" entity, then allow the method to run.
+
+        "queue": If shutdown_on_apply is True | b | q for a "queue" entity, then allow the method to run.
+
+    :type entity: str
+    :param force: :data:`libsolace.Kwargs.force`
+    :type force: bool
+    :param shutdown_on_apply: :data:`libsolace.Kwargs.shutdown_on_apply`
+    :rtype: object
+    :returns: the object to call
 
     """
 
@@ -101,11 +121,10 @@ def only_on_shutdown(entity):
         @wraps(f)
         def wrapped_f(*args, **kwargs):
 
-            # force kwarg, just return the method to allow exec
-            if "force" in kwargs:
-                if kwargs["force"]:
-                    args[0].set_exists(True)
-                    return f(*args, **kwargs)
+            # if force, return the method to allow exec
+            if force:
+                args[0].set_exists(True)
+                return f(*args, **kwargs)
 
             mode = kwargs.get('shutdown_on_apply', None)
             if entity == 'queue' and mode in ['b', 'q', True]:
@@ -122,26 +141,36 @@ def only_on_shutdown(entity):
     return wrap
 
 
-def only_if_not_exists(entity, data_path, primaryOnly=False, backupOnly=False):
-    """Return method if the item does NOT exist in the Solace appliance, setting the kwarg for which appliance needs
-    the method run.
+def only_if_not_exists(entity, data_path, primaryOnly=False, backupOnly=False, force=False):
+    """
+    Call the method only if the Solace object does NOT exist in the Solace appliance.
 
-    :param entity: the "getter" to call
-    :param data_path: a dot name spaced string which will be used to descend into the response document to verify exist
-    :param primaryOnly: run the "getter" only against primary
-    :param backupOnly: run the "getter" only against backup
-    :return: method
+        - if the object's exists caching bit is False, return the method
+        - If the object does not exist, return the method and set the exists bit to False
+        - If the object exists in the appliance, set the exists bit to True
 
-    if the object's exists caching bit is False, return the method
-    If the object does not exist, return the method and set the exists bit to False
-    If the object exists in the appliance, set the exists bit to True
+    Example:
 
-    Example
+    .. doctest::
+        :options: +SKIP
 
-    >>> @only_if_not_exists('get', 'rpc-reply.rpc.show.client-username.client-usernames.client-username')
-    >>> def create_user(**kwargs):
-    >>>    return True
-    >>> create_user()
+        >>> @only_if_not_exists('get', 'rpc-reply.rpc.show.client-username.client-usernames.client-username')
+        >>> def create_user(**kwargs):
+        >>>    return True
+        >>> create_user()
+
+    :param entity: the "getter" method to call by name
+    :type entity: str
+    :param data_path: a dot name spaced string which will be used to descend into the response document to verify existence
+    :type data_path: str
+    :param primaryOnly: :data:`libsolace.Kwargs.primaryOnly`
+    :type primaryOnly: bool
+    :param backupOnly: :data:`libsolace.Kwargs.backupOnly`
+    :type backupOnly: bool
+    :param force: :data:`libsolace.Kwargs.force`
+    :type force: bool
+    :rtype: object
+    :returns: the object to call
 
     """
 
@@ -152,10 +181,9 @@ def only_if_not_exists(entity, data_path, primaryOnly=False, backupOnly=False):
             logging.info(kwargs)
 
             # force kwarg, just return the method to allow exec
-            if "force" in kwargs:
-                if kwargs["force"]:
-                    args[0].set_exists(True)
-                    return f(*args, **kwargs)
+            if force:
+                args[0].set_exists(True)
+                return f(*args, **kwargs)
 
             # default false
             check_primary = False
@@ -239,22 +267,8 @@ def only_if_not_exists(entity, data_path, primaryOnly=False, backupOnly=False):
     return wrap
 
 
-def only_if_exists(entity, data_path, primaryOnly=False, backupOnly=False):
-    """ Return method only if item exists.
-
-    :param entity: the "getter" to call
-    :param data_path: a dot name spaced string which will be used to decend into the response document to verify exist
-    :param primaryOnly: run the "getter" only against primary
-    :param backupOnly: run the "getter" only against backup
-    :return: method
-
-If object exists bit set, return the method
-If object exists bit not set, query the object, return the method if succes
-If object does not exist, dont return the method.
-
-For Example see only_if_not_exists
-
-    """
+def only_if_exists(entity, data_path, primaryOnly=False, backupOnly=False, force=False):
+    """ The inverse of :func:`only_if_not_exists` """
 
     def wrap(f):
         @wraps(f)
@@ -268,10 +282,9 @@ For Example see only_if_not_exists
             module = get_calling_module()
 
             # force kwarg, just return the method to allow exec
-            if "force" in kwargs:
-                if kwargs["force"]:
-                    args[0].set_exists(True)
-                    return f(*args, **kwargs)
+            if force:
+                args[0].set_exists(True)
+                return f(*args, **kwargs)
 
             # determine if were checking both or a single node
             if primaryOnly:
@@ -340,10 +353,11 @@ For Example see only_if_not_exists
 
 
 def primary():
-    """ Sets the primaryOnly kwarg before calling the method. Use this to force a method onto a specific router.
-Note, this does NOT unset backupOnly kwarg, so you can actualy double target.
+    """
+    Sets the primaryOnly kwarg before calling the method. Use this to add a specific router to the appliances to call list.
+    Note, this does not unset backupOnly kwarg, so you can actualy double target.
 
-    :return: method
+    :returns: method
     """
 
     def wrap(f):
@@ -360,10 +374,11 @@ Note, this does NOT unset backupOnly kwarg, so you can actualy double target.
 
 
 def backup():
-    """ Sets the backupOnly kwarg before calling the method. Use this to force a method onto a specific router.
-Note, this does NOT unset primaryOnly kwarg, so you can actualy double target.
+    """
+    Sets the backupOnly kwarg before calling the method. Use this to add a specific router to the appliances to call list.
+    Note, this does not unset primaryOnly kwarg, so you can actualy double target.
 
-    :return: method
+    :returns: method
     """
 
     def wrap(f):

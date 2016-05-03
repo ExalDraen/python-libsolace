@@ -1,6 +1,5 @@
 import logging
 import traceback
-
 import libsolace.settingsloader as settings
 import libsolace
 from libsolace.SolaceXMLBuilder import SolaceXMLBuilder
@@ -35,77 +34,65 @@ class SolaceAPI:
     or the backup appliance utilizing the `primaryOnly` and `backupOnly` kwargs.
     see: :func:`~libsolace.SolaceAPI.SolaceAPI.rpc`
 
-    The version of the SolOS-TR OS is detected on instantiation, and this behaviour
-    can be overridden with the `version` kwarg.
+    The version of the SolOS-TR OS is detected on automatically, and this behaviour
+    can be overridden with the `version` kwarg. If using the VMR you will want to
+    pass in both detect_status=False and version="soltr/7_1_1".
 
-    Args:
-        environment (str): The environment name to connect to as defined in
-            libsolace.yaml.
-        version (Optional(str)): set the version to disable version detection
-            example of version: "soltr/6_0"
-        detect_status (Optional(bool)): detect the primary/backup appliance through
-            querying the message-spool state, default: True
-        version (Optional(str)): set the solOS-TR version, if None the version will
-            be retrieved from the appliances.
-        testmode (Optional(bool)): Uses readonly user from config
-            Communication with the appliance(s) will use the READ_ONLY_USER
-            and READ_ONLY_PASS as defined in libsolace.yaml
+    :keyword environment: the environemnt
+    :type environment: str
+    :keyword detect_status: detection of node primary/backup status, pass True
+        here for the VMR or single appliances.
+    :type detect_status: bool
+    :keyword version: override appliance version detection. Some versions of SolOS-TR
+        require you to set the language level a bit higher like the VMR for example.
+    :type version: str
+    :keyword testmode: Tells the api to connect using the READ_ONLY_USER as defined
+        in the libsolace.yaml file.
+    :type testmode: bool
+    :rtype: SolaceAPI.SolaceAPI
+    :returns: instance
 
-    Returns:
-        SolaceAPI: instance of SolaceAPI
 
     Examples:
-        >>> from libsolace.SolaceAPI import SolaceAPI
+        >>> from libsolace.SolaceXMLBuilder import SolaceXMLBuilder
         >>> api = SolaceAPI("dev")
-        >>> api.x = SolaceXMLBuilder("My Something something", version=api.version)
+        >>> api.x = SolaceXMLBuilder("LOG: Showing the Message Spool in %s" % api.environment, version=api.version)
         >>> api.x.show.message_spool.detail
         OrderedDict()
-        >>> api.cq.enqueueV2(str(api.x))
+        >>> response = api.rpc(api.x)
 
-        Single Appliance only version of the API to use if using the VMR
+        Setting the API version if detection fails
 
+        >>> from libsolace.SolaceXMLBuilder import SolaceXMLBuilder
         >>> api = SolaceAPI("dev", version="soltr/7_1_1")
-        >>> api.x = SolaceXMLBuilder("My Something something", version=api.version)
+        >>> api.x = SolaceXMLBuilder("My description of what im doing", version=api.version)
         >>> api.x.show.message_spool
         OrderedDict()
-        >>> api.cq.enqueueV2(str(api.x), primaryOnly=True)
-        >>> api.rpc(str(api.cq.commands[0]))
+        >>> response = api.rpc(api.x, primaryOnly=True)
+        >>> response[0]['rpc-reply']['rpc']['show']['message-spool']['message-spool-info']['config-status']
+        u'Enabled (Primary)'
 
-        Backup cluster node only:
+        Query the backup appliance only
 
-        >>> api = SolaceAPI("dev")
+        >>> from libsolace.SolaceXMLBuilder import SolaceXMLBuilder
+        >>> api = SolaceAPI("dev", detect_status=False)
         >>> api.x = SolaceXMLBuilder("My Something something", version=api.version)
         >>> api.x.show.version
         OrderedDict()
-        >>> api.cq.enqueueV2(str(api.x), backupOnly=True)
-
-        Get a instance of SolaceQueue from the plugin manager
-
-        >>> api = SolaceAPI("dev")
-        >>> api.manager("SolaceQueue")
-
-        Solace User plugin, check if a profile exists
-
-        >>> api = SolaceAPI("dev")
-        >>> api.manage("SolaceUser").check_client_profile_exists(client_profile="glassfish")
+        >>> r = api.rpc(api.x, backupOnly=True)
+        >>> # check the response was the "configured" backup
+        >>> r[0]['HOST'] == settings.SOLACE_CONF["dev"]['MGMT'][1]
         True
 
-        Create a Solace User via plugin
+        Get a instance of some plugin from the plugin manager
 
-        >>> api.manage("SolaceUser", client_profile="glassfish", acl_profile="test", username="foo", password="bar", vpn_name="%s_testvpn").commands.commands # doctest:+ELLIPSIS
-        [<rpc semp-version=...</client-username></rpc>]
-        >>> api.manage("SolaceUser").get(username="%s_testvpn", vpn_name="%s_testvpn") # doctest:+ELLIPSIS
-        {'reply': {u'show': {u'client-username'...}}}}}}
+        >>> api = SolaceAPI("dev")
+        >>> type(api.manage("NullPlugin"))
+        <class 'libsolace.items.NullPlugin.NullPlugin'>
 
-    """
-
-    # __name__ = "SolaceAPI"
+        """
 
     def __init__(self, environment, version=None, detect_status=True, testmode=False, **kwargs):
-        """
-
-
-        """
         try:
             logging.info("Solace Client SEMP version: %s" % version)
             self.version = version
@@ -242,7 +229,7 @@ class SolaceAPI:
                                                                  verifySsl=self.config['VERIFY_SSL'])
                 logging.debug("response: %s" % response)
                 data[host] = response
-                logging.info("code: %s" % code)
+                logging.debug("code: %s" % code)
                 codes[host] = code
             logging.debug(data)
 
@@ -276,7 +263,15 @@ class SolaceAPI:
             raise
 
     def get_redundancy(self):
-        """ Return redundancy status """
+        """
+        Return redundancy status
+
+        Example:
+            >>> api = SolaceAPI("dev")
+            >>> api.get_redundancy()[0]['rpc-reply']['rpc']['show']['redundancy']['config-status']
+            u'Enabled'
+
+        """
         request = SolaceXMLBuilder(version=self.version)
         request.show.redundancy
         return self.rpc(str(request))
@@ -313,193 +308,6 @@ class SolaceAPI:
         else:
             raise Exception("Unknown message-spool operational-status '%s'" % message_spool['operational-status'])
 
-    # @DeprecationWarning
-    # def get_queue(self, queue, vpn, detail=False, **kwargs):
-    #     """ Return Queue details """
-    #     try:
-    #         request = SolaceXMLBuilder(version=self.version)
-    #         request.show.queue.name = queue
-    #         request.show.queue.vpn_name = vpn
-    #         if detail:
-    #             request.show.queue.detail
-    #         return self.rpc(str(request), **kwargs)
-    #     except:
-    #         raise
-    #
-    # @DeprecationWarning
-    # def list_queues(self, vpn, queue_filter='*'):
-    #     """ List all queues in a VPN """
-    #     try:
-    #         request = SolaceXMLBuilder(version=self.version)
-    #         request.show.queue.name = queue_filter
-    #         request.show.queue.vpn_name = vpn
-    #         response = self.rpc(str(request))
-    #         logging.debug(response)
-    #         queues = []
-    #         for k in response:
-    #             logging.debug("Response: %s" % k)
-    #             try:
-    #                 myq = [queue['name'] for queue in k['rpc-reply']['rpc']['show']['queue']['queues']['queue']]
-    #                 for q in myq:
-    #                     queues.append(q)
-    #             except TypeError, e:
-    #                 logging.warn("Atttibute Error %s" % e)
-    #                 try:
-    #                     queues.append(k['rpc-reply']['rpc']['show']['queue']['queues']['queue']['name'])
-    #                 except:
-    #                     logging.warn("Error %s" % e)
-    #                     pass
-    #             logging.debug(queues)
-    #         return queues
-    #     except Exception, e:
-    #         logging.warn("Solace Exception, %s" % e)
-    #         raise
-    #
-    # @DeprecationWarning
-    # def get_client_username_queues(self, client_username, vpn):
-    #     """
-    #     Returns a list of queues owned by user
-    #     """
-    #     result = []
-    #     response = self.get_queue('*', vpn, detail=True)
-    #     queue_list = {
-    #         list: lambda x: [y['name'] for y in x if y['info']['owner'] == client_username],
-    #         dict: lambda x: [y['name'] for y in [x] if y['info']['owner'] == client_username]
-    #     }
-    #     try:
-    #         for h in response:
-    #             if h['rpc-reply']['rpc']['show']['queue'] != None and h['rpc-reply']['rpc']['show']['queue'][
-    #                 'queues'] != None:
-    #                 queues = h['rpc-reply']['rpc']['show']['queue']['queues']['queue']
-    #                 result.extend(queue_list[type(queues)](queues))
-    #     except KeyError, e:
-    #         raise Exception(
-    #             "While getting list of queues from get_queue() the response did not contain the expected data. VPN: %s. Exception message: %s" % (
-    #             vpn, str(e)))
-    #     else:
-    #         return result
-    #
-    # @DeprecationWarning
-    # def is_client_username_inuse(self, client_username, vpn):
-    #     """
-    #     Returns boolean if client username has client connections
-    #     """
-    #     result = []
-    #     response = self.get_client('*', vpn, detail=True)
-    #     in_use = lambda x, y: [True for yy in y if yy['client-username'] == x]
-    #     try:
-    #         for h in response:
-    #             if h['rpc-reply']['rpc']['show']['client'].has_key('primary-virtual-router'):
-    #                 result = in_use(client_username,
-    #                                 h['rpc-reply']['rpc']['show']['client']['primary-virtual-router']['client'])
-    #     except KeyError, e:
-    #         raise Exception(
-    #             "While getting list of connection from get_client() the response did not contain the expected data. VPN: %s. Exception message: %s" % (
-    #             vpn, str(e)))
-    #     else:
-    #         return result.count(True) > 0
-    #
-    # @DeprecationWarning
-    # def does_client_username_exist(self, client_username, vpn):
-    #     """
-    #     Returns boolean if client username exists inside vpn
-    #     """
-    #     response = self.get_client_username(client_username, vpn)
-    #     try:
-    #         result = [x for x in response if
-    #                   x['rpc-reply']['rpc']['show']['client-username']['client-usernames'] != None and
-    #                   x['rpc-reply']['rpc']['show']['client-username']['client-usernames']['client-username'][
-    #                       'client-username'] == client_username]
-    #     except TypeError, e:
-    #         raise Exception("Client username not consistent across all nodes. Message: %s" % str(e))
-    #     else:
-    #         if len(result) > 0 and len(result) < len(response):
-    #             msg = "Client username not consistent across all nodes, SEMP: %s" % str(result)
-    #             logging.error(msg)
-    #             raise Exception(msg)
-    #         elif len(result) == len(response):
-    #             return True
-    #         else:
-    #             return False
-    #
-    # @DeprecationWarning
-    # def is_client_username_enabled(self, client_username, vpn):
-    #     """
-    #     Returns boolean if client username inside vpn is enabled
-    #     """
-    #     response = self.get_client_username(client_username, vpn)
-    #     evaluate = lambda x: x['client-username'] == client_username and x['enabled'] == 'true'
-    #     result = [evaluate(x['rpc-reply']['rpc']['show']['client-username']['client-usernames']['client-username']) for
-    #               x in response
-    #               if x['rpc-reply']['rpc']['show']['client-username']['client-usernames'] != None]
-    #     if len(result) == 0:
-    #         raise Exception("Client username %s not found" % client_username)
-    #     elif len(result) < len(response):
-    #         raise Exception("Client username %s not consistent. Does not exist on all nodes" % client_username)
-    #     if (not result[0]) in result:
-    #         raise Exception("Client username %s not consistent. Enabled and disabled on some nodes" % client_username)
-    #     else:
-    #         return result[0]
-    #
-    # @DeprecationWarning
-    # def get_client_username(self, clientusername, vpn, detail=False, **kwargs):
-    #     """
-    #     Get client username details
-    #
-    #     Example:
-    #         >>> c = SolaceAPI("dev")
-    #         >>> c.get_client_username("%s_testvpn", "%s_testvpn")
-    #         {'reply': {u'show': {u'client-username': {u'client-usernames': {u'client-username': {u'profile': u'glassfish', u'acl-profile': u'dev_testvpn', u'guaranteed-endpoint-permission-override': u'false', u'client-username': u'dev_testvpn', u'enabled': u'true', u'message-vpn': u'dev_testvpn', u'password-configured': u'true', u'num-clients': u'0', u'num-endpoints': u'2', u'subscription-manager': u'false', u'max-connections': u'500', u'max-endpoints': u'16000'}}}}}}
-    #
-    #     """
-    #
-    #     return self.manage("SolaceUser").get(username=clientusername, vpn_name=vpn)
-    #
-    # @DeprecationWarning
-    # def get_client(self, client, vpn, detail=False, **kwargs):
-    #     """ Get Client details """
-    #     try:
-    #         request = SolaceXMLBuilder(version=self.version)
-    #         request.show.client.name = client
-    #         request.show.client.vpn_name = vpn
-    #         if detail:
-    #             request.show.client.detail
-    #         return self.rpc(str(request))
-    #     except:
-    #         raise
-    #
-    # @DeprecationWarning
-    # def get_vpn(self, vpn, stats=False):
-    #     """ Get VPN details """
-    #     try:
-    #         request = SolaceXMLBuilder(version=self.version)
-    #         request.show.message_vpn.vpn_name = vpn
-    #         if stats:
-    #             request.show.message_vpn.stats
-    #         return self.rpc(str(request))
-    #     except:
-    #         raise
-    #
-    # @DeprecationWarning
-    # def list_vpns(self, vpn):
-    #     try:
-    #         request = SolaceXMLBuilder(version=self.version)
-    #         request.show.message_vpn.vpn_name = vpn
-    #         response = self.rpc(str(request))
-    #         # try:
-    #         return [vpn['name'] for vpn in response[0]['rpc-reply']['rpc']['show']['message-vpn'][
-    #             'vpn']]  # ['replication']['message-vpns']['message-vpn']]
-    #         # except:
-    #         #    return [response[0]['rpc-reply']['rpc']['show']['message-vpn']['vpn']]
-    #     except:
-    #         raise
-
-    # def rpc(self, xml_and_kwargs):
-    #     logging.info("Unpacking tuple")
-    #     self.rpc(xml_and_kwargs[0], **xml_and_kwargs[1])
-
-
-
     def rpc(self, xml, allowfail=False, primaryOnly=False, backupOnly=False, xml_response=False, **kwargs):
         """
         Execute a SEMP command on the appliance(s), call with a string representation
@@ -516,11 +324,12 @@ class SolaceAPI:
             data response list as from appliances. Json-like data
 
         Example:
+            >>> from libsolace.SolaceXMLBuilder import SolaceXMLBuilder
             >>> conn = SolaceAPI("dev")
-            >>> xb = SolaceXMLBuilder(version = conn.version)
-            >>> xb.show.version
+            >>> conn.x = SolaceXMLBuilder(version = conn.version)
+            >>> conn.x.show.version
             OrderedDict()
-            >>> type(conn.rpc(str(xb)))
+            >>> type(conn.rpc(str(conn.x)))
             <type 'list'>
 
         """
@@ -543,8 +352,11 @@ class SolaceAPI:
         elif isinstance(xml, str):
             pass
 
+        elif isinstance(xml, SolaceXMLBuilder):
+            xml = str(xml)
+
         else:
-            logging.warn("I dont recognize this type of rpc: %s" % xml)
+            logging.warn("I dont recognize this type of rpc: %s type: %s" % (xml, type(xml)))
             raise Exception("Not a valid RPC argument")
 
         responses = None
@@ -597,25 +409,15 @@ class SolaceAPI:
 
         Example:
             >>> api = SolaceAPI("dev")
-            >>> api.manage("SolaceUser").check_client_profile_exists(client_profile="glassfish")
-            True
-            >>> api.manage("SolaceUser", client_profile="glassfish", acl_profile="test", username="foo", password="bar", vpn_name="%s_testvpn").commands.commands
-            [<rpc semp-version="soltr/6_0"><create><client-username><username>foo</username><vpn-name>%s_testvpn</vpn-name></client-username></create></rpc>, <rpc semp-version="soltr/6_0"><client-username><username>foo</username><vpn-name>%s_testvpn</vpn-name><client-profile><name>glassfish</name></client-profile></client-username></rpc>, <rpc semp-version="soltr/6_0"><client-username><username>foo</username><vpn-name>%s_testvpn</vpn-name><acl-profile><name>test</name></acl-profile></client-username></rpc>, <rpc semp-version="soltr/6_0"><client-username><username>foo</username><vpn-name>%s_testvpn</vpn-name><no><guaranteed-endpoint-permission-override/></no></client-username></rpc>, <rpc semp-version="soltr/6_0"><client-username><username>foo</username><vpn-name>%s_testvpn</vpn-name><no><subscription-manager/></no></client-username></rpc>, <rpc semp-version="soltr/6_0"><client-username><username>foo</username><vpn-name>%s_testvpn</vpn-name><password><password>bar</password></password></client-username></rpc>, <rpc semp-version="soltr/6_0"><client-username><username>foo</username><vpn-name>%s_testvpn</vpn-name><no><shutdown/></no></client-username></rpc>]
-            >>> api.manage("SolaceUser").get(username="%s_testvpn", vpn_name="%s_testvpn")
-            {'reply': {u'show': {u'client-username': {u'client-usernames': {u'client-username': {u'profile': u'glassfish', u'acl-profile': u'dev_testvpn', u'guaranteed-endpoint-permission-override': u'false', u'client-username': u'dev_testvpn', u'enabled': u'true', u'message-vpn': u'dev_testvpn', u'password-configured': u'true', u'num-clients': u'0', u'num-endpoints': u'2', u'subscription-manager': u'false', u'max-connections': u'500', u'max-endpoints': u'16000'}}}}}}
-
+            >>> p1 = api.manage("NullPlugin")
+            >>> p1.some_method("foo", bar="baz")
+            (('foo',), {'bar': 'baz'})
+            >>> p2 = api.manage("NullPlugin", a="a")
+            >>> p2.kwargs['a']
+            'a'
         """
 
         plugin = libsolace.plugin_registry(plugin_name, **kwargs)
         logging.debug("Setting up the plugin instance with api and kwargs")
         return plugin(api=self, **kwargs)
 
-# if __name__ == "__main__":
-#     import doctest
-#     import logging
-#     import sys
-#
-#     logging.basicConfig(format='[%(module)s] %(filename)s:%(lineno)s %(asctime)s %(levelname)s %(message)s',
-#                         stream=sys.stdout)
-#     logging.getLogger().setLevel(logging.INFO)
-#     doctest.testmod()

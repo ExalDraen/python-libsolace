@@ -6,71 +6,55 @@ updating the property and re-enabling the queue!
 
 
 """
-
+import sys
 import logging
-logging.basicConfig(level=logging.DEBUG, format='[gitti] %(asctime)s %(levelname)s %(message)s')
+
+logging.basicConfig(format='%(filename)s:%(lineno)s %(levelname)s %(message)s', stream=sys.stdout)
+logging.getLogger("urllib3").setLevel(logging.WARNING)
 import libsolace.settingsloader as settings
 from libsolace.SolaceAPI import SolaceAPI
-from libsolace.SolaceXMLBuilder import SolaceXMLBuilder
-from libsolace.SolaceCommandQueue import SolaceCommandQueue
 from optparse import OptionParser
 import sys
 import pprint
 
+queues = []
 
-queues = ['company.some.queue11']
 
-def generateXML(vpn_name=None, queues=None):
+def generateXML(vpn_name=None, queues=None, api=None):
     """
-    :param vpn_name: string name of vpn
-    :param queues: list of queues to manipulate
+    @keyword api:
+    @type api: SolaceAPI
+    @keyword vpn_name: string name of vpn
+    @keyword queues: list of queues to manipulate
     :return: commands
     """
     # commandQueue is used to stack and validate solace commands
-    commands = SolaceCommandQueue()
+    commands = []
+
 
     try:
         for queue in queues:
-            # Disable egress
-            '''
-            <rpc xmlns="http://www.solacesystems.com/semp/topic_routing/6_0">
-              <message-spool>
-                <vpn-name>test_dev_keghol</vpn-name>
-                <queue>
-                  <name>testqueue</name>
-                  <shutdown>
-                    <egress/>
-                  </shutdown>
-                </queue>
-              </message-spool>
-            </rpc>
-            '''
-            cmd = SolaceXMLBuilder("Shutttingdown egress for queue:%s" % queue)
-            cmd.message_spool.vpn_name = vpn_name
-            cmd.message_spool.queue.name = queue
-            cmd.message_spool.queue.shutdown.egress
-            commands.enqueue(cmd)
 
-            # Open Access
-            cmd = SolaceXMLBuilder("Settings Queue %s Permission to modify-topic" % queue)
-            cmd.message_spool.vpn_name = vpn_name
-            cmd.message_spool.queue.name = queue
-            cmd.message_spool.queue.permission.all
-            cmd.message_spool.queue.permission.modify_topic
-            commands.enqueue(cmd)
+            commands.append(api.manage(settings.SOLACE_QUEUE_PLUGIN).shutdown_egress(shutdown_on_apply=True,
+                                                                               vpn_name=vpn_name,
+                                                                               queue_name=queue))
 
-            # Enable the Queue
-            cmd = SolaceXMLBuilder("Enabling Queue %s" % queue)
-            cmd.message_spool.vpn_name = vpn_name
-            cmd.message_spool.queue.name = queue
-            cmd.message_spool.queue.no.shutdown.full
-            commands.enqueue(cmd)
+
+            commands.append(api.manage(settings.SOLACE_QUEUE_PLUGIN).permission(permission="modify-topic",
+                                                                          shutdown_on_apply=True,
+                                                                          vpn_name=vpn_name,
+                                                                          queue_name=queue))
+
+            commands.append(api.manage(settings.SOLACE_QUEUE_PLUGIN).enable(vpn_name=vpn_name,
+                                                                            queue_name=queue))
+
 
     except Exception, e:
         print("Error %s" % e)
 
     print("Returning the plan")
     return commands
+
 
 if __name__ == '__main__':
     """ parse opts, read site.xml, start provisioning vpns. """
@@ -83,6 +67,8 @@ if __name__ == '__main__':
                       help="literal name of vpn, eg: pt1_domainevent")
     parser.add_option("-t", "--testmode", action="store_true", dest="testmode",
                       default=False, help="only test configuration and exit")
+    parser.add_option("-q", "--queues", action="store", type="string", dest="queues",
+                      help="comma separated list of queues")
 
     (options, args) = parser.parse_args()
 
@@ -92,14 +78,18 @@ if __name__ == '__main__':
     if not options.vpn_name:
         parser.print_help()
         sys.exit()
+    if not options.queues:
+        parser.print_help()
+        sys.exit()
     if options.testmode:
         logging.info("TEST MODE ACTIVE!!!")
 
     settings.env = options.env.lower()
+    queues = options.queues.split(',')
 
     logging.info("Connecting to appliance in %s, testmode:%s" % (settings.env, options.testmode))
     connection = SolaceAPI(settings.env, testmode=options.testmode)
-    commands = generateXML(vpn_name=options.vpn_name, queues=queues)
+    commands = generateXML(vpn_name=options.vpn_name, queues=queues, api=connection)
 
     print("The following queues will be manipulated in %s environment! " % settings.env)
     pprint.pprint(queues)
@@ -107,7 +97,7 @@ if __name__ == '__main__':
     s = raw_input('Do you want to continue? N/y? ')
 
     if s.lower() == 'y':
-        for cmd in commands.commands:
-            connection.rpc(str(cmd))
+        for cmd in commands:
+            connection.rpc(cmd)
     else:
         print("chickening out...")

@@ -14,6 +14,7 @@ class SolaceReplyHandler(object):
     ignoring the "primary" if its NOT the 1st host in the "MGMT" config
 
     Example:
+        >>> from libsolace.SolaceReply import SolaceReplyHandler
         >>> srh = SolaceReplyHandler([{'HOST': 'http://solace2/SEMP', u'rpc-reply': {u'rpc': {u'show': {u'client-username': {u'client-usernames': {u'client-username': {u'profile': u'glassfish', u'acl-profile': u'dev_testvpn', u'max-endpoints': u'16000', u'client-username': u'dev_testvpn', u'enabled': u'true', u'message-vpn': u'dev_testvpn', u'password-configured': u'true', u'num-clients': u'0', u'num-endpoints': u'2', u'subscription-manager': u'false', u'max-connections': u'500', u'guaranteed-endpoint-permission-override': u'false'}}}}}, u'execute-result': {u'@code': u'ok'}, u'@semp-version': u'soltr/6_0'}}])
         >>> str(srh.reply.show.client_username.client_usernames.client_username.profile)
         'glassfish'
