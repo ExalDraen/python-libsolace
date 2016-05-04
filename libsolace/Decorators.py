@@ -80,7 +80,7 @@ def before(method_name, skip_before=False):
     return wrap
 
 
-def only_on_shutdown(entity, force=False):
+def only_on_shutdown(entity):
     """
     Only calls the method if the shutdown_on_apply rules apply to the `entity` type. The entity can be either `queue` or
     `user`.
@@ -122,7 +122,7 @@ def only_on_shutdown(entity, force=False):
         def wrapped_f(*args, **kwargs):
 
             # if force, return the method to allow exec
-            if force:
+            if "force" in kwargs and kwargs.get('force'):
                 args[0].set_exists(True)
                 return f(*args, **kwargs)
 
@@ -141,7 +141,7 @@ def only_on_shutdown(entity, force=False):
     return wrap
 
 
-def only_if_not_exists(entity, data_path, primaryOnly=False, backupOnly=False, force=False):
+def only_if_not_exists(entity, data_path, primaryOnly=False, backupOnly=False):
     """
     Call the method only if the Solace object does NOT exist in the Solace appliance.
 
@@ -181,7 +181,7 @@ def only_if_not_exists(entity, data_path, primaryOnly=False, backupOnly=False, f
             logging.info(kwargs)
 
             # force kwarg, just return the method to allow exec
-            if force:
+            if "force" in kwargs and kwargs.get('force'):
                 args[0].set_exists(True)
                 return f(*args, **kwargs)
 
@@ -267,7 +267,7 @@ def only_if_not_exists(entity, data_path, primaryOnly=False, backupOnly=False, f
     return wrap
 
 
-def only_if_exists(entity, data_path, primaryOnly=False, backupOnly=False, force=False):
+def only_if_exists(entity, data_path, primaryOnly=False, backupOnly=False, **kwargs):
     """ The inverse of :func:`only_if_not_exists` """
 
     def wrap(f):
@@ -282,9 +282,12 @@ def only_if_exists(entity, data_path, primaryOnly=False, backupOnly=False, force
             module = get_calling_module()
 
             # force kwarg, just return the method to allow exec
-            if force:
+            if "force" in kwargs and kwargs.get('force'):
+                logging.info("Force being used, returning obj")
                 args[0].set_exists(True)
                 return f(*args, **kwargs)
+            else:
+                logging.info("Not forcing return of object")
 
             # determine if were checking both or a single node
             if primaryOnly:

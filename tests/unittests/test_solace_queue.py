@@ -30,12 +30,7 @@ class TestSolaceQueue(unittest.TestCase):
                                           vpn_name="default")
         self.assertTrue(isinstance(self.plugin.commands.commands, list))
         print(self.plugin.commands.commands[0])
-        self.assertEqual(self.plugin.commands.commands[0], (
-        '<rpc semp-version="%s"><show><queue><name>solacetest.prov.queue</name><vpn-name>default</vpn-name></queue></show></rpc>' % self.api.version,
-        {'queues': [{'name': 'solacetest.prov.queue',
-                     'queue_config': {'retries': 0, 'consume': 'all', 'exclusive': 'true', 'max_bind_count': 10,
-                                      'queue_size': 1024, 'owner': 'default'}}], 'queue_name': 'solacetest.prov.queue',
-         'primaryOnly': True, 'vpn_name': 'default'}))
+        self.assertEqual(self.plugin.commands.commands[0], ('<rpc semp-version="soltr/7_1_1"><message-spool><vpn-name>default</vpn-name><create><queue><name>solacetest.prov.queue</name></queue></create></message-spool></rpc>', {'queues': [{'name': 'solacetest.prov.queue', 'queue_config': {'retries': 0, 'consume': 'all', 'exclusive': 'true', 'max_bind_count': 10, 'queue_size': 1024, 'owner': 'default'}}], 'queue_name': 'solacetest.prov.queue', 'primaryOnly': True, 'vpn_name': 'default'}))
 
     def test_get_queue(self):
         xml = self.plugin.get(queue_name="please.dont.exist", vpn_name="default")

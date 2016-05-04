@@ -66,5 +66,5 @@ class PrePostCaller:
 
 
 def get_plugin_from_api(api, plugin_name, **kwargs):
-    plugin = PrePostCaller(api.manage(plugin_name, **kwargs), api=api)
-    return plugin
+    # plugin = PrePostCaller(api.manage(plugin_name, **kwargs), api=api)
+    return api.manage(plugin_name, **kwargs)

@@ -2,7 +2,7 @@ import logging
 import libsolace
 from libsolace.Decorators import only_if_not_exists, only_if_exists, primary, backup
 from libsolace.SolaceReply import SolaceReplyHandler
-from libsolace.plugin import Plugin
+from libsolace.plugin import Plugin, PluginResponse
 from libsolace.SolaceCommandQueue import SolaceCommandQueue
 from libsolace.SolaceXMLBuilder import SolaceXMLBuilder
 from libsolace.util import get_key_from_kwargs
@@ -362,26 +362,31 @@ Example:
         return (str(self.api.x), kwargs)
 
     def list_vpns(self, **kwargs):
-        """Returns a list of vpns
+        """Returns a list of vpns from first / primary node only
 
-    :param vpn_name: the vpn_name search pattern to apply.
-    :return:
+        :param vpn_name: the vpn_name or search pattern
+        :type vpn_name: str
+        :return:
 
-Example:
+        Example:
 
-```python
->>> api = SolaceAPI("dev")
->>> list_dict = api.manage("SolaceVPN").list_vpns(vpn_name="*")
-```
+        >>> api = SolaceAPI("dev")
+        >>> list_dict = api.manage("SolaceVPN").list_vpns(vpn_name="*")
+
 
         """
         vpn_name = get_key_from_kwargs("vpn_name", kwargs)
 
         self.api.x = SolaceXMLBuilder("Getting list of VPNS", version=self.api.version)
         self.api.x.show.message_vpn.vpn_name = vpn_name
-        response = SolaceReplyHandler(self.api.rpc(str(self.api.x), primaryOnly=True))
 
-        return [vpn['name'] for vpn in response.reply.show.message_vpn.vpn]
+        self.commands.enqueue(PluginResponse(str(self.api.x), **kwargs))
+        response = self.api.rpc(PluginResponse(str(self.api.x), **kwargs))
+
+        # response = SolaceReplyHandler(self.api.rpc(str(self.api.x), primaryOnly=True))
+        # logging.info(response)
+
+        return [vpn['name'] for vpn in response[0]['rpc-reply']['rpc']['show']['message-vpn']['vpn']]
 
     def __getitem__(self, k):
         return self.__dict__[k]

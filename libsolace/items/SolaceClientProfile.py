@@ -99,7 +99,7 @@ class SolaceClientProfile(Plugin):
             self.allow_transacted_sessions(**kwargs)
 
     def get(self, **kwargs):
-        """Returns a ClientProfile immediately
+        """Returns a ClientProfile immediately from both appliances
 
         Example:
 
@@ -130,7 +130,7 @@ class SolaceClientProfile(Plugin):
             self.api.x.show.client_profile.details
         # enqueue to validate
         self.commands.enqueue(PluginResponse(str(self.api.x), **kwargs))
-        return SolaceReplyHandler(self.api.rpc(str(self.api.x)))
+        return self.api.rpc(PluginResponse(str(self.api.x), **kwargs))
 
     # @only_if_not_exists('get', 'rpc-reply.rpc.show.message-vpn.vpn')
     def new_client_profile(self, **kwargs):
