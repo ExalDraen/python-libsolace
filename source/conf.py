@@ -14,6 +14,10 @@
 
 import sys
 import os
+import logging
+logging.basicConfig(format='%(filename)s:%(lineno)s %(levelname)s %(message)s', stream=sys.stdout)
+logging.getLogger("urllib3").setLevel(logging.WARNING)
+logging.getLogger().setLevel(logging.CRITICAL)
 
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the

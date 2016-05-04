@@ -1,10 +1,9 @@
 import sys
 import logging
 import libsolace
-from libsolace.plugin import Plugin
+from libsolace.plugin import Plugin, PluginResponse
 from libsolace.SolaceCommandQueue import SolaceCommandQueue
 from libsolace.SolaceXMLBuilder import SolaceXMLBuilder
-from libsolace.items.SolaceUser import SolaceUser
 from libsolace.util import get_key_from_kwargs
 from libsolace.Exceptions import *
 from libsolace.Decorators import only_on_shutdown
@@ -138,16 +137,21 @@ class SolaceUsers(Plugin):
         Checks if a client_profile exists on the appliance for linking.
 
         Example:
-            >>> foo = SolaceUser(username="joe", environment="dev", client_profile="glassfish")
-            >>> foo.check_client_profile_exists()
-            >>> from libsolace.SolaceAPI import SolaceAPI
-            >>> apic = SolaceAPI("dev")
-            >>> foo = SolaceUser(api=apic)
-            >>> foo.check_client_profile_exists(client_profile="glassfish")
+
+        >>> from libsolace.SolaceAPI import SolaceAPI
+        >>> apic = SolaceAPI("dev")
+        >>> foo = apic.manage("SolaceUser")
+        >>> foo.check_client_profile_exists(client_profile="default")
+        True
+
+        :param client_profile: the client profile name
+        :type client_profile: str
+        :return: boolean
+        :rtype: bool
 
         """
 
-        client_profile = kwargs.get('client_profile')
+        client_profile = get_key_from_kwargs('client_profile', kwargs)
 
         logging.info('Checking if client_profile is present on devices')
         self.api.x = SolaceXMLBuilder("Checking client_profile %s is present on device" % client_profile,
@@ -162,7 +166,14 @@ class SolaceUsers(Plugin):
         return True
 
     def check_acl_profile_exists(self, **kwargs):
-        acl_profile = kwargs.get('acl_profile')
+        """ Check if the acl profile already exists
+
+        :param acl_profile: the acl profile name
+        :type acl_profile: str
+        :return: boolean
+        :rtype: bool
+        """
+        acl_profile = get_key_from_kwargs('acl_profile', kwargs)
 
         logging.info('Checking if acl_profile is present on devices')
         self.api.x = SolaceXMLBuilder("Checking acl_profile %s is present on device" % acl_profile,
@@ -177,25 +188,45 @@ class SolaceUsers(Plugin):
         return True
 
     def create_user(self, **kwargs):
-        username = kwargs.get('username')
-        vpn_name = kwargs.get('vpn_name')
+        """
+        Create the user
+
+        :param username: the username
+        :type username: str
+        :param vpn_name: the vpn name
+        :type vpn_name: str
+        :rtype: plugin.PluginResponse
+        :return: SEMP request
+
+        """
+        username = get_key_from_kwargs('username', kwargs)
+        vpn_name = get_key_from_kwargs('vpn_name', kwargs)
 
         self.api.x = SolaceXMLBuilder("Creating User %s" % username, version=self.api.version)
         self.api.x.create.client_username.username = username
         self.api.x.create.client_username.vpn_name = vpn_name
-        self.commands.enqueue(self.api.x)
-        return self.api.x;
+        self.commands.enqueue(PluginResponse(str(self.api.x), **kwargs))
+        return PluginResponse(str(self.api.x), **kwargs)
 
     @only_on_shutdown('user')
     def disable_user(self, **kwargs):
         """
         Disable the user ( suspending pub/sub )
 
+        :param username: the username
+        :type username: str
+        :param vpn_name: the vpn name
+        :type vpn_name: str
+        :param shutdown_on_apply: see :func:`Kwargs.shutdown_on_apply`
+        :type shutdown_on_apply: bool / char
+        :rtype: plugin.PluginResponse
+        :return: SEMP request
+
         """
 
-        username = kwargs.get('username')
-        vpn_name = kwargs.get('vpn_name')
-        shutdown_on_apply = kwargs.get('shutdown_on_apply')
+        username = get_key_from_kwargs('username', kwargs)
+        vpn_name = get_key_from_kwargs('vpn_name', kwargs)
+        shutdown_on_apply = get_key_from_kwargs('shutdown_on_apply', kwargs)
 
         if (shutdown_on_apply == 'b') or (shutdown_on_apply == 'u') or (shutdown_on_apply == True):
             # Disable / Shutdown User ( else we cant change profiles )
@@ -203,8 +234,8 @@ class SolaceUsers(Plugin):
             self.api.x.client_username.username = username
             self.api.x.client_username.vpn_name = vpn_name
             self.api.x.client_username.shutdown
-            self.commands.enqueue(self.api.x)
-            return self.api.x
+            self.commands.enqueue(PluginResponse(str(self.api.x), **kwargs))
+            return PluginResponse(str(self.api.x), **kwargs)
         else:
             logging.warning(
                 "Not disabling User, commands could fail since shutdown_on_apply = %s" % self.shutdown_on_apply)
@@ -212,10 +243,22 @@ class SolaceUsers(Plugin):
 
     @only_on_shutdown('user')
     def set_client_profile(self, **kwargs):
+        """
+        set client profile
 
-        username = kwargs.get('username')
-        vpn_name = kwargs.get('vpn_name')
-        client_profile = kwargs.get('client_profile')
+        :param username: the username
+        :type username: str
+        :param vpn_name: the vpn name
+        :type vpn_name: str
+        :param client_profile: name of the profile
+        :type client_profile: str
+        :rtype: plugin.PluginResponse
+        :return: SEMP request
+        """
+
+        username = get_key_from_kwargs('username', kwargs)
+        vpn_name = get_key_from_kwargs('vpn_name', kwargs)
+        client_profile = get_key_from_kwargs('client_profile', kwargs)
 
         # Client Profile
         self.api.x = SolaceXMLBuilder("Setting User %s client profile to %s" % (username, client_profile),
@@ -223,28 +266,50 @@ class SolaceUsers(Plugin):
         self.api.x.client_username.username = username
         self.api.x.client_username.vpn_name = vpn_name
         self.api.x.client_username.client_profile.name = client_profile
-        self.commands.enqueue(self.api.x)
-        return self.api.x
+        self.commands.enqueue(PluginResponse(str(self.api.x), **kwargs))
+        return PluginResponse(str(self.api.x), **kwargs)
 
     @only_on_shutdown('user')
     def set_acl_profile(self, **kwargs):
+        """
+        set acl profile
 
-        username = kwargs.get('username')
-        vpn_name = kwargs.get('vpn_name')
-        acl_profile = kwargs.get('acl_profile')
+        :param username: the username
+        :type username: str
+        :param vpn_name: the vpn name
+        :type vpn_name: str
+        :param acl_profile: name of the profile
+        :type acl_profile: str
+        :rtype: plugin.PluginResponse
+        :return: SEMP request
+        """
+
+        username = get_key_from_kwargs('username', kwargs)
+        vpn_name = get_key_from_kwargs('vpn_name', kwargs)
+        acl_profile = get_key_from_kwargs('acl_profile', kwargs)
 
         # Set client user profile
         self.api.x = SolaceXMLBuilder("Set User %s ACL Profile to %s" % (username, vpn_name), version=self.api.version)
         self.api.x.client_username.username = username
         self.api.x.client_username.vpn_name = vpn_name
         self.api.x.client_username.acl_profile.name = acl_profile
-        self.commands.enqueue(self.api.x)
-        return self.api.x
+        self.commands.enqueue(PluginResponse(str(self.api.x), **kwargs))
+        return PluginResponse(str(self.api.x), **kwargs)
 
     def no_guarenteed_endpoint(self, **kwargs):
+        """
+        no guaranteed endpoint
 
-        username = kwargs.get('username')
-        vpn_name = kwargs.get('vpn_name')
+        :param username: the username
+        :type username: str
+        :param vpn_name: the vpn name
+        :type vpn_name: str
+        :rtype: plugin.PluginResponse
+        :return: SEMP request
+        """
+
+        username = get_key_from_kwargs('username', kwargs)
+        vpn_name = get_key_from_kwargs('vpn_name', kwargs)
 
         # No Guarenteed Endpoint
         self.api.x = SolaceXMLBuilder("Default User %s guaranteed endpoint override" % username,
@@ -252,54 +317,79 @@ class SolaceUsers(Plugin):
         self.api.x.client_username.username = username
         self.api.x.client_username.vpn_name = vpn_name
         self.api.x.client_username.no.guaranteed_endpoint_permission_override
-        self.commands.enqueue(self.api.x)
-        return self.api.x
+        self.commands.enqueue(PluginResponse(str(self.api.x), **kwargs))
+        return PluginResponse(str(self.api.x), **kwargs)
 
     def no_subscription_manager(self, **kwargs):
+        """
+        no subscription manager
 
-        username = kwargs.get('username')
-        vpn_name = kwargs.get('vpn_name')
+        :param username: the username
+        :type username: str
+        :param vpn_name: the vpn name
+        :type vpn_name: str
+        :rtype: plugin.PluginResponse
+        :return: SEMP request
+        """
+
+        username = get_key_from_kwargs('username', kwargs)
+        vpn_name = get_key_from_kwargs('vpn_name', kwargs)
 
         # No Subscription Managemer
         self.api.x = SolaceXMLBuilder("Default User %s subscription manager" % username, version=self.api.version)
         self.api.x.client_username.username = username
         self.api.x.client_username.vpn_name = vpn_name
         self.api.x.client_username.no.subscription_manager
-        self.commands.enqueue(self.api.x)
-        return self.api.x
+        self.commands.enqueue(PluginResponse(str(self.api.x), **kwargs))
+        return PluginResponse(str(self.api.x), **kwargs)
 
     def set_password(self, **kwargs):
+        """
+        Set the user password
 
-        username = kwargs.get('username')
-        vpn_name = kwargs.get('vpn_name')
-        password = kwargs.get('password')
+        :param username: the username
+        :type username: str
+        :param vpn_name: the vpn name
+        :type vpn_name: str
+        :param password: the password
+        :type password: str
+        :rtype: plugin.PluginResponse
+        :return: SEMP request
+        """
+
+        username = get_key_from_kwargs('username', kwargs)
+        vpn_name = get_key_from_kwargs('vpn_name', kwargs)
+        password = get_key_from_kwargs('password', kwargs)
 
         # Set User Password
         self.api.x = SolaceXMLBuilder("Set User %s password" % username, version=self.api.version)
         self.api.x.client_username.username = username
         self.api.x.client_username.vpn_name = vpn_name
         self.api.x.client_username.password.password = password
-        self.commands.enqueue(self.api.x)
-        return self.api.x
+        self.commands.enqueue(PluginResponse(str(self.api.x), **kwargs))
+        return PluginResponse(str(self.api.x), **kwargs)
 
     def no_shutdown_user(self, **kwargs):
+        """
+        Enable the user
 
-        username = kwargs.get('username')
-        vpn_name = kwargs.get('vpn_name')
+        :param username: the username
+        :type username: str
+        :param vpn_name: the vpn name
+        :type vpn_name: str
+        :rtype: plugin.PluginResponse
+        :return: SEMP request
+        """
+
+        username = get_key_from_kwargs('username', kwargs)
+        vpn_name = get_key_from_kwargs('vpn_name', kwargs)
 
         # Enable User
         self.api.x = SolaceXMLBuilder("Enable User %s" % username, version=self.api.version)
         self.api.x.client_username.username = username
         self.api.x.client_username.vpn_name = vpn_name
         self.api.x.client_username.no.shutdown
-        self.commands.enqueue(self.api.x)
-        return self.api.x
+        self.commands.enqueue(PluginResponse(str(self.api.x), **kwargs))
+        return PluginResponse(str(self.api.x), **kwargs)
 
 
-if __name__ == "__main__":
-    logging.basicConfig(format='[%(module)s] %(filename)s:%(lineno)s %(asctime)s %(levelname)s %(message)s',
-                        stream=sys.stdout)
-    logging.getLogger().setLevel(logging.INFO)
-    import doctest
-
-    doctest.testmod()

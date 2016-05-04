@@ -89,8 +89,8 @@ class SolaceACLProfile(Plugin):
         Example:
 
         >>> api = SolaceAPI("dev")
-        >>> plugin_response = api.manage("SolaceACLProfile").new_acl(name="myprofile", vpn_name="dev_testvpn")
-        >>> api.rpc(plugin_response)
+        >>> request = api.manage("SolaceACLProfile").new_acl(name="myprofile", vpn_name="dev_testvpn")
+        >>> # response = api.rpc(request)
 
         :param name: name of the profile
         :param vpn_name: vpn name
@@ -112,7 +112,8 @@ class SolaceACLProfile(Plugin):
 
         Example:
             >>> api = SolaceAPI("dev")
-            >>> api.rpc(api.manage("SolaceACLProfile").allow_publish(name="myprofile", vpn_name="dev_testvpn"))
+            >>> request = api.manage("SolaceACLProfile").allow_publish(name="myprofile", vpn_name="dev_testvpn")
+            >>> # response = api.rpc(request)
 
         :param name: name of the profile
         :param vpn_name: vpn name
@@ -141,8 +142,8 @@ class SolaceACLProfile(Plugin):
         Example:
 
             >>> api = SolaceAPI("dev")
-            >>> plugin_response = api.manage("SolaceACLProfile").allow_subscribe(name="myprofile", vpn_name="dev_testvpn")
-            >>> api.rpc(plugin_response)
+            >>> request = api.manage("SolaceACLProfile").allow_subscribe(name="myprofile", vpn_name="dev_testvpn")
+            >>> # api.rpc(request)
 
         """
         name = get_key_from_kwargs("name", kwargs)
@@ -167,8 +168,8 @@ class SolaceACLProfile(Plugin):
         Example:
             
             >>> api = SolaceAPI("dev")
-            >>> plugin_response = api.manage("SolaceACLProfile").allow_subscribe(name="myprofile", vpn_name="dev_testvpn")
-            >>> api.rpc(plugin_response)
+            >>> request = api.manage("SolaceACLProfile").allow_subscribe(name="myprofile", vpn_name="dev_testvpn")
+            >>> # response = api.rpc(request)
 
         """
         name = get_key_from_kwargs("name", kwargs)

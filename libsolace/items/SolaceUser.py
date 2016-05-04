@@ -25,26 +25,26 @@ class SolaceUser(Plugin):
     def __init__(self, **kwargs):
         """ Manage the SolaceUser ( client-username )
 
-        @keyword client_username: the username of the client
-        @type client_username: str
-        @keyword password: the password to set ( plaintext )
-        @type password: str
-        @keyword vpn_name: the vpn name
-        @type vpn_name: str
-        @keyword client_profile: the client profile name to associate with, must exist!
-        @type client_profile: str
-        @keyword acl_profile: the acl_profile to associate with, must exist!
-        @type acl_profile: str
-        @keyword shutdown_on_apply: is shutdown permitted boolean or char
-        @type shutdown_on_apply: bool or char b or char u
-        @keyword options: not implemented yet
-        @type options: Options
-        @keyword version: if you want to override the SEMP version for some reason
-        @type version: str
-        @keyword api: the instance of the SolaceAPI if not instantiated via SolaceAPI.manage
-        @type api: SolaceAPI
-        @rtype: list
-        @returns: list of requests that can be performed in a for loop.
+        :param client_username: the username of the client
+        :type client_username: str
+        :param password: the password to set ( plaintext )
+        :type password: str
+        :param vpn_name: the vpn name
+        :type vpn_name: str
+        :param client_profile: the client profile name to associate with, must exist!
+        :type client_profile: str
+        :param acl_profile: the acl_profile to associate with, must exist!
+        :type acl_profile: str
+        :param shutdown_on_apply: is shutdown permitted boolean or char
+        :type shutdown_on_apply: bool or char b or char u
+        :param options: not implemented yet
+        :type options: Options
+        :param version: if you want to override the SEMP version for some reason
+        :type version: str
+        :param api: the instance of the SolaceAPI if not instantiated via SolaceAPI.manage
+        :type api: SolaceAPI
+        :rtype: list
+        :returns: list of requests that can be performed in a for loop.
 
         Example:
         >>> connection = SolaceAPI("dev")
@@ -127,8 +127,8 @@ class SolaceUser(Plugin):
     def requirements(self, **kwargs):
         """ Call the tests before create is attempted, checks for profiles in this case
 
-        @rtype: None
-        @returns: nothing
+        :rtype: None
+        :returns: nothing
 
         """
         logging.info('Pre-Provision Tests')
@@ -141,15 +141,16 @@ class SolaceUser(Plugin):
         Example
 
         >>> connection = SolaceAPI("dev")
-        >>> connection.manage("SolaceUser").get(client_username="dev_testvpn", vpn_name="dev_testvpn")
-        [{'HOST': 'http://solace1.swe1.unibet.com/SEMP', u'rpc-reply': {u'rpc': {u'show': {u'client-username': {u'client-usernames': {u'num-total-client-usernames': u'752', u'max-num-total-client-usernames': u'9002', u'num-dynamic-client-usernames': u'0', u'num-configured-client-usernames': u'752', u'client-username': {u'profile': u'default', u'dynamically-configured': u'false', u'acl-profile': u'default', u'max-endpoints': u'16000', u'client-username': u'default', u'max-connections-service-smf': u'9000', u'enabled': u'false', u'message-vpn': u'default', u'password-configured': u'false', u'num-clients': u'0', u'max-connections-service-web': u'9000', u'num-endpoints': u'0', u'subscription-manager': u'false', u'authorization-group': None, u'max-connections': u'9000', u'num-clients-service-web': u'0', u'guaranteed-endpoint-permission-override': u'false', u'num-clients-service-smf': u'0'}}}}}, u'execute-result': {u'@code': u'ok'}, u'@semp-version': u'soltr/7_1_1'}}, {'HOST': 'http://solace2.swe1.unibet.com/SEMP', u'rpc-reply': {u'rpc': {u'show': {u'client-username': {u'client-usernames': {u'num-total-client-usernames': u'744', u'max-num-total-client-usernames': u'9002', u'num-dynamic-client-usernames': u'0', u'num-configured-client-usernames': u'744', u'client-username': {u'profile': u'default', u'dynamically-configured': u'false', u'acl-profile': u'default', u'max-endpoints': u'16000', u'client-username': u'default', u'max-connections-service-smf': u'9000', u'enabled': u'false', u'message-vpn': u'default', u'password-configured': u'false', u'num-clients': u'0', u'max-connections-service-web': u'9000', u'num-endpoints': u'0', u'subscription-manager': u'false', u'authorization-group': None, u'max-connections': u'9000', u'num-clients-service-web': u'0', u'guaranteed-endpoint-permission-override': u'false', u'num-clients-service-smf': u'0'}}}}}, u'execute-result': {u'@code': u'ok'}, u'@semp-version': u'soltr/7_1_1'}}]
+        >>> reply = connection.manage("SolaceUser").get(client_username="default", vpn_name="default")
+        >>> reply[0]['rpc-reply']['rpc']['show']['client-username']['client-usernames']['client-username']['client-username']
+        u'default'
 
-        @keyword client_username: the username
-        @type client_username: str
-        @keyword vpn_name: the vpn name
-        @type vpn_name: str
-        @rtype: list
-        @returns: the user as a dict from the appliance
+        :param client_username: the username
+        :type client_username: str
+        :param vpn_name: the vpn name
+        :type vpn_name: str
+        :rtype: list
+        :returns: the user as a dict from the appliance
 
         """
 
@@ -190,12 +191,12 @@ class SolaceUser(Plugin):
         <rpc semp-version="soltr/6_0"><create><client-username><username>foo</username><vpn-name>bar</vpn-name>
         </client-username></create></rpc>
 
-        @keyword client_username: the username
-        @type client_username: str
-        @keyword vpn_name: the vpn name
-        @type vpn_name: str
-        @rtype: plugin.PluginResponse
-        @returns: SEMP request
+        :param client_username: the username
+        :type client_username: str
+        :param vpn_name: the vpn name
+        :type vpn_name: str
+        :rtype: plugin.PluginResponse
+        :returns: SEMP request
 
         """
         client_username = get_key_from_kwargs("client_username", kwargs)
@@ -215,12 +216,13 @@ class SolaceUser(Plugin):
 
         >>> api = SolaceAPI("dev")
         >>> client = api.manage("SolaceUser")
-        >>> client.check_client_profile_exists(client_profile="glassfish")
+        >>> client.check_client_profile_exists(client_profile="default")
+        True
 
-        @keyword client_profile: the client profile to check
-        @type client_profile: str
-        @rtype: bool
-        @returns: true or false
+        :param client_profile: the client profile to check
+        :type client_profile: str
+        :rtype: bool
+        :returns: true or false
 
         """
 
@@ -246,11 +248,12 @@ class SolaceUser(Plugin):
         >>> api = SolaceAPI("dev")
         >>> client = api.manage("SolaceUser")
         >>> client.check_acl_profile_exists(acl_profile="myacl")
+        False
 
-        @keyword acl_profile: the client profile to check
-        @type acl_profile: str
-        @rtype: bool
-        @returns: true or false
+        :param acl_profile: the client profile to check
+        :type acl_profile: str
+        :rtype: bool
+        :returns: true or false
         """
         acl_profile = get_key_from_kwargs('acl_profile', kwargs)
 
@@ -277,12 +280,12 @@ class SolaceUser(Plugin):
         <rpc semp-version="soltr/6_0"><create><client-username><username>foo</username><vpn-name>bar</vpn-name>
         </client-username></create></rpc>
 
-        @keyword client_username: the username
-        @type client_username: str
-        @keyword vpn_name: the vpn name
-        @type vpn_name:str
-        @rtype: plugin.PluginResponse
-        @returns: SEMP request
+        :param client_username: the username
+        :type client_username: str
+        :param vpn_name: the vpn name
+        :type vpn_name:str
+        :rtype: plugin.PluginResponse
+        :returns: SEMP request
 
         """
         client_username = get_key_from_kwargs('client_username', kwargs)
@@ -304,14 +307,14 @@ class SolaceUser(Plugin):
         <rpc semp-version="soltr/6_0"><client-username><username>foo</username><vpn-name>bar</vpn-name><shutdown/>
         </client-username></rpc>
 
-        @keyword client_username: the username
-        @type client_username: str
-        @keyword vpn_name: the vpn name
-        @type vpn_name: str
-        @keyword shutdown_on_apply: bool / char
-        @type shutdown_on_apply: bool / char
-        @rtype: plugin.PluginResponse
-        @returns: SEMP request
+        :param client_username: the username
+        :type client_username: str
+        :param vpn_name: the vpn name
+        :type vpn_name: str
+        :param shutdown_on_apply: bool / char
+        :type shutdown_on_apply: bool / char
+        :rtype: plugin.PluginResponse
+        :returns: SEMP request
 
         """
 
@@ -339,23 +342,22 @@ class SolaceUser(Plugin):
 
         Example
         >>> connection = SolaceAPI("dev")
-        >>> xml = []
-        >>> xml.append(connection.manage("SolaceUser").shutdown(client_username="foo", vpn_name="bar", shutdown_on_apply=True))
-        >>> xml.append(connection.manage("SolaceUser").set_client_profile(client_username="foo", vpn_name="bar", client_profile="jboss"))
-        >>> xml.append(connection.manage("SolaceUser").no_shutdown(client_username="foo", vpn_name="bar", shutdown_on_apply=True))
-        >>> for x in xml:
-        >>>     connection.rpc(str(x))
+        >>> requests = []
+        >>> requests.append(connection.manage("SolaceUser").shutdown(client_username="default", vpn_name="default", shutdown_on_apply=True))
+        >>> requests.append(connection.manage("SolaceUser").set_client_profile(client_username="default", vpn_name="default", client_profile="default"))
+        >>> requests.append(connection.manage("SolaceUser").no_shutdown(client_username="default", vpn_name="default", shutdown_on_apply=True))
+        >>> # [api.rpc(r) for r in requests]
 
-        @keyword client_username: the username
-        @type client_username: str
-        @keyword vpn_name: the vpn name
-        @type vpn_name: str
-        @keyword client_profile: the client profile to check
-        @type client_profile: str
-        @keyword shutdown_on_apply: bool / char
-        @type shutdown_on_apply: bool / char
-        @rtype: plugin.PluginResponse
-        @returns: SEMP request
+        :param client_username: the username
+        :type client_username: str
+        :param vpn_name: the vpn name
+        :type vpn_name: str
+        :param client_profile: the client profile to check
+        :type client_profile: str
+        :param shutdown_on_apply: bool / char
+        :type shutdown_on_apply: bool / char
+        :rtype: plugin.PluginResponse
+        :returns: SEMP request
 
         """
         client_username = get_key_from_kwargs('client_username', kwargs)
@@ -378,23 +380,22 @@ class SolaceUser(Plugin):
         Set the acl profile
 
         >>> connection = SolaceAPI("dev")
-        >>> xml = []
-        >>> xml.append(connection.manage("SolaceUser").shutdown(client_username="foo", vpn_name="bar", shutdown_on_apply=True))
-        >>> xml.append(connection.manage("SolaceUser").set_acl_profile(client_username="foo", vpn_name="bar", acl_profile="myprofile"))
-        >>> xml.append(connection.manage("SolaceUser").no_shutdown(client_username="foo", vpn_name="bar", shutdown_on_apply=True))
-        >>> for x in xml:
-        >>>     connection.rpc(str(x))
+        >>> requests = []
+        >>> requests.append(connection.manage("SolaceUser").shutdown(client_username="default", vpn_name="default", shutdown_on_apply=True))
+        >>> requests.append(connection.manage("SolaceUser").set_acl_profile(client_username="default", vpn_name="default", acl_profile="default"))
+        >>> requests.append(connection.manage("SolaceUser").no_shutdown(client_username="default", vpn_name="default", shutdown_on_apply=True))
+        >>> # [api.rpc(r) for r in requests]
 
-        @keyword client_username: the username
-        @type client_username: str
-        @keyword vpn_name: the vpn name
-        @type vpn_name: str
-        @keyword client_profile: the client profile to check
-        @type client_profile: str
-        @keyword shutdown_on_apply: bool / char
-        @type shutdown_on_apply: bool / char
-        @rtype: plugin.PluginResponse
-        @returns: SEMP request
+        :param client_username: the username
+        :type client_username: str
+        :param vpn_name: the vpn name
+        :type vpn_name: str
+        :param client_profile: the client profile to check
+        :type client_profile: str
+        :param shutdown_on_apply: bool / char
+        :type shutdown_on_apply: bool / char
+        :rtype: plugin.PluginResponse
+        :returns: SEMP request
         """
 
         client_username = get_key_from_kwargs('client_username', kwargs)
@@ -416,15 +417,17 @@ class SolaceUser(Plugin):
 
         Example:
 
-        >>> api = SolaceAPI("dev")
-        >>> api.manage("SolaceUser").no_guarenteed_endpoint(client_username="foo", vpn_name="bar")
+        >>> api = SolaceAPI("dev", version="soltr/7_1_1")
+        >>> request = api.manage("SolaceUser").no_guarenteed_endpoint(client_username="foo", vpn_name="bar")
+        >>> request.xml
+        '<rpc semp-version="soltr/7_1_1"><client-username><username>foo</username><vpn-name>bar</vpn-name><no><guaranteed-endpoint-permission-override/></no></client-username></rpc>'
 
-        @keyword client_username: the username
-        @type client_username: str
-        @keyword vpn_name: the vpn name
-        @type vpn_name: str
-        @rtype: plugin.PluginResponse
-        @returns: SEMP request
+        :param client_username: the username
+        :type client_username: str
+        :param vpn_name: the vpn name
+        :type vpn_name: str
+        :rtype: plugin.PluginResponse
+        :returns: SEMP request
         """
 
         client_username = get_key_from_kwargs('client_username', kwargs)
@@ -445,15 +448,17 @@ class SolaceUser(Plugin):
 
         Example:
 
-        >>> api = SolaceAPI("dev")
-        >>> api.manage("SolaceUser").no_subscription_manager(client_username="foo", vpn_name="bar")
+        >>> api = SolaceAPI("dev", version="soltr/7_1_1")
+        >>> request = api.manage("SolaceUser").no_subscription_manager(client_username="foo", vpn_name="bar")
+        >>> request.xml
+        '<rpc semp-version="soltr/7_1_1"><client-username><username>foo</username><vpn-name>bar</vpn-name><no><subscription-manager/></no></client-username></rpc>'
 
-        @keyword client_username: the username
-        @type client_username: str
-        @keyword vpn_name: the vpn name
-        @type vpn_name: str
-        @rtype: plugin.PluginResponse
-        @returns: SEMP request
+        :param client_username: the username
+        :type client_username: str
+        :param vpn_name: the vpn name
+        :type vpn_name: str
+        :rtype: plugin.PluginResponse
+        :returns: SEMP request
         """
 
         client_username = get_key_from_kwargs('client_username', kwargs)
@@ -472,14 +477,14 @@ class SolaceUser(Plugin):
         """
         Sets the client-user's password
 
-        @keyword client_username: the username
-        @type client_username: str
-        @keyword vpn_name: the vpn name
-        @type vpn_name: str
-        @keyword password: the vpn name
-        @type password: str
-        @rtype: plugin.PluginResponse
-        @returns: SEMP request
+        :param client_username: the username
+        :type client_username: str
+        :param vpn_name: the vpn name
+        :type vpn_name: str
+        :param password: the vpn name
+        :type password: str
+        :rtype: plugin.PluginResponse
+        :returns: SEMP request
         """
 
         client_username = get_key_from_kwargs('client_username', kwargs)
@@ -498,12 +503,12 @@ class SolaceUser(Plugin):
         """
         Enable the client-user
 
-        @keyword client_username: the username
-        @type client_username: str
-        @keyword vpn_name: the vpn name
-        @type vpn_name: str
-        @rtype: plugin.PluginResponse
-        @returns: SEMP request
+        :param client_username: the username
+        :type client_username: str
+        :param vpn_name: the vpn name
+        :type vpn_name: str
+        :rtype: plugin.PluginResponse
+        :returns: SEMP request
         """
         client_username = kwargs.get('client_username')
         vpn_name = kwargs.get('vpn_name')
@@ -517,5 +522,3 @@ class SolaceUser(Plugin):
         return PluginResponse(str(self.api.x), **kwargs)
 
 
-if __name__ == "__main__":
-    print("Bootstrapping")

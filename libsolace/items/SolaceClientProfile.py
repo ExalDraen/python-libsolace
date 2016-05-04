@@ -14,11 +14,11 @@ class SolaceClientProfile(Plugin):
 
     Description
     ===========
-        This plugin manages Client Profiles within Solace. Typically you should invoke this plugin via L{SolaceAPI.SolaceAPI}.
+        This plugin manages Client Profiles within Solace. Typically you should invoke this plugin via :class:`libsolace.SolaceAPI.SolaceAPI`
 
-        Please see L{plugin.Plugin} for how plugins are instantiated and used.
+        Please see :class:`libsolace.plugin.Plugin` for how plugins are instantiated and used.
 
-    Example 1:
+    Example of Instantiation outside of SolaceAPI
 
     >>> import libsolace.settingsloader as settings
     >>> import libsolace
@@ -28,7 +28,7 @@ class SolaceClientProfile(Plugin):
     >>> scp = clazz(settings=settings, api=api)
     >>> client_dict = scp.get(api=api, name="default", vpn_name="default")
 
-    Example 2, using SolaceAPI.manage:
+    Example of Instantiation within the SolaceAPI
 
     >>> import libsolace.settingsloader as settings
     >>> from libsolace.SolaceAPI import SolaceAPI
@@ -36,8 +36,6 @@ class SolaceClientProfile(Plugin):
     >>> scp = api.manage("SolaceClientProfile")
     >>> client_dict = scp.get(api=api, name="default", vpn_name="default")
     >>> list_xml = api.manage("SolaceClientProfile", name="myprofile", vpn_name="dev_testvpn").commands.commands
-    >>> for xml in list_xml:
-    >>>    api.rpc(str(xml[0]), **xml[1])
 
     """
 
@@ -58,21 +56,21 @@ class SolaceClientProfile(Plugin):
         >>> client.manage("SolaceClientProfile", name="myprofile", vpn_name="testvpn").commands.commands
         [XML, XML, XML]
 
-        @keyword api: The instance of SolaceAPI if not called from SolaceAPI.manage
+        :param api: The instance of SolaceAPI if not called from SolaceAPI.manage
 
         Optional (Batch/Provision) Mode
 
-        @keyword name: the name of the profile
-        @keyword vpn_name: name of the VPN to scope the ACL to
-        @keyword defaults: dictionary of defaults
-        @keyword max_clients: max clients sharing a username connection limit
-        @type api: SolaceAPI
-        @type name: str
-        @type vpn_name: str
-        @type defaults: dict
-        @type max_clients: int
-        @returns: instance with batch requests on SolaceACLProfile.commands.commands
-        @rtype: SolaceClientProfile
+        :param name: the name of the profile
+        :param vpn_name: name of the VPN to scope the ACL to
+        :param defaults: dictionary of defaults
+        :param max_clients: max clients sharing a username connection limit
+        :type api: SolaceAPI
+        :type name: str
+        :type vpn_name: str
+        :type defaults: dict
+        :type max_clients: int
+        :returns: instance with batch requests on SolaceACLProfile.commands.commands
+        :rtype: SolaceClientProfile
         """
 
         self.api = get_key_from_kwargs("api", kwargs)
@@ -110,14 +108,14 @@ class SolaceClientProfile(Plugin):
         >>> api = SolaceAPI("dev")
         >>> response = api.manage("SolaceClientProfile").get(name="default", vpn_name="default")
 
-        @keyword name: name of the profile
-        @keyword vpn_name: the name of the vpn to scope the request to
-        @keyword details: get more details boolean
-        @type name: str
-        @type vpn_name: str
-        @type details: bool
-        @rtype: libsolace.SolaceReplyHandler
-        @returns: dictionary representation of client profile
+        :param name: name of the profile
+        :param vpn_name: the name of the vpn to scope the request to
+        :param details: get more details boolean
+        :type name: str
+        :type vpn_name: str
+        :type details: bool
+        :rtype: libsolace.SolaceReplyHandler
+        :returns: dictionary representation of client profile
 
         """
         name = get_key_from_kwargs("name", kwargs)
@@ -147,12 +145,12 @@ class SolaceClientProfile(Plugin):
         >>> api = SolaceAPI("dev")
         >>> plugin_response = api.manage("SolaceClientProfile").new_client_profile(name="default", vpn_name="default")
 
-        @keyword name: name of the profile
-        @keyword vpn_name: the name of the vpn to scope the request to
-        @type name: str
-        @type vpn_name: str
-        @returns: dictionary representation of client profile
-        @rtype: plugin.PluginResponse
+        :param name: name of the profile
+        :param vpn_name: the name of the vpn to scope the request to
+        :type name: str
+        :type vpn_name: str
+        :returns: dictionary representation of client profile
+        :rtype: plugin.PluginResponse
 
         """
         name = get_key_from_kwargs("name", kwargs)
@@ -175,12 +173,12 @@ class SolaceClientProfile(Plugin):
         >>> api = SolaceAPI("dev")
         >>> plugin_response = api.manage("SolaceClientProfile").delete(name="default", vpn_name="default")
 
-        @keyword name: name of the profile
-        @keyword vpn_name: the name of the vpn to scope the request to
-        @type name: str
-        @type vpn_name: str
-        @returns: SEMP request
-        @rtype: plugin.PluginResponse
+        :param name: name of the profile
+        :param vpn_name: the name of the vpn to scope the request to
+        :type name: str
+        :type vpn_name: str
+        :returns: SEMP request
+        :rtype: plugin.PluginResponse
         """
         name = get_key_from_kwargs("name", kwargs)
         vpn_name = get_key_from_kwargs("vpn_name", kwargs)
@@ -201,12 +199,12 @@ class SolaceClientProfile(Plugin):
         >>> api = SolaceAPI("dev")
         >>> plugin_response = api.manage("SolaceClientProfile").allow_consume(name="default", vpn_name="default")
 
-        @keyword name: name of the profile
-        @keyword vpn_name: the name of the vpn to scope the request to
-        @type name: str
-        @type vpn_name: str
-        @returns: SEMP request
-        @rtype: plugin.PluginResponse
+        :param name: name of the profile
+        :param vpn_name: the name of the vpn to scope the request to
+        :type name: str
+        :type vpn_name: str
+        :returns: SEMP request
+        :rtype: plugin.PluginResponse
 
         """
         name = get_key_from_kwargs("name", kwargs)
@@ -230,12 +228,12 @@ class SolaceClientProfile(Plugin):
         >>> api = SolaceAPI("dev")
         >>> plugin_response = api.manage("SolaceClientProfile").allow_send(name="default", vpn_name="default")
 
-        @keyword name: name of the profile
-        @keyword vpn_name: the name of the vpn to scope the request to
-        @type name: str
-        @type vpn_name: str
-        @returns: SEMP request
-        @rtype: plugin.PluginResponse
+        :param name: name of the profile
+        :param vpn_name: the name of the vpn to scope the request to
+        :type name: str
+        :type vpn_name: str
+        :returns: SEMP request
+        :rtype: plugin.PluginResponse
 
         """
         name = get_key_from_kwargs("name", kwargs)
@@ -257,14 +255,15 @@ class SolaceClientProfile(Plugin):
         >>> import libsolace.settingsloader as settings
         >>> from libsolace.SolaceAPI import SolaceAPI
         >>> api = SolaceAPI("dev")
-        >>> plugin_response = api.manage("SolaceClientProfile").allow_endpoint_create(name="default", vpn_name="default")
+        >>> request = api.manage("SolaceClientProfile").allow_endpoint_create(name="default", vpn_name="default")
+        >>> # response = api.rpc(request)
 
-        @keyword name: name of the profile
-        @keyword vpn_name: the name of the vpn to scope the request to
-        @type name: str
-        @type vpn_name: str
-        @returns: SEMP request
-        @rtype: plugin.PluginResponse
+        :param name: name of the profile
+        :param vpn_name: the name of the vpn to scope the request to
+        :type name: str
+        :type vpn_name: str
+        :returns: SEMP request
+        :rtype: plugin.PluginResponse
 
         """
         name = get_key_from_kwargs("name", kwargs)
@@ -286,14 +285,15 @@ class SolaceClientProfile(Plugin):
         >>> import libsolace.settingsloader as settings
         >>> from libsolace.SolaceAPI import SolaceAPI
         >>> api = SolaceAPI("dev")
-        >>> plugin_response = api.manage("SolaceClientProfile").allow_transacted_sessions(name="default", vpn_name="default")
+        >>> request = api.manage("SolaceClientProfile").allow_transacted_sessions(name="default", vpn_name="default")
+        >>> # response = api.rpc(request)
 
-        @keyword name: name of the profile
-        @keyword vpn_name: the name of the vpn to scope the request to
-        @type name: str
-        @type vpn_name: str
-        @returns: SEMP request
-        @rtype: plugin.PluginResponse
+        :param name: name of the profile
+        :param vpn_name: the name of the vpn to scope the request to
+        :type name: str
+        :type vpn_name: str
+        :returns: SEMP request
+        :rtype: plugin.PluginResponse
 
         """
         name = get_key_from_kwargs("name", kwargs)
@@ -315,16 +315,17 @@ class SolaceClientProfile(Plugin):
         >>> import libsolace.settingsloader as settings
         >>> from libsolace.SolaceAPI import SolaceAPI
         >>> api = SolaceAPI("dev")
-        >>> plugin_response = api.manage("SolaceClientProfile").set_max_clients(name="default", vpn_name="default", max_clients=500)
+        >>> request = api.manage("SolaceClientProfile").set_max_clients(name="default", vpn_name="default", max_clients=500)
+        >>> # response = api.rpc(request)
 
-        @keyword name: name of the profile
-        @keyword vpn_name: the name of the vpn to scope the request to
-        @keyword max_clients: max number of clients
-        @type name: str
-        @type vpn_name: str
-        @type max_clients: int
-        @returns: SEMP request
-        @rtype: plugin.PluginResponse
+        :param name: name of the profile
+        :param vpn_name: the name of the vpn to scope the request to
+        :param max_clients: max number of clients
+        :type name: str
+        :type vpn_name: str
+        :type max_clients: int
+        :returns: SEMP request
+        :rtype: plugin.PluginResponse
 
         """
         name = get_key_from_kwargs("name", kwargs)
@@ -346,14 +347,21 @@ class SolaceClientProfile(Plugin):
 
         >>> import libsolace.settingsloader as settings
         >>> from libsolace.SolaceAPI import SolaceAPI
-        >>> api = SolaceAPI("dev")
+        >>> plugin = SolaceAPI("dev", version="soltr/7_1_1").manage("SolaceClientProfile")
+        >>> request = plugin.allow_bridging(name="default", vpn_name="default")
+        >>> request.xml
+        '<rpc semp-version="soltr/7_1_1"><client-profile><name>default</name><vpn-name>default</vpn-name><allow-bridge-connections/></client-profile></rpc>'
+        >>> # api.rpc(request)
 
-        @keyword name: name of the profile
-        @keyword vpn_name: the name of the vpn to scope the request to
-        @type name: str
-        @type vpn_name: str
-        @returns: SEMP request
-        @rtype: plugin.PluginResponse
+
+        ""
+
+        :param name: name of the profile
+        :param vpn_name: the name of the vpn to scope the request to
+        :type name: str
+        :type vpn_name: str
+        :returns: SEMP request
+        :rtype: plugin.PluginResponse
 
         """
         name = get_key_from_kwargs("name", kwargs)

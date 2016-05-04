@@ -10,7 +10,8 @@ from libsolace.items.SolaceQueue import SolaceQueue
 
 @libsolace.plugin_registry.register
 class SolaceBridge(Plugin):
-    """ Construct a bridge between two appliance clusters to link specific VPN's """
+    """ Construct a bridge between two appliance clusters to link specific VPN's. This Plugin is still being developed,
+    and is NOT ready for production. """
 
     def __init__(self, testmode=True, shutdown_on_apply=False, options=None, version=None, **kwargs):
         """ Init user object

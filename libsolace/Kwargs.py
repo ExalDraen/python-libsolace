@@ -27,7 +27,7 @@ the VMR due to the fact that we need a SEMP version to initiate communication wi
 appliance SolOS-TR version, you can set it manually with this kwargs while instantiating the SolaceAPI instance.
 
 Example:
-    >>> api = SolaceAPI(version="soltr/7_1_1")
+    >>> api = SolaceAPI("dev", version="soltr/7_1_1")
 
 """
 

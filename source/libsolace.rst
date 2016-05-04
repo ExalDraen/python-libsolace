@@ -10,6 +10,7 @@ Subpackages
 -----------
 
 .. toctree::
+    :maxdepth: 3
 
     libsolace.data
     libsolace.items
