@@ -1,6 +1,7 @@
 /.eggs
 /.git
 /dist
+/build
 /libsolace.egg-info
 *.pyc
 .DS_Store
