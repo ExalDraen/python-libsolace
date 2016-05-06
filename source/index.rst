@@ -7,7 +7,6 @@ Welcome to libsolace's documentation!
 =====================================
 
 
-
 .. sidebar:: Quickstart
    :subtitle: Provisioning
 

@@ -7,7 +7,7 @@ Basics
     Managed objects within Solace are managed through :class:`plugin.Plugin`. Plugins are used to create SEMP requests,
     which can then be posted to the appliance through a :class:`SolaceAPI.SolaceAPI` instance.
 
-    During the creation of SEMP requests, Plugins will enqueue the request in a instance of L{SolaceCommandQueue<SolaceCommandQueue.SolaceCommandQueue>}
+    During the creation of SEMP requests, Plugins will enqueue the request in a instance of :class:`SolaceCommandQueue.SolaceCommandQueue`
     which will also validate the request against the appropriate XSD for the version of SolOS-TR the appliance is running.
 
 Example:

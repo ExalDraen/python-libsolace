@@ -16,27 +16,40 @@ import libsolace
 from libsolace.plugin import Plugin
 from libsolace.util import get_key_from_settings
 
-"""
+__doc__ = """
+Simple influxdb client that can send metrics to influx.
 
-e.g.
-PLUGINS:
-    ...
-    - libsolace.plugins.InfluxDBClient
-    ...
+.. code-block:: none
 
-INFLUXDB_HOST: localhost
-INFLUXDB_PORT: 8086
-INFLUXDB_USER: user
-INFLUXDB_PASS: pass
-INFLUXDB_DB: solace
+    PLUGINS:
+        ...
+        - libsolace.plugins.InfluxDBClient
+        ...
+
+    INFLUXDB_HOST: localhost
+    INFLUXDB_PORT: 8086
+    INFLUXDB_USER: user
+    INFLUXDB_PASS: pass
+    INFLUXDB_DB: solace
+
 """
 
 
 def get_time():
+    """ consistent time formatting
+
+    :return: time
+    """
     return strftime("%Y-%m-%dT%H:%M:%SZ", gmtime())
 
 
 def flatten_json(y):
+    """
+    flattens a json object combining key names to be {parent-child-leaf: value}
+
+    :param y:
+    :return:
+    """
     out = {}
 
     def flatten(x, name=''):
@@ -56,11 +69,17 @@ def flatten_json(y):
 @libsolace.plugin_registry.register
 class InfluxDBClient(Plugin):
     """
+    Simple influxdb client plugin for libsolace
 
-    import libsolace.settingsloader as settings
-    import libsolace
-    metrics_class = libsolace.plugin_registry('InfluxDBClient', settings=settings)
-    metrics = metrics_class(settings=settings)
+    Example:
+
+    .. doctest::
+        :options: +SKIP
+
+        >>> import libsolace.settingsloader as settings
+        >>> import libsolace
+        >>> metrics_class = libsolace.plugin_registry('InfluxDBClient', settings=settings)
+        >>> metrics = metrics_class(settings=settings)
 
     """
     plugin_name = "InfluxDBClient"
@@ -83,13 +102,19 @@ class InfluxDBClient(Plugin):
 
     def send(self, measurement, data, **tags):
         """
-        import libsolace.settingsloader as settings
-        import libsolace
-        metrics_class = libsolace.plugin_registry('InfluxDBClient', settings=settings)
-        metrics = metrics_class(settings=settings)
+        Sends the metrics to influxdb.
 
-        metrics.send('http-metrics', {"key": 10, "key2": 12}, environment='prod', host='foo')
-        metrics.send("test", {"key": 2}, host="test")
+        Examples:
+
+        .. doctest::
+            :options: +SKIP
+
+            >>> import libsolace.settingsloader as settings
+            >>> import libsolace
+            >>> metrics_class = libsolace.plugin_registry('InfluxDBClient', settings=settings)
+            >>> metrics = metrics_class(settings=settings)
+            >>> metrics.send('http-metrics', {"key": 10, "key2": 12}, environment='prod', host='foo')
+            >>> metrics.send("test", {"key": 2}, host="test")
 
         :param data: a json object of keys and values. will be flattened!
         :param measurement:

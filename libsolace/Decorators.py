@@ -80,7 +80,7 @@ def before(method_name, skip_before=False):
     return wrap
 
 
-def only_on_shutdown(entity):
+def only_on_shutdown(entity, **kwargs):
     """
     Only calls the method if the shutdown_on_apply rules apply to the `entity` type. The entity can be either `queue` or
     `user`.
@@ -141,7 +141,7 @@ def only_on_shutdown(entity):
     return wrap
 
 
-def only_if_not_exists(entity, data_path, primaryOnly=False, backupOnly=False):
+def only_if_not_exists(entity, data_path, primaryOnly=False, backupOnly=False, **kwargs):
     """
     Call the method only if the Solace object does NOT exist in the Solace appliance.
 
@@ -191,6 +191,14 @@ def only_if_not_exists(entity, data_path, primaryOnly=False, backupOnly=False):
 
             # extract package name
             module = get_calling_module()
+
+            # force kwarg, just return the method to allow exec
+            if "force" in kwargs and kwargs.get('force'):
+                logging.info("Force being used, returning obj")
+                args[0].set_exists(False)
+                return f(*args, **kwargs)
+            else:
+                logging.info("Not forcing return of object")
 
             # determine if were checking both or a single node
             if primaryOnly:

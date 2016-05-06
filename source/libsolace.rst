@@ -140,11 +140,13 @@ And then finally run wither of the following depending on if you have a cluster 
 
 
 Single appliance:
+
 .. code-block:: none
 
     ./bin/solace-provision.py -e dev --no-detect-status -p SolaceTest --soltr_version="soltr/7_1_1"
 
 Cluster
+
 .. code-block:: none
 
     ./bin/solace-provision.py -e dev -p SolaceTest
@@ -180,3 +182,11 @@ Submodules
    libsolace.util
    libsolace.xml2dict
 
+Documentation
+-------------
+
+Documentation is sphinx based, so you need to install all the basics for sphinx including the rtd theme.
+
+Doctest is run with `make doctest`
+
+Documentation html is rendered with `make html`

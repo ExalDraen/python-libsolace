@@ -35,14 +35,14 @@ class SolaceVPN(Plugin):
         >>> clazz = libsolace.plugin_registry("SolaceVPN", settings=settings)
         >>> api = SolaceAPI("dev")
         >>> solaceVpnPlugin = clazz(settings=settings, api=api)
-        >>> solaceVpnPlugin.get(vpn_name="default")
+        >>> list_of_dicts = solaceVpnPlugin.get(vpn_name="default")
 
     Provision/Batch Mode Example via SolaceAPI
 
         >>> api = SolaceAPI("dev")
         >>> vpn = api.manage("SolaceVPN", vpn_name="my_vpn", owner_name="someuser", acl_profile="default", max_spool_usage=1024)
-        >>> for req in vpn.commands.commands:
-        >>>    api.rpc(str(req[0]), **req[1])
+        >>> #for req in vpn.commands.commands:
+        >>> #   api.rpc(str(req[0]), **req[1])
 
     """
 
@@ -112,14 +112,14 @@ class SolaceVPN(Plugin):
 
             >>> api = SolaceAPI("dev")
             >>> tuple_request = api.manage("SolaceVPN").create_vpn(vpn_name="my_vpn")
-            >>> api.rpc(tuple_request)
+            >>> response = api.rpc(tuple_request)
 
 
         Example2:
 
 
             >>> api = SolaceAPI("dev")
-            >>> api.rpc(api.manage("SolaceVPN").create_vpn(vpn_name="my_vpn"))
+            >>> response = api.rpc(api.manage("SolaceVPN").create_vpn(vpn_name="my_vpn"))
 
         """
 
@@ -173,13 +173,13 @@ class SolaceVPN(Plugin):
 
         >>> api = SolaceAPI("dev")
         >>> tuple_request = api.manage("SolaceVPN").clear_radius(vpn_name="my_vpn")
-    >>> api.rpc(tuple_request)
+        >>> response = api.rpc(tuple_request)
 
 
     Example 2:
 
         >>> api = SolaceAPI("dev")
-        >>> api.rpc(api.manage("SolaceVPN").clear_radius(vpn_name="my_vpn"))
+        >>> response = api.rpc(api.manage("SolaceVPN").clear_radius(vpn_name="my_vpn"))
 
 
         """
@@ -209,7 +209,7 @@ class SolaceVPN(Plugin):
 
             >>> api = SolaceAPI("dev")
             >>> tuple_request = api.manage("SolaceVPN").set_internal_auth(vpn_name="my_vpn")
-            >>> api.rpc(tuple_request)
+            >>> response = api.rpc(tuple_request)
 
         """
 
@@ -243,7 +243,7 @@ class SolaceVPN(Plugin):
 
             >>> api = SolaceAPI("dev")
             >>> request_tuple = api.manage("SolaceVPN").set_spool_size(vpn_name="my_vpn", max_spool_usage=4096)
-            >>> api.rpc(request_tuple)
+            >>> response = api.rpc(request_tuple)
 
         """
 
@@ -273,7 +273,7 @@ class SolaceVPN(Plugin):
 
             >>> api = SolaceAPI("dev")
             >>> request_tuple = api.manage("SolaceVPN").set_large_message_threshold(vpn_name="my_vpn", large_message_threshold=4096)
-            >>> api.rpc(request_tuple)
+            >>> response = api.rpc(request_tuple)
 
         """
 
@@ -304,7 +304,7 @@ class SolaceVPN(Plugin):
 
             >>> api = SolaceAPI("dev")
             >>> request_tuple = api.manage("SolaceVPN").set_logging_tag(vpn_name="my_vpn", tag="my_vpn_string")
-            >>> api.rpc(request_tuple)
+            >>> response = api.rpc(request_tuple)
 
         """
 
@@ -331,7 +331,7 @@ class SolaceVPN(Plugin):
 
             >>> api = SolaceAPI("dev")
             >>> request_tuple = api.manage("SolaceVPN").enable_vpn(vpn_name="my_vpn")
-            >>> api.rpc(request_tuple)
+            >>> response = api.rpc(request_tuple)
 
 
         """

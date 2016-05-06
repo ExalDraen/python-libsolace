@@ -5,3 +5,8 @@ libsolace.plugins.InfluxDBClient module
     :members:
     :undoc-members:
     :show-inheritance:
+
+.. autoclass:: libsolace.plugins.InfluxDBClient.InfluxDBClient
+    :members:
+    :undoc-members:
+    :show-inheritance:

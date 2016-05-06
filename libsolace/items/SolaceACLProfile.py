@@ -27,10 +27,10 @@ class SolaceACLProfile(Plugin):
 
         Example:
 
-        >>> from libsolace.SolaceAPI import SolaceAPI
-        >>> client = SolaceAPI("dev")
-        >>> client.manage("SolaceACLProfile", name="myprofile", vpn_name="testvpn").commands.commands
-        [XML, XML, XML]
+            >>> from libsolace.SolaceAPI import SolaceAPI
+            >>> client = SolaceAPI("dev")
+            >>> client.manage("SolaceACLProfile", name="myprofile", vpn_name="testvpn").commands.commands
+            [XML, XML, XML]
 
         :type api: SolaceAPI
         :param api: the api (passed in automatically if instantiated via SolaceAPI.manage
@@ -88,9 +88,9 @@ class SolaceACLProfile(Plugin):
 
         Example:
 
-        >>> api = SolaceAPI("dev")
-        >>> request = api.manage("SolaceACLProfile").new_acl(name="myprofile", vpn_name="dev_testvpn")
-        >>> # response = api.rpc(request)
+            >>> api = SolaceAPI("dev")
+            >>> request = api.manage("SolaceACLProfile").new_acl(name="myprofile", vpn_name="dev_testvpn")
+            >>> # response = api.rpc(request)
 
         :param name: name of the profile
         :param vpn_name: vpn name
@@ -111,6 +111,7 @@ class SolaceACLProfile(Plugin):
         """Allow publish
 
         Example:
+
             >>> api = SolaceAPI("dev")
             >>> request = api.manage("SolaceACLProfile").allow_publish(name="myprofile", vpn_name="dev_testvpn")
             >>> # response = api.rpc(request)

@@ -31,14 +31,10 @@ class SolaceXMLBuilder(object):
         '<rpc semp-version="soltr/6_2"><foo><bar><baz>2</baz></bar><banana/></foo></rpc>'
         >>> a.bar.zoo = 2 # different ROOT will break repr
         >>> str(a)
-        ERROR:root:the root leaf node was not found, maybe you registered two roots!
         Traceback (most recent call last):
-          File "<stdin>", line 1, in <module>
-          File "libsolace/SolaceXMLBuilder.py", line 60, in __repr__
-            complete_xml = str('<rpc semp-version="%s">%s</rpc>' % (self.version, myxml.display(version=self.version)))
-          File "libsolace/util.py", line 178, in display
-            complete_xml = str('\n<rpc semp-version="%s">\n%s</rpc>' % (version, self.root.toprettyxml(indent="  ")))
+          ...
         AttributeError: d2x instance has no attribute 'root'
+
 
 
     """

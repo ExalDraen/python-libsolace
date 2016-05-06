@@ -47,6 +47,7 @@ class SolaceUser(Plugin):
         :returns: list of requests that can be performed in a for loop.
 
         Example:
+
         >>> connection = SolaceAPI("dev")
         >>> self.users = [connection.manage("SolaceUser",
                                 client_username = "%s_testuser",
@@ -186,10 +187,10 @@ class SolaceUser(Plugin):
         Delete a client user
 
         Example
+
         >>> connection = SolaceAPI("dev")
-        >>> connection.manage("SolaceUser").delete(client_username="foo", vpn_name="bar")
-        <rpc semp-version="soltr/6_0"><create><client-username><username>foo</username><vpn-name>bar</vpn-name>
-        </client-username></create></rpc>
+        >>> connection.manage("SolaceUser").delete(client_username="foo", vpn_name="bar", force=True, skip_before=True).xml
+        '<rpc semp-version="soltr/7_1_1"><no><client-username><username>foo</username><vpn-name>bar</vpn-name></client-username></no></rpc>'
 
         :param client_username: the username
         :type client_username: str
@@ -275,10 +276,11 @@ class SolaceUser(Plugin):
         Create client-user
 
         Example
+
         >>> api = SolaceAPI("dev")
-        >>> xml = api.manage("SolaceUser").create_user(client_username="foo", vpn_name="bar")
-        <rpc semp-version="soltr/6_0"><create><client-username><username>foo</username><vpn-name>bar</vpn-name>
-        </client-username></create></rpc>
+        >>> xml = api.manage("SolaceUser").create_user(client_username="foo", vpn_name="bar", force=True)
+        >>> xml.xml
+        '<rpc semp-version="soltr/7_1_1"><create><client-username><username>foo</username><vpn-name>bar</vpn-name></client-username></create></rpc>'
 
         :param client_username: the username
         :type client_username: str
@@ -303,9 +305,9 @@ class SolaceUser(Plugin):
         The kwarg shutdown_on_apply needs to be either True or 'u' or 'b' for this method to fire.
 
         Example
-        >>> connection.manage("SolaceUser").shutdown(client_username="foo", vpn_name="bar", shutdown_on_apply=True)
-        <rpc semp-version="soltr/6_0"><client-username><username>foo</username><vpn-name>bar</vpn-name><shutdown/>
-        </client-username></rpc>
+
+        >>> connection.manage("SolaceUser").shutdown(client_username="foo", vpn_name="bar", shutdown_on_apply=True).xml
+        '<rpc semp-version="soltr/7_1_1"><client-username><username>foo</username><vpn-name>bar</vpn-name><shutdown/></client-username></rpc>'
 
         :param client_username: the username
         :type client_username: str
@@ -341,6 +343,7 @@ class SolaceUser(Plugin):
         Set the ClientProfile
 
         Example
+
         >>> connection = SolaceAPI("dev")
         >>> requests = []
         >>> requests.append(connection.manage("SolaceUser").shutdown(client_username="default", vpn_name="default", shutdown_on_apply=True))

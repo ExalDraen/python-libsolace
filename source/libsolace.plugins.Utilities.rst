@@ -1,7 +1,11 @@
 libsolace.plugins.Utilities module
 ==================================
 
-.. automodule:: libsolace.plugins.Utilities
+.. testsetup:: *
+   from libsolace.SolaceAPI import SolaceAPI
+   from libsolace.util import get_plugin
+
+.. autoclass:: libsolace.plugins.Utilities.Utilities
     :members:
     :undoc-members:
     :show-inheritance:

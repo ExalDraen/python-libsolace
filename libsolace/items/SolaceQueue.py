@@ -196,13 +196,9 @@ class SolaceQueue(Plugin):
         :returns: single SEMP request
 
         Example 1: Create Request, then Execute
+
         >>> api = SolaceAPI("dev")
         >>> request = api.manage("SolaceQueue").create_queue(vpn_name="dev_testvpn", queue_name="my_test_queue")
-        >>> # response = api.rpc(request)
-
-        Example 2: One Shot
-        >>> api = SolaceAPI("dev")
-        >>> request = api.manage("SolaceQueue").create_queue(vpn_name="dev_testvpn", queue_name="my_test_queue2")
         >>> # response = api.rpc(request)
 
         """
@@ -237,7 +233,6 @@ class SolaceQueue(Plugin):
         >>> api = SolaceAPI("dev")
         >>> request = api.manage("SolaceQueue").shutdown_egress(shutdown_on_apply=True, vpn_name="dev_testvpn", queue_name="testqueue1")
         >>> # response = api.rpc(request)
-        ""
 
         Example 2: Create Request, then Execute
 

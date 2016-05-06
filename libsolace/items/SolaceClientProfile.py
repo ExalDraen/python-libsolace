@@ -12,30 +12,28 @@ from libsolace.util import get_key_from_kwargs
 class SolaceClientProfile(Plugin):
     """Create / Manage client profiles
 
-    Description
-    ===========
-        This plugin manages Client Profiles within Solace. Typically you should invoke this plugin via :class:`libsolace.SolaceAPI.SolaceAPI`
+    This plugin manages Client Profiles within Solace. Typically you should invoke this plugin via :class:`libsolace.SolaceAPI.SolaceAPI`
 
-        Please see :class:`libsolace.plugin.Plugin` for how plugins are instantiated and used.
+    Please see :class:`libsolace.plugin.Plugin` for how plugins are instantiated and used.
 
-    Example of Instantiation outside of SolaceAPI
+    Example of direct instantiation and passing in a instance SolaceAPI
 
-    >>> import libsolace.settingsloader as settings
-    >>> import libsolace
-    >>> from libsolace.SolaceAPI import SolaceAPI
-    >>> clazz = libsolace.plugin_registry("SolaceClientProfile", settings=settings)
-    >>> api = SolaceAPI("dev")
-    >>> scp = clazz(settings=settings, api=api)
-    >>> client_dict = scp.get(api=api, name="default", vpn_name="default")
+        >>> import libsolace.settingsloader as settings
+        >>> import libsolace
+        >>> from libsolace.SolaceAPI import SolaceAPI
+        >>> clazz = libsolace.plugin_registry("SolaceClientProfile", settings=settings)
+        >>> api = SolaceAPI("dev")
+        >>> scp = clazz(settings=settings, api=api)
+        >>> client_dict = scp.get(api=api, name="default", vpn_name="default")
 
-    Example of Instantiation within the SolaceAPI
+    Example of Instantiation via the SolaceAPI manage method
 
-    >>> import libsolace.settingsloader as settings
-    >>> from libsolace.SolaceAPI import SolaceAPI
-    >>> api = SolaceAPI("dev")
-    >>> scp = api.manage("SolaceClientProfile")
-    >>> client_dict = scp.get(api=api, name="default", vpn_name="default")
-    >>> list_xml = api.manage("SolaceClientProfile", name="myprofile", vpn_name="dev_testvpn").commands.commands
+        >>> import libsolace.settingsloader as settings
+        >>> from libsolace.SolaceAPI import SolaceAPI
+        >>> api = SolaceAPI("dev")
+        >>> scp = api.manage("SolaceClientProfile")
+        >>> client_dict = scp.get(api=api, name="default", vpn_name="default")
+        >>> list_xml = api.manage("SolaceClientProfile", name="myprofile", vpn_name="dev_testvpn").commands.commands
 
     """
 
@@ -352,9 +350,6 @@ class SolaceClientProfile(Plugin):
         >>> request.xml
         '<rpc semp-version="soltr/7_1_1"><client-profile><name>default</name><vpn-name>default</vpn-name><allow-bridge-connections/></client-profile></rpc>'
         >>> # api.rpc(request)
-
-
-        ""
 
         :param name: name of the profile
         :param vpn_name: the name of the vpn to scope the request to

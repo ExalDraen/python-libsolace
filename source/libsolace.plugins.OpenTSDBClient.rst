@@ -5,3 +5,8 @@ libsolace.plugins.OpenTSDBClient module
     :members:
     :undoc-members:
     :show-inheritance:
+
+.. autoclass:: libsolace.plugins.OpenTSDBClient.OpenTSDBClient
+    :members:
+    :undoc-members:
+    :show-inheritance:

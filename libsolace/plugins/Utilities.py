@@ -34,8 +34,10 @@ class Utilities(Plugin):
         Get all queues and return filtered list of only queues who's owner matches the username
 
         Example:
+
             >>> connection = SolaceAPI("dev")
-            >>> results = get_plugin("Utilities", connection).get_user_queues("dev_testproductA", "dev_testvpn")
+            >>> results = connection.manage("Utilities").get_user_queues("dev_testproductA", "dev_testvpn")
+            >>> results
             [u'testqueue1']
 
         :param username: username to filter on
@@ -46,7 +48,7 @@ class Utilities(Plugin):
         result = []
 
         response = self.api.manage(self.SOLACE_QUEUE_PLUGIN).get(queue_name='*', vpn_name=vpn_name,
-                                                                 detail=True).reply.show.queue.queues.queue
+                                                                 detail=True)[0]['rpc-reply']['rpc']['show']['queue']['queues']['queue']
 
         try:
             for h in response:
@@ -65,11 +67,18 @@ class Utilities(Plugin):
 
     def is_client_user_inuse(self, client_username, vpn_name):
         """
-        Returns boolean if client username has client connections
+        Returns boolean if client username has client
+
+        Example:
+            >>> connection = SolaceAPI("dev")
+            >>> results = connection.manage("Utilities").is_client_user_inuse("dev_testproductA", "dev_testvpn")
+            >>> results
+            True
+
         """
         result = []
         response = self.api.manage(self.SOLACE_USER_PLUGIN).get(client_username=client_username, vpn_name=vpn_name,
-                                                                detail=True).reply.show.client_username.client_usernames.client_username.num_clients
+                                                                detail=True)[0]['rpc-reply']['rpc']['show']['client-username']['client-usernames']['client-username']['num-clients']
         if int(response) > 0:
             logging.info("User %s is in-use, %s sessions open" % (client_username, response))
             return True
@@ -80,10 +89,18 @@ class Utilities(Plugin):
     def is_client_user_enabled(self, client_username, vpn_name):
         """
         Returns boolean if client username has client connections
+
+        Example:
+            >>> connection = SolaceAPI("dev")
+            >>> t = connection.rpc(connection.manage("SolaceUser").no_shutdown(client_username="dev_testproductA", vpn_name="dev_testvpn", force=True))
+            >>> results = connection.manage("Utilities").is_client_user_enabled("dev_testproductA", "dev_testvpn")
+            >>> results
+            True
+
         """
         result = []
         response = self.api.manage(self.SOLACE_USER_PLUGIN).get(client_username=client_username, vpn_name=vpn_name,
-                                                                detail=True).reply.show.client_username.client_usernames.client_username.num_clients
+                                                                detail=True)[0]['rpc-reply']['rpc']['show']['client-username']['client-usernames']['client-username']['num-clients']
         if int(response) > 0:
             logging.info("User %s is in-use, %s sessions open" % (client_username, response))
             return True

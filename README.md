@@ -224,3 +224,11 @@ nosetests -d tests.unittests.test_solace_user:TestSolaceUser.test_create_user  -
 
 All with Coverage
 nosetests --with-coverage --cover-package=libsolace
+
+# Docs
+
+## Doctests
+make doctest
+
+## Html
+make html

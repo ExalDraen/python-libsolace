@@ -16,27 +16,37 @@ from libsolace.plugin import Plugin
 from libsolace.util import get_key_from_settings
 
 """
+Simple opentsdb plugin
 
-e.g.
-PLUGINS:
-    ...
-    - libsolace.plugins.OpenTSDBClient
-    ...
+.. code-block:: none
 
-TSDB_HOST: localhost
-TSDB_PORT: 4242
-TSDB_QSIZE: 1000
-TSDB_MPS: 100
+    PLUGINS:
+        ...
+        - libsolace.plugins.OpenTSDBClient
+        ...
+
+    TSDB_HOST: localhost
+    TSDB_PORT: 4242
+    TSDB_QSIZE: 1000
+    TSDB_MPS: 100
+
 """
 
 
 @libsolace.plugin_registry.register
 class OpenTSDBClient(Plugin):
     """
-    import libsolace.settingsloader as settings
-    import libsolace
-    metrics_class = libsolace.plugin_registry('OpenTSDBClient', settings=settings)
-    metrics = metrics_class(settings=settings)
+    Similar to the influxdb client, but for opentsdb.
+
+    Example:
+
+    .. doctest::
+        :options: +SKIP
+
+            >>> import libsolace.settingsloader as settings
+            >>> import libsolace
+            >>> metrics_class = libsolace.plugin_registry('OpenTSDBClient', settings=settings)
+            >>> metrics = metrics_class(settings=settings)
 
     """
     plugin_name = "OpenTSDBClient"
@@ -57,12 +67,18 @@ class OpenTSDBClient(Plugin):
 
     def send(self, measurement, data, **tags):
         """
+        Send the metrics to opentsdb
 
-        import libsolace.settingsloader as settings
-        import libsolace
-        metrics_class = libsolace.plugin_registry('OpenTSDBClient', settings=settings)
-        metrics = metrics_class(settings=settings)
-        metrics.send('somekey', 100, extratag1='tagvalue', extratag2='tagvalue')
+        Example:
+
+        .. doctest::
+            :options: +SKIP
+
+            >>> import libsolace.settingsloader as settings
+            >>> import libsolace
+            >>> metrics_class = libsolace.plugin_registry('OpenTSDBClient', settings=settings)
+            >>> metrics = metrics_class(settings=settings)
+            >>> metrics.send('somekey', 100, extratag1='tagvalue', extratag2='tagvalue')
 
         :param measurement: the key name
         :param data: the value
