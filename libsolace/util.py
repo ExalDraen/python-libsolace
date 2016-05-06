@@ -18,6 +18,15 @@ import logging
 
 logger = logging.getLogger(__name__)
 
+
+"""
+
+.. testsetup::
+    from libsolace.util import *
+
+"""
+
+
 try:
     import urllib3
 
