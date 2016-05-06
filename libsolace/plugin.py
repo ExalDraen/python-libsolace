@@ -30,7 +30,6 @@ class Plugin(object):
         >>> import pprint
         >>> import libsolace
         >>> from libsolace.plugin import Plugin
-        >>> libsolace.plugin_registry = Plugin()
         >>> @libsolace.plugin_registry.register
         >>> class Bar(Plugin):
         >>>     plugin_name = "BarPlugin"

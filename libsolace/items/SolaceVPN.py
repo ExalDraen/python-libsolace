@@ -12,14 +12,14 @@ from libsolace.util import get_key_from_kwargs
 class SolaceVPN(Plugin):
     """Manage a Solace VPN
 
-If `vpn_name` is passed as a kwarg, this plugin enters provision/batch mode, if it is omitted, the plugin will go into
-single query mode.
+    If `vpn_name` is passed as a kwarg, this plugin enters provision/batch mode, if it is omitted, the plugin will go into
+    single query mode.
 
-In provision/batch mode, this plugin generates all the neccesary SEMP requests to create a VPN. You also need to pass a
-`owner_name` and a existing `acl_profile` name. If these are omitted, the vpn_name property is used.
+    In provision/batch mode, this plugin generates all the neccesary SEMP requests to create a VPN. You also need to pass a
+    `owner_name` and a existing `acl_profile` name. If these are omitted, the vpn_name property is used.
 
-In single query mode, this plugin creates single SEMP requests, you need only pass a SolaceAPI into `api`, or invoke
-via SolaceAPI("dev").manage("SolaceVPN")
+    In single query mode, this plugin creates single SEMP requests, you need only pass a SolaceAPI into `api`, or invoke
+    via SolaceAPI("dev").manage("SolaceVPN")
 
     :param api: The instance of SolaceAPI if not called from SolaceAPI.manage
     :param vpn_name: name of the VPN to scope the ACL to
@@ -27,26 +27,22 @@ via SolaceAPI("dev").manage("SolaceVPN")
     :type vpn_name: str
     :rtype: SolaceVPN
 
-Query/Single Mode Example Direct Access:
+    Query/Single Mode Example Direct Access:
 
-```python
->>> import libsolace.settingsloader as settings
->>> import libsolace
->>> from libsolace.SolaceAPI import SolaceAPI
->>> clazz = libsolace.plugin_registry("SolaceVPN", settings=settings)
->>> api = SolaceAPI("dev")
->>> solaceVpnPlugin = clazz(settings=settings, api=api)
->>> solaceVpnPlugin.get(vpn_name="default")
-```
+        >>> import libsolace.settingsloader as settings
+        >>> import libsolace
+        >>> from libsolace.SolaceAPI import SolaceAPI
+        >>> clazz = libsolace.plugin_registry("SolaceVPN", settings=settings)
+        >>> api = SolaceAPI("dev")
+        >>> solaceVpnPlugin = clazz(settings=settings, api=api)
+        >>> solaceVpnPlugin.get(vpn_name="default")
 
-Provision/Batch Mode Example via SolaceAPI
+    Provision/Batch Mode Example via SolaceAPI
 
-```python
->>> api = SolaceAPI("dev")
->>> vpn = api.manage("SolaceVPN", vpn_name="my_vpn", owner_name="someuser", acl_profile="default", max_spool_usage=1024)
->>> for req in vpn.commands.commands:
->>>    api.rpc(str(req[0]), **req[1])
-```
+        >>> api = SolaceAPI("dev")
+        >>> vpn = api.manage("SolaceVPN", vpn_name="my_vpn", owner_name="someuser", acl_profile="default", max_spool_usage=1024)
+        >>> for req in vpn.commands.commands:
+        >>>    api.rpc(str(req[0]), **req[1])
 
     """
 
@@ -108,24 +104,23 @@ Provision/Batch Mode Example via SolaceAPI
     def create_vpn(self, **kwargs):
         """New VPN SEMP Request generator.
 
-    :param vpn_name: The name of the VPN
-    :type vpn_name: str
-    :return: tuple SEMP request and kwargs
+        :param vpn_name: The name of the VPN
+        :type vpn_name: str
+        :return: tuple SEMP request and kwargs
 
-Example:
+        Example:
 
-```python
->>> api = SolaceAPI("dev")
->>> tuple_request = api.manage("SolaceVPN").create_vpn(vpn_name="my_vpn")
->>> api.rpc(tuple_request)
-```
+            >>> api = SolaceAPI("dev")
+            >>> tuple_request = api.manage("SolaceVPN").create_vpn(vpn_name="my_vpn")
+            >>> api.rpc(tuple_request)
 
-Example2:
 
-```python
->>> api = SolaceAPI("dev")
->>> api.rpc(api.manage("SolaceVPN").create_vpn(vpn_name="my_vpn"))
-```
+        Example2:
+
+
+            >>> api = SolaceAPI("dev")
+            >>> api.rpc(api.manage("SolaceVPN").create_vpn(vpn_name="my_vpn"))
+
         """
 
         vpn_name = get_key_from_kwargs("vpn_name", kwargs)
@@ -140,18 +135,17 @@ Example2:
     def get(self, **kwargs):
         """Returns a VPN from the appliance immediately. This method calls the api instance so it MUST be referenced through the SolaceAPI instance, or passed a `api` kwarg.
 
-    :param vpn_name: The name of the VPN
-    :param detail: return details
-    :type vpn_name: str
-    :type detail: bool
-    :return: dict
+        :param vpn_name: The name of the VPN
+        :param detail: return details
+        :type vpn_name: str
+        :type detail: bool
+        :return: dict
 
-Example:
+        Example:
 
-```python
->>> api = SolaceAPI("dev")
->>> dict_vpn = api.manage("SolaceVPN").get(vpn_name="my_vpn", detail=True)
-```
+            >>> api = SolaceAPI("dev")
+            >>> dict_vpn = api.manage("SolaceVPN").get(vpn_name="my_vpn", detail=True)
+
         """
 
         vpn_name = get_key_from_kwargs("vpn_name", kwargs)
@@ -171,24 +165,22 @@ Example:
     def clear_radius(self, **kwargs):
         """Clears radius authentication mechanism
 
-    :param vpn_name: The name of the VPN
-    :type vpn_name: str
-    :return: tuple SEMP request and kwargs
+        :param vpn_name: The name of the VPN
+        :type vpn_name: str
+        :return: tuple SEMP request and kwargs
 
-Example:
+    Example:
 
-```python
->>> api = SolaceAPI("dev")
->>> tuple_request = api.manage("SolaceVPN").clear_radius(vpn_name="my_vpn")
->>> api.rpc(tuple_request)
-```
+        >>> api = SolaceAPI("dev")
+        >>> tuple_request = api.manage("SolaceVPN").clear_radius(vpn_name="my_vpn")
+    >>> api.rpc(tuple_request)
 
-Example 2:
 
-```python
->>> api = SolaceAPI("dev")
->>> api.rpc(api.manage("SolaceVPN").clear_radius(vpn_name="my_vpn"))
-```
+    Example 2:
+
+        >>> api = SolaceAPI("dev")
+        >>> api.rpc(api.manage("SolaceVPN").clear_radius(vpn_name="my_vpn"))
+
 
         """
 
@@ -209,17 +201,15 @@ Example 2:
     def set_internal_auth(self, **kwargs):
         """Set authentication method to internal
 
-    :param vpn_name: The name of the VPN
-    :type vpn_name: str
-    :return: tuple SEMP request and kwargs
+        :param vpn_name: The name of the VPN
+        :type vpn_name: str
+        :return: tuple SEMP request and kwargs
 
-Example:
+        Example:
 
-```python
->>> api = SolaceAPI("dev")
->>> tuple_request = api.manage("SolaceVPN").set_internal_auth(vpn_name="my_vpn")
->>> api.rpc(tuple_request)
-```
+            >>> api = SolaceAPI("dev")
+            >>> tuple_request = api.manage("SolaceVPN").set_internal_auth(vpn_name="my_vpn")
+            >>> api.rpc(tuple_request)
 
         """
 
@@ -243,19 +233,17 @@ Example:
     def set_spool_size(self, **kwargs):
         """Set the maximun spool size for the VPN
 
-    :param vpn_name: The name of the VPN
-    :param max_spool_usage: size in mb
-    :type vpn_name: str
-    :type max_spool_usage: int
-    :return: tuple SEMP request and kwargs
+        :param vpn_name: The name of the VPN
+        :param max_spool_usage: size in mb
+        :type vpn_name: str
+        :type max_spool_usage: int
+        :return: tuple SEMP request and kwargs
 
-Example:
+        Example:
 
-```python
->>> api = SolaceAPI("dev")
->>> request_tuple = api.manage("SolaceVPN").set_spool_size(vpn_name="my_vpn", max_spool_usage=4096)
->>> api.rpc(request_tuple)
-```
+            >>> api = SolaceAPI("dev")
+            >>> request_tuple = api.manage("SolaceVPN").set_spool_size(vpn_name="my_vpn", max_spool_usage=4096)
+            >>> api.rpc(request_tuple)
 
         """
 
@@ -275,19 +263,17 @@ Example:
     def set_large_message_threshold(self, **kwargs):
         """Sets the large message threshold
 
-    :param vpn_name: The name of the VPN
-    :param large_message_threshold: size in bytes
-    :type vpn_name: str
-    :type large_message_threshold: int
-    :return: tuple SEMP request and kwargs
+        :param vpn_name: The name of the VPN
+        :param large_message_threshold: size in bytes
+        :type vpn_name: str
+        :type large_message_threshold: int
+        :return: tuple SEMP request and kwargs
 
-Example:
+        Example:
 
-```python
->>> api = SolaceAPI("dev")
->>> request_tuple = api.manage("SolaceVPN").set_large_message_threshold(vpn_name="my_vpn", large_message_threshold=4096)
->>> api.rpc(request_tuple)
-```
+            >>> api = SolaceAPI("dev")
+            >>> request_tuple = api.manage("SolaceVPN").set_large_message_threshold(vpn_name="my_vpn", large_message_threshold=4096)
+            >>> api.rpc(request_tuple)
 
         """
 
@@ -308,19 +294,18 @@ Example:
     def set_logging_tag(self, **kwargs):
         """Sets the VPN logging tag, default = vpn_name
 
-    :param vpn_name: The name of the VPN
-    :param tag: string to use in logging tag
-    :type vpn_name: str
-    :type tag: str
-    :return: tuple SEMP request and kwargs
+        :param vpn_name: The name of the VPN
+        :param tag: string to use in logging tag
+        :type vpn_name: str
+        :type tag: str
+        :return: tuple SEMP request and kwargs
 
-Example:
+        Example:
 
-```python
->>> api = SolaceAPI("dev")
->>> request_tuple = api.manage("SolaceVPN").set_logging_tag(vpn_name="my_vpn", tag="my_vpn_string")
->>> api.rpc(request_tuple)
-```
+            >>> api = SolaceAPI("dev")
+            >>> request_tuple = api.manage("SolaceVPN").set_logging_tag(vpn_name="my_vpn", tag="my_vpn_string")
+            >>> api.rpc(request_tuple)
+
         """
 
         vpn_name = get_key_from_kwargs("vpn_name", kwargs)
@@ -338,17 +323,16 @@ Example:
     def enable_vpn(self, **kwargs):
         """Enable a VPN
 
-    :param vpn_name: The name of the VPN
-    :type vpn_name: str
-    :return: tuple SEMP request and kwargs
+        :param vpn_name: The name of the VPN
+        :type vpn_name: str
+        :return: tuple SEMP request and kwargs
 
-Example:
+        Example:
 
-```python
->>> api = SolaceAPI("dev")
->>> request_tuple = api.manage("SolaceVPN").enable_vpn(vpn_name="my_vpn")
->>> api.rpc(request_tuple)
-```
+            >>> api = SolaceAPI("dev")
+            >>> request_tuple = api.manage("SolaceVPN").enable_vpn(vpn_name="my_vpn")
+            >>> api.rpc(request_tuple)
+
 
         """
 
@@ -370,8 +354,8 @@ Example:
 
         Example:
 
-        >>> api = SolaceAPI("dev")
-        >>> list_dict = api.manage("SolaceVPN").list_vpns(vpn_name="*")
+            >>> api = SolaceAPI("dev")
+            >>> list_dict = api.manage("SolaceVPN").list_vpns(vpn_name="*")
 
 
         """

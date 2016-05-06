@@ -21,15 +21,25 @@ class SolaceXMLBuilder(object):
     THe only limitatoin here is that there can only be ONE root node, "foo" in the example below.
 
     Example
+
+        >>> from libsolace.SolaceXMLBuilder import SolaceXMLBuilder
         >>> a=SolaceXMLBuilder(version="soltr/6_2")
         >>> a.foo.bar.baz=2
-        >>> a.foo.banana = 5
+        >>> a.foo.banana
+        OrderedDict()
         >>> str(a)
-        '<rpc semp-version="soltr/6_2"><foo><bar><baz>2</baz></bar><banana>5</banana></foo></rpc>'
-        >>> a.bar.zoo = 2
+        '<rpc semp-version="soltr/6_2"><foo><bar><baz>2</baz></bar><banana/></foo></rpc>'
+        >>> a.bar.zoo = 2 # different ROOT will break repr
+        >>> str(a)
+        ERROR:root:the root leaf node was not found, maybe you registered two roots!
         Traceback (most recent call last):
           File "<stdin>", line 1, in <module>
-        AttributeError: 'int' object has no attribute 'zoo'
+          File "libsolace/SolaceXMLBuilder.py", line 60, in __repr__
+            complete_xml = str('<rpc semp-version="%s">%s</rpc>' % (self.version, myxml.display(version=self.version)))
+          File "libsolace/util.py", line 178, in display
+            complete_xml = str('\n<rpc semp-version="%s">\n%s</rpc>' % (version, self.root.toprettyxml(indent="  ")))
+        AttributeError: d2x instance has no attribute 'root'
+
 
     """
 
