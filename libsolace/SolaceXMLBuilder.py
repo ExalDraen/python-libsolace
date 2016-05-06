@@ -10,30 +10,38 @@ import re
 from libsolace.SolaceNode import SolaceNode
 from libsolace.util import d2x, get_calling_module
 
+
 class SolaceXMLBuilder(object):
     """Builds Solace's SEMP XML Configuration Commands
 
-Any dot-name-space calling of a instance of SolaceXMLBuilder will create
-nested dictionary named the same. These are converted to XML when the instance
-is represented serialized or represented as a string.
+    Creating a instance of this, and then calling any obj on the instance, will create
+    nested XML tags if the element does not exist, or return the element if it does exist
+    for recursive instantiation.
 
-```python
->>> a=SolaceXMLBuilder(version="soltr/6_2")
->>> a.foo.bar.baz=2
->>> str(a)
-'<rpc semp-version="soltr/6_2">\n<foo><bar><baz>2</baz></bar></foo></rpc>'
-```
+    THe only limitatoin here is that there can only be ONE root node, "foo" in the example below.
+
+    Example
+        >>> a=SolaceXMLBuilder(version="soltr/6_2")
+        >>> a.foo.bar.baz=2
+        >>> a.foo.banana = 5
+        >>> str(a)
+        '<rpc semp-version="soltr/6_2"><foo><bar><baz>2</baz></bar><banana>5</banana></foo></rpc>'
+        >>> a.bar.zoo = 2
+        Traceback (most recent call last):
+          File "<stdin>", line 1, in <module>
+        AttributeError: 'int' object has no attribute 'zoo'
+
     """
 
     def __init__(self, description=None, version=None, **kwargs):
 
         if version is None:
-            version="soltr/6_0"
+            version = "soltr/6_0"
 
         self.__dict__ = OrderedDict()
         self.__setattr__ = None
         if description is not None:
-            self.description=description
+            self.description = description
         self.version = version
         calling_module = get_calling_module()
         logging.info("Called by module: %s - %s description: %s " % (calling_module, self.version, description))

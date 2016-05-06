@@ -18,10 +18,22 @@ __yamlfiles__ = [
     '/opt/libsolace/libsolace.yaml'
 ]
 __doc__ = """
+The settingsloader searches for a libsolace.yaml file in:
 
->>> import libsolace.settingsloader as settings
->>> settings.CMDB_URL
-'http://mydomain.com/path'
+    - libsolace.yaml
+    - /etc/libsolace/libsolace.yaml
+    - /opt/libsolace/libsolace.yaml
+
+The environment variable: :envvar:`LIBSOLACE_CONFIG` can also be used to specify another file. e.g
+
+    LIBSOLACE_CONFIG="/tmp/my.yaml" ./bin/solace-provision.py ....
+
+Examples:
+
+    >>> import libsolace.settingsloader as settings
+    >>> settings.CMDB_URL
+    'http://mydomain.com/path'
+
 """
 
 logging.basicConfig(format='[%(module)s] %(filename)s:%(lineno)s %(asctime)s %(levelname)s %(message)s',
