@@ -1,0 +1,391 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>libsolace.Decorators module &mdash; libsolace 1.0 documentation</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+    <link rel="top" title="libsolace 1.0 documentation" href="index.html"/>
+        <link rel="next" title="libsolace.Exceptions module" href="libsolace.Exceptions.html"/>
+        <link rel="prev" title="libsolace.plugins.ZoinksNamingStandard module" href="libsolace.plugins.ZoinksNamingStandard.html"/> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="libsolace.html" class="icon icon-home"> libsolace
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                1.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+                <ul>
+<li class="toctree-l1"><a class="reference internal" href="libsolace.data.html">libsolace.data package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="libsolace.items.html">libsolace.items package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="libsolace.plugins.html">libsolace.plugins package</a></li>
+</ul>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">libsolace.Decorators module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="libsolace.Exceptions.html">libsolace.Exceptions module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="libsolace.Kwargs.html">libsolace.Kwargs module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="libsolace.Naming.html">libsolace.Naming module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="libsolace.SolaceAPI.html">libsolace.SolaceAPI module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="libsolace.SolaceCommandQueue.html">libsolace.SolaceCommandQueue module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="libsolace.SolaceNode.html">libsolace.SolaceNode module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="libsolace.SolaceProvision.html">libsolace.SolaceProvision module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="libsolace.SolaceReply.html">libsolace.SolaceReply module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="libsolace.SolaceXMLBuilder.html">libsolace.SolaceXMLBuilder module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="libsolace.plugin.html">libsolace.plugin module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="libsolace.settingsloader.html">libsolace.settingsloader module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="libsolace.util.html">libsolace.util module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="libsolace.xml2dict.html">libsolace.xml2dict module</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="libsolace.html">libsolace</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+ 
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="libsolace.html">Docs</a> &raquo;</li>
+      
+    <li>libsolace.Decorators module</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="_sources/libsolace.Decorators.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="module-libsolace.Decorators">
+<span id="libsolace-decorators-module"></span><h1>libsolace.Decorators module<a class="headerlink" href="#module-libsolace.Decorators" title="Permalink to this headline">¶</a></h1>
+<p>Some decorators which are used within the Plugins in order to control / limit execution.</p>
+<dl class="function">
+<dt id="libsolace.Decorators.backup">
+<code class="descclassname">libsolace.Decorators.</code><code class="descname">backup</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/libsolace/Decorators.html#backup"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#libsolace.Decorators.backup" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sets the backupOnly kwarg before calling the method. Use this to add a specific router to the appliances to call list.
+Note, this does not unset primaryOnly kwarg, so you can actualy double target.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">method</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="libsolace.Decorators.before">
+<code class="descclassname">libsolace.Decorators.</code><code class="descname">before</code><span class="sig-paren">(</span><em>method_name</em>, <em>skip_before=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/libsolace/Decorators.html#before"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#libsolace.Decorators.before" title="Permalink to this definition">¶</a></dt>
+<dd><p>Call a named method before. This is typically used to tell a object to shutdown so some modification can be made.
+This decorator passes all kwargs and args on to the &#8220;before&#8221; method so keep your params and keywords in sync!</p>
+<p>Example:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="k">def</span> <span class="nf">shutdown</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="gp">&gt;&gt;&gt; </span>   <span class="c1"># shutdown some object</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nd">@before</span><span class="p">(</span><span class="s2">&quot;shutdown&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">def</span> <span class="nf">delete</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="gp">&gt;&gt;&gt; </span>   <span class="c1"># delete object since its shutdown</span>
+</pre></div>
+</div>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>method_name</strong> (<em>str</em>) &#8211; the method name to call</li>
+<li><strong>skip_before</strong> (<em>bool</em>) &#8211; skips the before hook</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">the decorated object</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">obj</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="libsolace.Decorators.deprecation_warning">
+<code class="descclassname">libsolace.Decorators.</code><code class="descname">deprecation_warning</code><span class="sig-paren">(</span><em>warning_msg</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/libsolace/Decorators.html#deprecation_warning"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#libsolace.Decorators.deprecation_warning" title="Permalink to this definition">¶</a></dt>
+<dd><p>Log a deprecation warning and carry on.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>warning_msg</strong> (<em>str</em>) &#8211; the warning text</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">object</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">the decorated object</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="libsolace.Decorators.only_if_exists">
+<code class="descclassname">libsolace.Decorators.</code><code class="descname">only_if_exists</code><span class="sig-paren">(</span><em>entity</em>, <em>data_path</em>, <em>primaryOnly=False</em>, <em>backupOnly=False</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/libsolace/Decorators.html#only_if_exists"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#libsolace.Decorators.only_if_exists" title="Permalink to this definition">¶</a></dt>
+<dd><p>The inverse of <a class="reference internal" href="#libsolace.Decorators.only_if_not_exists" title="libsolace.Decorators.only_if_not_exists"><code class="xref py py-func docutils literal"><span class="pre">only_if_not_exists()</span></code></a></p>
+</dd></dl>
+
+<dl class="function">
+<dt id="libsolace.Decorators.only_if_not_exists">
+<code class="descclassname">libsolace.Decorators.</code><code class="descname">only_if_not_exists</code><span class="sig-paren">(</span><em>entity</em>, <em>data_path</em>, <em>primaryOnly=False</em>, <em>backupOnly=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/libsolace/Decorators.html#only_if_not_exists"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#libsolace.Decorators.only_if_not_exists" title="Permalink to this definition">¶</a></dt>
+<dd><p>Call the method only if the Solace object does NOT exist in the Solace appliance.</p>
+<blockquote>
+<div><ul class="simple">
+<li>if the object&#8217;s exists caching bit is False, return the method</li>
+<li>If the object does not exist, return the method and set the exists bit to False</li>
+<li>If the object exists in the appliance, set the exists bit to True</li>
+</ul>
+</div></blockquote>
+<p>Example:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="nd">@only_if_not_exists</span><span class="p">(</span><span class="s1">&#39;get&#39;</span><span class="p">,</span> <span class="s1">&#39;rpc-reply.rpc.show.client-username.client-usernames.client-username&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">def</span> <span class="nf">create_user</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="gp">&gt;&gt;&gt; </span>   <span class="k">return</span> <span class="kc">True</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">create_user</span><span class="p">()</span>
+</pre></div>
+</div>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>entity</strong> (<em>str</em>) &#8211; the &#8220;getter&#8221; method to call by name</li>
+<li><strong>data_path</strong> (<em>str</em>) &#8211; a dot name spaced string which will be used to descend into the response document to verify existence</li>
+<li><strong>primaryOnly</strong> (<em>bool</em>) &#8211; <a class="reference internal" href="libsolace.Kwargs.html#libsolace.Kwargs.primaryOnly" title="libsolace.Kwargs.primaryOnly"><code class="xref py py-data docutils literal"><span class="pre">libsolace.Kwargs.primaryOnly</span></code></a></li>
+<li><strong>backupOnly</strong> (<em>bool</em>) &#8211; <a class="reference internal" href="libsolace.Kwargs.html#libsolace.Kwargs.backupOnly" title="libsolace.Kwargs.backupOnly"><code class="xref py py-data docutils literal"><span class="pre">libsolace.Kwargs.backupOnly</span></code></a></li>
+<li><strong>force</strong> (<em>bool</em>) &#8211; <a class="reference internal" href="libsolace.Kwargs.html#libsolace.Kwargs.force" title="libsolace.Kwargs.force"><code class="xref py py-data docutils literal"><span class="pre">libsolace.Kwargs.force</span></code></a></li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><p class="first">object</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">the object to call</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="libsolace.Decorators.only_on_shutdown">
+<code class="descclassname">libsolace.Decorators.</code><code class="descname">only_on_shutdown</code><span class="sig-paren">(</span><em>entity</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/libsolace/Decorators.html#only_on_shutdown"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#libsolace.Decorators.only_on_shutdown" title="Permalink to this definition">¶</a></dt>
+<dd><p>Only calls the method if the shutdown_on_apply rules apply to the <cite>entity</cite> type. The entity can be either <cite>queue</cite> or
+<cite>user</cite>.</p>
+<p>Methods decorated with this can optionally be decorated with the &#64;shutdown decorator to actually call whatever method
+is capable of shutting down the object. If the object is not shutdown correcty, the appliance can not change the property
+and will raise an exception.</p>
+<p>Example:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="nd">@only_on_shutdown</span><span class="p">(</span><span class="s1">&#39;user&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">def</span> <span class="nf">delete_user</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="gp">&gt;&gt;&gt; </span>   <span class="k">return</span> <span class="kc">True</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">delete_user</span><span class="p">(</span><span class="n">shutdown_on_apply</span><span class="o">=</span><span class="s1">&#39;u&#39;</span><span class="p">)</span>
+<span class="go">True</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">delete_user</span><span class="p">(</span><span class="n">shutdown_on_apply</span><span class="o">=</span><span class="s1">&#39;q&#39;</span><span class="p">)</span>
+<span class="go">None</span>
+</pre></div>
+</div>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>entity</strong> (<em>str</em>) &#8211; <p>the type of entity were expecting for the following comparisons:</p>
+<p>&#8220;user&#8221;: If shutdown_on_apply is True | b | u for a &#8220;user&#8221; entity, then allow the method to run.</p>
+<p>&#8220;queue&#8221;: If shutdown_on_apply is True | b | q for a &#8220;queue&#8221; entity, then allow the method to run.</p>
+</li>
+<li><strong>force</strong> (<em>bool</em>) &#8211; <a class="reference internal" href="libsolace.Kwargs.html#libsolace.Kwargs.force" title="libsolace.Kwargs.force"><code class="xref py py-data docutils literal"><span class="pre">libsolace.Kwargs.force</span></code></a></li>
+<li><strong>shutdown_on_apply</strong> &#8211; <a class="reference internal" href="libsolace.Kwargs.html#libsolace.Kwargs.shutdown_on_apply" title="libsolace.Kwargs.shutdown_on_apply"><code class="xref py py-data docutils literal"><span class="pre">libsolace.Kwargs.shutdown_on_apply</span></code></a></li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><p class="first">object</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">the object to call</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="libsolace.Decorators.primary">
+<code class="descclassname">libsolace.Decorators.</code><code class="descname">primary</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/libsolace/Decorators.html#primary"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#libsolace.Decorators.primary" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sets the primaryOnly kwarg before calling the method. Use this to add a specific router to the appliances to call list.
+Note, this does not unset backupOnly kwarg, so you can actualy double target.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">method</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+
+
+           </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="libsolace.Exceptions.html" class="btn btn-neutral float-right" title="libsolace.Exceptions module" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="libsolace.plugins.ZoinksNamingStandard.html" class="btn btn-neutral" title="libsolace.plugins.ZoinksNamingStandard module" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2016, Kegan Holtzhausen, Johan Lyheden.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'./',
+            VERSION:'1.0',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="_static/jquery.js"></script>
+      <script type="text/javascript" src="_static/underscore.js"></script>
+      <script type="text/javascript" src="_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

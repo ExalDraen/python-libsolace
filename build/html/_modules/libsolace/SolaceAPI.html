@@ -1,0 +1,631 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>libsolace.SolaceAPI &mdash; libsolace 1.0 documentation</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+    <link rel="top" title="libsolace 1.0 documentation" href="../../index.html"/>
+        <link rel="up" title="Module code" href="../index.html"/> 
+
+  
+  <script src="../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../libsolace.html" class="icon icon-home"> libsolace
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                1.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+                <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../libsolace.data.html">libsolace.data package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../libsolace.items.html">libsolace.items package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../libsolace.plugins.html">libsolace.plugins package</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../libsolace.Decorators.html">libsolace.Decorators module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../libsolace.Exceptions.html">libsolace.Exceptions module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../libsolace.Kwargs.html">libsolace.Kwargs module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../libsolace.Naming.html">libsolace.Naming module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../libsolace.SolaceAPI.html">libsolace.SolaceAPI module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../libsolace.SolaceCommandQueue.html">libsolace.SolaceCommandQueue module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../libsolace.SolaceNode.html">libsolace.SolaceNode module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../libsolace.SolaceProvision.html">libsolace.SolaceProvision module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../libsolace.SolaceReply.html">libsolace.SolaceReply module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../libsolace.SolaceXMLBuilder.html">libsolace.SolaceXMLBuilder module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../libsolace.plugin.html">libsolace.plugin module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../libsolace.settingsloader.html">libsolace.settingsloader module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../libsolace.util.html">libsolace.util module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../libsolace.xml2dict.html">libsolace.xml2dict module</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="../../libsolace.html">libsolace</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../../libsolace.html">Docs</a> &raquo;</li>
+      
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+      
+    <li>libsolace.SolaceAPI</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for libsolace.SolaceAPI</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">import</span> <span class="nn">traceback</span>
+<span class="kn">import</span> <span class="nn">libsolace.settingsloader</span> <span class="kn">as</span> <span class="nn">settings</span>
+<span class="kn">import</span> <span class="nn">libsolace</span>
+<span class="kn">from</span> <span class="nn">libsolace.SolaceXMLBuilder</span> <span class="kn">import</span> <span class="n">SolaceXMLBuilder</span>
+<span class="kn">from</span> <span class="nn">libsolace.SolaceCommandQueue</span> <span class="kn">import</span> <span class="n">SolaceCommandQueue</span>
+<span class="kn">from</span> <span class="nn">libsolace</span> <span class="kn">import</span> <span class="n">xml2dict</span>
+<span class="kn">from</span> <span class="nn">libsolace.plugin</span> <span class="kn">import</span> <span class="n">PluginResponse</span>
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">OrderedDict</span>
+<span class="k">except</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">ordereddict</span> <span class="kn">import</span> <span class="n">OrderedDict</span>
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">import</span> <span class="nn">simplejson</span>
+<span class="k">except</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">json</span> <span class="kn">import</span> <span class="n">simplejson</span>
+
+<span class="kn">from</span> <span class="nn">libsolace.util</span> <span class="kn">import</span> <span class="n">httpRequest</span><span class="p">,</span> <span class="n">generateRequestHeaders</span><span class="p">,</span> <span class="n">generateBasicAuthHeader</span>
+
+
+<div class="viewcode-block" id="SolaceAPI"><a class="viewcode-back" href="../../libsolace.SolaceAPI.html#libsolace.SolaceAPI.SolaceAPI">[docs]</a><span class="k">class</span> <span class="nc">SolaceAPI</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Connects to a Solace cluster&#39;s *primary* and *backup* appliance(s)</span>
+
+<span class="sd">    a SolaceAPI instance contains a SolaceXMLBuilder and a SolaceCommandQueue</span>
+<span class="sd">    in order to facilitate the generation of SEMP XML requests, enqueuing the XML</span>
+<span class="sd">    requests, and sending them to the appliance(s) through the rpc(str) method.</span>
+
+<span class="sd">    SolaceAPI connects to **both** appliances in a redundant pair setup and gets</span>
+<span class="sd">    the the *primary* and *backup* node states. Typically you issue the same SEMP</span>
+<span class="sd">    command to both appliances. Commands can also be issued to either the primary</span>
+<span class="sd">    or the backup appliance utilizing the `primaryOnly` and `backupOnly` kwargs.</span>
+<span class="sd">    see: :func:`~libsolace.SolaceAPI.SolaceAPI.rpc`</span>
+
+<span class="sd">    The version of the SolOS-TR OS is detected on automatically, and this behaviour</span>
+<span class="sd">    can be overridden with the `version` kwarg. If using the VMR you will want to</span>
+<span class="sd">    pass in both detect_status=False and version=&quot;soltr/7_1_1&quot;.</span>
+
+<span class="sd">    :keyword environment: the environemnt</span>
+<span class="sd">    :type environment: str</span>
+<span class="sd">    :keyword detect_status: detection of node primary/backup status, pass True</span>
+<span class="sd">        here for the VMR or single appliances.</span>
+<span class="sd">    :type detect_status: bool</span>
+<span class="sd">    :keyword version: override appliance version detection. Some versions of SolOS-TR</span>
+<span class="sd">        require you to set the language level a bit higher like the VMR for example.</span>
+<span class="sd">    :type version: str</span>
+<span class="sd">    :keyword testmode: Tells the api to connect using the READ_ONLY_USER as defined</span>
+<span class="sd">        in the libsolace.yaml file.</span>
+<span class="sd">    :type testmode: bool</span>
+<span class="sd">    :rtype: SolaceAPI.SolaceAPI</span>
+<span class="sd">    :returns: instance</span>
+
+
+<span class="sd">    Examples:</span>
+<span class="sd">        &gt;&gt;&gt; from libsolace.SolaceXMLBuilder import SolaceXMLBuilder</span>
+<span class="sd">        &gt;&gt;&gt; api = SolaceAPI(&quot;dev&quot;)</span>
+<span class="sd">        &gt;&gt;&gt; api.x = SolaceXMLBuilder(&quot;LOG: Showing the Message Spool in %s&quot; % api.environment, version=api.version)</span>
+<span class="sd">        &gt;&gt;&gt; api.x.show.message_spool.detail</span>
+<span class="sd">        OrderedDict()</span>
+<span class="sd">        &gt;&gt;&gt; response = api.rpc(api.x)</span>
+
+<span class="sd">        Setting the API version if detection fails</span>
+
+<span class="sd">        &gt;&gt;&gt; from libsolace.SolaceXMLBuilder import SolaceXMLBuilder</span>
+<span class="sd">        &gt;&gt;&gt; api = SolaceAPI(&quot;dev&quot;, version=&quot;soltr/7_1_1&quot;)</span>
+<span class="sd">        &gt;&gt;&gt; api.x = SolaceXMLBuilder(&quot;My description of what im doing&quot;, version=api.version)</span>
+<span class="sd">        &gt;&gt;&gt; api.x.show.message_spool</span>
+<span class="sd">        OrderedDict()</span>
+<span class="sd">        &gt;&gt;&gt; response = api.rpc(api.x, primaryOnly=True)</span>
+<span class="sd">        &gt;&gt;&gt; response[0][&#39;rpc-reply&#39;][&#39;rpc&#39;][&#39;show&#39;][&#39;message-spool&#39;][&#39;message-spool-info&#39;][&#39;config-status&#39;]</span>
+<span class="sd">        u&#39;Enabled (Primary)&#39;</span>
+
+<span class="sd">        Query the backup appliance only</span>
+
+<span class="sd">        &gt;&gt;&gt; from libsolace.SolaceXMLBuilder import SolaceXMLBuilder</span>
+<span class="sd">        &gt;&gt;&gt; api = SolaceAPI(&quot;dev&quot;, detect_status=False)</span>
+<span class="sd">        &gt;&gt;&gt; api.x = SolaceXMLBuilder(&quot;My Something something&quot;, version=api.version)</span>
+<span class="sd">        &gt;&gt;&gt; api.x.show.version</span>
+<span class="sd">        OrderedDict()</span>
+<span class="sd">        &gt;&gt;&gt; r = api.rpc(api.x, backupOnly=True)</span>
+<span class="sd">        &gt;&gt;&gt; # check the response was the &quot;configured&quot; backup</span>
+<span class="sd">        &gt;&gt;&gt; r[0][&#39;HOST&#39;] == settings.SOLACE_CONF[&quot;dev&quot;][&#39;MGMT&#39;][1]</span>
+<span class="sd">        True</span>
+
+<span class="sd">        Get a instance of some plugin from the plugin manager</span>
+
+<span class="sd">        &gt;&gt;&gt; api = SolaceAPI(&quot;dev&quot;)</span>
+<span class="sd">        &gt;&gt;&gt; type(api.manage(&quot;NullPlugin&quot;))</span>
+<span class="sd">        &lt;class &#39;libsolace.items.NullPlugin.NullPlugin&#39;&gt;</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">environment</span><span class="p">,</span> <span class="n">version</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">detect_status</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">testmode</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Solace Client SEMP version: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">version</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">version</span> <span class="o">=</span> <span class="n">version</span>
+
+            <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Connecting to appliances </span><span class="si">%s</span><span class="s2"> in </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">SOLACE_CONF</span><span class="p">[</span><span class="n">environment</span><span class="p">][</span><span class="s1">&#39;MGMT&#39;</span><span class="p">],</span> <span class="n">environment</span><span class="p">))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">environment</span> <span class="o">=</span> <span class="n">environment</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">settings</span> <span class="o">=</span> <span class="n">settings</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">config</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">SOLACE_CONF</span><span class="p">[</span><span class="n">environment</span><span class="p">]</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Loaded Config: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">)</span>
+
+            <span class="c1"># testmode sets the user to the RO user</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">testmode</span> <span class="o">=</span> <span class="n">testmode</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">testmode</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s1">&#39;USER&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">READ_ONLY_USER</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s1">&#39;PASS&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">READ_ONLY_PASS</span>
+                <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;READONLY mode&#39;</span><span class="p">)</span>
+
+            <span class="c1"># for SSL / TLS</span>
+            <span class="k">if</span> <span class="s1">&#39;VERIFY_SSL&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s1">&#39;VERIFY_SSL&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">True</span>
+
+            <span class="c1"># detect primary / backup node instance states or assume</span>
+            <span class="c1"># 1st node is primary and second is backup</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">detect_status</span> <span class="o">=</span> <span class="n">detect_status</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">detect_status</span><span class="p">:</span>
+                <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Detecting primary and backup node states&quot;</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">status</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_message_spool</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">primaryRouter</span> <span class="o">=</span> <span class="bp">None</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">backupRouter</span> <span class="o">=</span> <span class="bp">None</span>
+
+                <span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">status</span><span class="p">:</span>
+                    <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__detect_state</span><span class="p">(</span><span class="n">node</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="n">result</span> <span class="o">==</span> <span class="s1">&#39;Primary&#39;</span><span class="p">:</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">primaryRouter</span> <span class="o">=</span> <span class="n">node</span><span class="p">[</span><span class="s1">&#39;HOST&#39;</span><span class="p">]</span>
+                    <span class="k">elif</span> <span class="n">result</span> <span class="o">==</span> <span class="s1">&#39;Backup&#39;</span><span class="p">:</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">backupRouter</span> <span class="o">=</span> <span class="n">node</span><span class="p">[</span><span class="s1">&#39;HOST&#39;</span><span class="p">]</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">primaryRouter</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Failed to detect primary router&quot;</span><span class="p">)</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">backupRouter</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Failed to detect backup router&quot;</span><span class="p">)</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">primaryRouter</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">backupRouter</span><span class="p">:</span>
+                    <span class="c1"># impossible to test, but possible to happen...</span>
+                    <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Error, detected router </span><span class="si">%s</span><span class="s2"> to be both primary and backup&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">primaryRouter</span><span class="p">)</span>
+                <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Detected primary Router: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">primaryRouter</span><span class="p">)</span>
+                <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Detected backup Router: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">backupRouter</span><span class="p">)</span>
+
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Not detecting statuses, using config&quot;</span><span class="p">)</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">primaryRouter</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s1">&#39;MGMT&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+                <span class="k">except</span> <span class="ne">Exception</span><span class="p">,</span> <span class="n">e</span><span class="p">:</span>
+                    <span class="n">logging</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;No routers&quot;</span><span class="p">)</span>
+                    <span class="k">raise</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">backupRouter</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s1">&#39;MGMT&#39;</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span>
+                <span class="k">except</span> <span class="ne">IndexError</span><span class="p">,</span> <span class="n">e</span><span class="p">:</span>
+                    <span class="n">logging</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s2">&quot;No second router in config&quot;</span><span class="p">)</span>
+                    <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;primaryOnly&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">True</span>
+                    <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;backupOnly&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">False</span>
+                    <span class="k">pass</span>
+
+            <span class="c1"># if the version is NOT specified, query appliance versions</span>
+            <span class="c1"># assumes that backup and primary are SAME firmware version.s</span>
+            <span class="k">if</span> <span class="n">version</span> <span class="o">==</span> <span class="bp">None</span><span class="p">:</span>
+                <span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Detecting Version&quot;</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">xmlbuilder</span> <span class="o">=</span> <span class="n">SolaceXMLBuilder</span><span class="p">(</span><span class="s2">&quot;Detecting SolOS-TR Version&quot;</span><span class="p">,</span> <span class="n">version</span><span class="o">=</span><span class="s2">&quot;soltr/5_0&quot;</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">xmlbuilder</span><span class="o">.</span><span class="n">show</span><span class="o">.</span><span class="n">version</span>
+                <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">rpc</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">xmlbuilder</span><span class="p">),</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">version</span> <span class="o">=</span> <span class="n">result</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s1">&#39;rpc-reply&#39;</span><span class="p">][</span><span class="s1">&#39;@semp-version&#39;</span><span class="p">]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Override SolOS-TR Version: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">version</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">version</span> <span class="o">=</span> <span class="n">version</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;SolOS-TR Version: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">version</span><span class="p">)</span>
+
+            <span class="c1"># backwards compatibility</span>
+            <span class="c1"># self.xmlbuilder = SolaceXMLBuilder(version=self.version)</span>
+
+            <span class="c1"># shortcut / new methods</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">x</span> <span class="o">=</span> <span class="n">SolaceXMLBuilder</span><span class="p">(</span><span class="s2">&quot;XML Buider&quot;</span><span class="p">,</span> <span class="n">version</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">version</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">cq</span> <span class="o">=</span> <span class="n">SolaceCommandQueue</span><span class="p">(</span><span class="n">version</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">version</span><span class="p">)</span>
+
+        <span class="k">except</span> <span class="ne">Exception</span><span class="p">,</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s2">&quot;Solace Error </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">e</span><span class="p">)</span>
+            <span class="k">raise</span>
+
+    <span class="k">def</span> <span class="nf">__restcall</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">request</span><span class="p">,</span> <span class="n">primaryOnly</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">backupOnly</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">%s</span><span class="s2"> user requesting: </span><span class="si">%s</span><span class="s2"> kwargs:</span><span class="si">%s</span><span class="s2"> primaryOnly:</span><span class="si">%s</span><span class="s2"> backupOnly:</span><span class="si">%s</span><span class="s2">&quot;</span>
+                     <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s1">&#39;USER&#39;</span><span class="p">],</span> <span class="n">request</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">,</span> <span class="n">primaryOnly</span><span class="p">,</span> <span class="n">backupOnly</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">kwargs</span> <span class="o">=</span> <span class="n">kwargs</span>
+
+        <span class="c1"># appliances in the query</span>
+        <span class="c1"># appliances = self.config[&#39;MGMT&#39;]</span>
+
+        <span class="c1"># appliances in order, fallback to unordered if this is the early calls to determine order</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">appliances</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">primaryRouter</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">backupRouter</span><span class="p">]</span>
+        <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">,</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">appliances</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s1">&#39;MGMT&#39;</span><span class="p">]</span>
+
+        <span class="c1"># change appliances based on boolean conditions</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">appliances</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">primaryOnly</span> <span class="ow">and</span> <span class="n">backupOnly</span><span class="p">:</span>
+                <span class="n">appliances</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">primaryRouter</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">backupRouter</span><span class="p">]</span>
+                <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Forced Both: </span><span class="si">%s</span><span class="s2">, request: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">appliances</span><span class="p">,</span> <span class="n">request</span><span class="p">))</span>
+            <span class="k">elif</span> <span class="n">primaryOnly</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">backupOnly</span><span class="p">:</span>
+                <span class="n">appliances</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">primaryRouter</span><span class="p">]</span>
+                <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Primary: </span><span class="si">%s</span><span class="s2">, request: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">appliances</span><span class="p">,</span> <span class="n">request</span><span class="p">))</span>
+            <span class="k">elif</span> <span class="n">backupOnly</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">primaryOnly</span><span class="p">:</span>
+                <span class="n">appliances</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">backupRouter</span><span class="p">]</span>
+                <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Backup: </span><span class="si">%s</span><span class="s2">, request: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">appliances</span><span class="p">,</span> <span class="n">request</span><span class="p">))</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Both: </span><span class="si">%s</span><span class="s2">, request: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">appliances</span><span class="p">,</span> <span class="n">request</span><span class="p">))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s2">&quot;Only one appliance in config!!!&quot;</span><span class="p">)</span>
+            <span class="n">appliances</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">primaryRouter</span><span class="p">]</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="n">OrderedDict</span><span class="p">()</span>
+            <span class="n">codes</span> <span class="o">=</span> <span class="n">OrderedDict</span><span class="p">()</span>
+            <span class="k">for</span> <span class="n">host</span> <span class="ow">in</span> <span class="n">appliances</span><span class="p">:</span>
+                <span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Querying host: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">host</span><span class="p">)</span>
+                <span class="n">url</span> <span class="o">=</span> <span class="n">host</span>
+                <span class="n">request_headers</span> <span class="o">=</span> <span class="n">generateRequestHeaders</span><span class="p">(</span>
+                        <span class="n">default_headers</span><span class="o">=</span><span class="p">{</span>
+                            <span class="s1">&#39;Content-type&#39;</span><span class="p">:</span> <span class="s1">&#39;text/xml&#39;</span><span class="p">,</span>
+                            <span class="s1">&#39;Accept&#39;</span><span class="p">:</span> <span class="s1">&#39;text/xml&#39;</span>
+                        <span class="p">},</span>
+                        <span class="n">auth_headers</span><span class="o">=</span><span class="n">generateBasicAuthHeader</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s1">&#39;USER&#39;</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s1">&#39;PASS&#39;</span><span class="p">])</span>
+                <span class="p">)</span>
+                <span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;request_headers: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">request_headers</span><span class="p">)</span>
+                <span class="p">(</span><span class="n">response</span><span class="p">,</span> <span class="n">response_headers</span><span class="p">,</span> <span class="n">code</span><span class="p">)</span> <span class="o">=</span> <span class="n">httpRequest</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;POST&#39;</span><span class="p">,</span> <span class="n">headers</span><span class="o">=</span><span class="n">request_headers</span><span class="p">,</span>
+                                                                 <span class="n">fields</span><span class="o">=</span><span class="n">request</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="mi">5000</span><span class="p">,</span>
+                                                                 <span class="n">verifySsl</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s1">&#39;VERIFY_SSL&#39;</span><span class="p">])</span>
+                <span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;response: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">response</span><span class="p">)</span>
+                <span class="n">data</span><span class="p">[</span><span class="n">host</span><span class="p">]</span> <span class="o">=</span> <span class="n">response</span>
+                <span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;code: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">code</span><span class="p">)</span>
+                <span class="n">codes</span><span class="p">[</span><span class="n">host</span><span class="p">]</span> <span class="o">=</span> <span class="n">code</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+
+            <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">data</span><span class="p">:</span>
+                <span class="n">thisreply</span> <span class="o">=</span> <span class="bp">None</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">thisreply</span> <span class="o">=</span> <span class="n">xml2dict</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">k</span><span class="p">])</span>
+                    <span class="k">if</span> <span class="n">thisreply</span><span class="p">[</span><span class="s1">&#39;rpc-reply&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">has_key</span><span class="p">(</span><span class="s1">&#39;execute-result&#39;</span><span class="p">):</span>
+                        <span class="k">if</span> <span class="n">thisreply</span><span class="p">[</span><span class="s1">&#39;rpc-reply&#39;</span><span class="p">][</span><span class="s1">&#39;execute-result&#39;</span><span class="p">][</span><span class="s1">&#39;@code&#39;</span><span class="p">]</span> <span class="o">!=</span> <span class="s1">&#39;ok&#39;</span><span class="p">:</span>
+                            <span class="n">logging</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s2">&quot;Device: </span><span class="si">%s</span><span class="s2">: </span><span class="si">%s</span><span class="s2"> </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">thisreply</span><span class="p">[</span><span class="s1">&#39;rpc-reply&#39;</span><span class="p">][</span><span class="s1">&#39;execute-result&#39;</span><span class="p">][</span><span class="s1">&#39;@code&#39;</span><span class="p">],</span>
+                                                                <span class="s2">&quot;Request that failed: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">request</span><span class="p">))</span>
+                            <span class="n">logging</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s2">&quot;Device: </span><span class="si">%s</span><span class="s2">: </span><span class="si">%s</span><span class="s2">: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">thisreply</span><span class="p">[</span><span class="s1">&#39;rpc-reply&#39;</span><span class="p">][</span><span class="s1">&#39;execute-result&#39;</span><span class="p">][</span><span class="s1">&#39;@code&#39;</span><span class="p">],</span>
+                                                                 <span class="s2">&quot;Reply from appliance: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span>
+                                                                 <span class="n">thisreply</span><span class="p">[</span><span class="s1">&#39;rpc-reply&#39;</span><span class="p">][</span><span class="s1">&#39;execute-result&#39;</span><span class="p">][</span><span class="s1">&#39;@reason&#39;</span><span class="p">]))</span>
+                        <span class="k">else</span><span class="p">:</span>
+                            <span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Device: </span><span class="si">%s</span><span class="s2">: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">thisreply</span><span class="p">[</span><span class="s1">&#39;rpc-reply&#39;</span><span class="p">][</span><span class="s1">&#39;execute-result&#39;</span><span class="p">][</span><span class="s1">&#39;@code&#39;</span><span class="p">]))</span>
+                        <span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Device: </span><span class="si">%s</span><span class="s2">: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">thisreply</span><span class="p">))</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;no execute-result in response. Device: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">k</span><span class="p">)</span>
+                <span class="k">except</span> <span class="ne">Exception</span><span class="p">,</span> <span class="n">e</span><span class="p">:</span>
+                    <span class="n">logging</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;Error decoding response from appliance&quot;</span><span class="p">)</span>
+                    <span class="n">logging</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;Response Codes: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">codes</span><span class="p">)</span>
+                    <span class="n">logging</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;Data Object: key: </span><span class="si">%s</span><span class="s2">, data: </span><span class="si">%s</span><span class="s2"> &quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">data</span><span class="p">))</span>
+                    <span class="k">raise</span> <span class="c1"># (Exception(&quot;Appliance Communication Failure&quot;))</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Returning Data from rest_call&quot;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">data</span><span class="p">,</span> <span class="n">codes</span>
+
+        <span class="k">except</span> <span class="ne">Exception</span><span class="p">,</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">traceback</span><span class="o">.</span><span class="n">print_exc</span><span class="p">()</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s2">&quot;Solace Error </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">e</span><span class="p">)</span>
+            <span class="k">raise</span>
+
+<div class="viewcode-block" id="SolaceAPI.get_redundancy"><a class="viewcode-back" href="../../libsolace.SolaceAPI.html#libsolace.SolaceAPI.SolaceAPI.get_redundancy">[docs]</a>    <span class="k">def</span> <span class="nf">get_redundancy</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return redundancy status</span>
+
+<span class="sd">        Example:</span>
+<span class="sd">            &gt;&gt;&gt; api = SolaceAPI(&quot;dev&quot;)</span>
+<span class="sd">            &gt;&gt;&gt; api.get_redundancy()[0][&#39;rpc-reply&#39;][&#39;rpc&#39;][&#39;show&#39;][&#39;redundancy&#39;][&#39;config-status&#39;]</span>
+<span class="sd">            u&#39;Enabled&#39;</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">request</span> <span class="o">=</span> <span class="n">SolaceXMLBuilder</span><span class="p">(</span><span class="n">version</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">version</span><span class="p">)</span>
+        <span class="n">request</span><span class="o">.</span><span class="n">show</span><span class="o">.</span><span class="n">redundancy</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">rpc</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">request</span><span class="p">))</span></div>
+
+<div class="viewcode-block" id="SolaceAPI.get_memory"><a class="viewcode-back" href="../../libsolace.SolaceAPI.html#libsolace.SolaceAPI.SolaceAPI.get_memory">[docs]</a>    <span class="k">def</span> <span class="nf">get_memory</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Returns the Memory Usage</span>
+
+<span class="sd">        Example of request XML</span>
+<span class="sd">        &lt;rpc semp-version=&quot;soltr/6_0&quot;&gt;</span>
+<span class="sd">            &lt;show&gt;</span>
+<span class="sd">                &lt;memory&gt;&lt;/memory&gt;</span>
+<span class="sd">            &lt;/show&gt;</span>
+<span class="sd">        &lt;/rpc&gt;</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">request</span> <span class="o">=</span> <span class="n">SolaceXMLBuilder</span><span class="p">(</span><span class="n">version</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">version</span><span class="p">)</span>
+        <span class="n">request</span><span class="o">.</span><span class="n">show</span><span class="o">.</span><span class="n">memory</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">rpc</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">request</span><span class="p">))</span></div>
+
+<div class="viewcode-block" id="SolaceAPI.get_message_spool"><a class="viewcode-back" href="../../libsolace.SolaceAPI.html#libsolace.SolaceAPI.SolaceAPI.get_message_spool">[docs]</a>    <span class="k">def</span> <span class="nf">get_message_spool</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; show message spool</span>
+<span class="sd">        :param version:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">request</span> <span class="o">=</span> <span class="n">SolaceXMLBuilder</span><span class="p">(</span><span class="s2">&quot;Getting message spool status&quot;</span><span class="p">,</span> <span class="n">version</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">version</span><span class="p">)</span>
+        <span class="n">request</span><span class="o">.</span><span class="n">show</span><span class="o">.</span><span class="n">message_spool</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">rpc</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">request</span><span class="p">),</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+
+    <span class="k">def</span> <span class="nf">__detect_state</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">response</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; TODO: is this sufficient to detect cluster state? &quot;&quot;&quot;</span>
+        <span class="n">message_spool</span> <span class="o">=</span> <span class="n">response</span><span class="p">[</span><span class="s1">&#39;rpc-reply&#39;</span><span class="p">][</span><span class="s1">&#39;rpc&#39;</span><span class="p">][</span><span class="s1">&#39;show&#39;</span><span class="p">][</span><span class="s1">&#39;message-spool&#39;</span><span class="p">][</span><span class="s1">&#39;message-spool-info&#39;</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">message_spool</span><span class="p">[</span><span class="s1">&#39;operational-status&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;AD-Active&#39;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="s1">&#39;Primary&#39;</span>
+        <span class="k">elif</span> <span class="n">message_spool</span><span class="p">[</span><span class="s1">&#39;operational-status&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;AD-Standby&#39;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="s1">&#39;Backup&#39;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Unknown message-spool operational-status &#39;</span><span class="si">%s</span><span class="s2">&#39;&quot;</span> <span class="o">%</span> <span class="n">message_spool</span><span class="p">[</span><span class="s1">&#39;operational-status&#39;</span><span class="p">])</span>
+
+<div class="viewcode-block" id="SolaceAPI.rpc"><a class="viewcode-back" href="../../libsolace.SolaceAPI.html#libsolace.SolaceAPI.SolaceAPI.rpc">[docs]</a>    <span class="k">def</span> <span class="nf">rpc</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">xml</span><span class="p">,</span> <span class="n">allowfail</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">primaryOnly</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">backupOnly</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">xml_response</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Execute a SEMP command on the appliance(s), call with a string representation</span>
+<span class="sd">        of a SolaceXMLBuilder instance.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            xml(str): string representation of a SolaceXMLBuilder instance.</span>
+<span class="sd">            allowFail(Optional(bool)): tollerate some types of errors from the</span>
+<span class="sd">                appliance.</span>
+<span class="sd">            primaryOnly(Optional(bool)): only execute on primary appliance.</span>
+<span class="sd">            backupOnly(Optional(bool)): only execute on backup appliance.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            data response list as from appliances. Json-like data</span>
+
+<span class="sd">        Example:</span>
+<span class="sd">            &gt;&gt;&gt; from libsolace.SolaceXMLBuilder import SolaceXMLBuilder</span>
+<span class="sd">            &gt;&gt;&gt; conn = SolaceAPI(&quot;dev&quot;)</span>
+<span class="sd">            &gt;&gt;&gt; conn.x = SolaceXMLBuilder(version = conn.version)</span>
+<span class="sd">            &gt;&gt;&gt; conn.x.show.version</span>
+<span class="sd">            OrderedDict()</span>
+<span class="sd">            &gt;&gt;&gt; type(conn.rpc(str(conn.x)))</span>
+<span class="sd">            &lt;type &#39;list&#39;&gt;</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">xml</span><span class="p">))</span>
+
+        <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">xml</span><span class="p">)</span> <span class="o">==</span> <span class="nb">type</span><span class="p">(</span><span class="bp">None</span><span class="p">):</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s2">&quot;Ignoring empty request&quot;</span><span class="p">)</span>
+            <span class="k">return</span>
+
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">xml</span><span class="p">,</span> <span class="n">PluginResponse</span><span class="p">):</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Plugin Response&quot;</span><span class="p">)</span>
+            <span class="n">kwargs</span> <span class="o">=</span> <span class="n">xml</span><span class="o">.</span><span class="n">kwargs</span>
+            <span class="n">xml</span> <span class="o">=</span> <span class="n">xml</span><span class="o">.</span><span class="n">xml</span>
+
+        <span class="k">elif</span> <span class="nb">type</span><span class="p">(</span><span class="n">xml</span><span class="p">)</span> <span class="o">==</span> <span class="nb">type</span><span class="p">(()):</span>
+            <span class="n">kwargs</span> <span class="o">=</span> <span class="n">xml</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+            <span class="n">xml</span> <span class="o">=</span> <span class="n">xml</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">xml</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+            <span class="k">pass</span>
+
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">xml</span><span class="p">,</span> <span class="n">SolaceXMLBuilder</span><span class="p">):</span>
+            <span class="n">xml</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">xml</span><span class="p">)</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s2">&quot;I dont recognize this type of rpc: </span><span class="si">%s</span><span class="s2"> type: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">xml</span><span class="p">,</span> <span class="nb">type</span><span class="p">(</span><span class="n">xml</span><span class="p">)))</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Not a valid RPC argument&quot;</span><span class="p">)</span>
+
+        <span class="n">responses</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="n">mywargs</span> <span class="o">=</span> <span class="n">kwargs</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Kwargs: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">mywargs</span><span class="p">)</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Request SEMP: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">xml</span><span class="p">)</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;primaryOnly: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">primaryOnly</span><span class="p">)</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;backupOnly: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">backupOnly</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="s2">&quot;primaryOnly&quot;</span> <span class="ow">in</span> <span class="n">mywargs</span><span class="p">:</span>
+            <span class="n">primaryOnly</span> <span class="o">=</span> <span class="n">mywargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;primaryOnly&quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="s2">&quot;backupOnly&quot;</span> <span class="ow">in</span> <span class="n">mywargs</span><span class="p">:</span>
+            <span class="n">backupOnly</span> <span class="o">=</span> <span class="n">mywargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;backupOnly&quot;</span><span class="p">)</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="n">responses</span><span class="p">,</span> <span class="n">codes</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__restcall</span><span class="p">(</span><span class="n">xml</span><span class="p">,</span> <span class="n">primaryOnly</span><span class="o">=</span><span class="n">primaryOnly</span><span class="p">,</span> <span class="n">backupOnly</span><span class="o">=</span><span class="n">backupOnly</span><span class="p">,</span> <span class="o">**</span><span class="n">mywargs</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">xml_response</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">responses</span>
+            <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">responses</span><span class="p">:</span>
+                <span class="n">response</span> <span class="o">=</span> <span class="n">xml2dict</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="n">responses</span><span class="p">[</span><span class="n">k</span><span class="p">])</span>
+                <span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Response: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">response</span><span class="p">)</span>
+                <span class="n">response</span><span class="p">[</span><span class="s1">&#39;HOST&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">k</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">allowfail</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="s1">&#39;parse-error&#39;</span> <span class="ow">in</span> <span class="n">response</span><span class="p">[</span><span class="s1">&#39;rpc-reply&#39;</span><span class="p">]:</span>
+                        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">response</span><span class="p">))</span>
+                    <span class="k">elif</span> <span class="s1">&#39;permission-error&#39;</span> <span class="ow">in</span> <span class="n">response</span><span class="p">[</span><span class="s1">&#39;rpc-reply&#39;</span><span class="p">]:</span>
+                        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">testmode</span><span class="p">:</span>
+                            <span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;tolerable permission error in test mode&#39;</span><span class="p">)</span>
+                        <span class="k">else</span><span class="p">:</span>
+                            <span class="n">logging</span><span class="o">.</span><span class="n">critical</span><span class="p">(</span><span class="s2">&quot;Error occured, request was: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">xml</span><span class="p">)</span>
+                            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">response</span><span class="p">))</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">data</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">response</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">data</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">response</span><span class="p">)</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span> <span class="ow">is</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="n">data</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">None</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">data</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;responses: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">responses</span><span class="p">)</span>
+            <span class="k">raise</span></div>
+
+<div class="viewcode-block" id="SolaceAPI.manage"><a class="viewcode-back" href="../../libsolace.SolaceAPI.html#libsolace.SolaceAPI.SolaceAPI.manage">[docs]</a>    <span class="k">def</span> <span class="nf">manage</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">plugin_name</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Gets a plugin, configures it, then allows direct communication with it.</span>
+
+<span class="sd">        Plugins are passed the kwargs directly if any are specified.</span>
+
+<span class="sd">        Example:</span>
+<span class="sd">            &gt;&gt;&gt; api = SolaceAPI(&quot;dev&quot;)</span>
+<span class="sd">            &gt;&gt;&gt; p1 = api.manage(&quot;NullPlugin&quot;)</span>
+<span class="sd">            &gt;&gt;&gt; p1.some_method(&quot;foo&quot;, bar=&quot;baz&quot;)</span>
+<span class="sd">            ((&#39;foo&#39;,), {&#39;bar&#39;: &#39;baz&#39;})</span>
+<span class="sd">            &gt;&gt;&gt; p2 = api.manage(&quot;NullPlugin&quot;, a=&quot;a&quot;)</span>
+<span class="sd">            &gt;&gt;&gt; p2.kwargs[&#39;a&#39;]</span>
+<span class="sd">            &#39;a&#39;</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">plugin</span> <span class="o">=</span> <span class="n">libsolace</span><span class="o">.</span><span class="n">plugin_registry</span><span class="p">(</span><span class="n">plugin_name</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Setting up the plugin instance with api and kwargs&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">plugin</span><span class="p">(</span><span class="n">api</span><span class="o">=</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2016, Kegan Holtzhausen, Johan Lyheden.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../',
+            VERSION:'1.0',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

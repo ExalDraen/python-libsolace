@@ -1,0 +1,413 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>libsolace.SolaceProvision &mdash; libsolace 1.0 documentation</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+    <link rel="top" title="libsolace 1.0 documentation" href="../../index.html"/>
+        <link rel="up" title="Module code" href="../index.html"/> 
+
+  
+  <script src="../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../libsolace.html" class="icon icon-home"> libsolace
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                1.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+                <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../libsolace.data.html">libsolace.data package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../libsolace.items.html">libsolace.items package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../libsolace.plugins.html">libsolace.plugins package</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../libsolace.Decorators.html">libsolace.Decorators module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../libsolace.Exceptions.html">libsolace.Exceptions module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../libsolace.Kwargs.html">libsolace.Kwargs module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../libsolace.Naming.html">libsolace.Naming module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../libsolace.SolaceAPI.html">libsolace.SolaceAPI module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../libsolace.SolaceCommandQueue.html">libsolace.SolaceCommandQueue module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../libsolace.SolaceNode.html">libsolace.SolaceNode module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../libsolace.SolaceProvision.html">libsolace.SolaceProvision module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../libsolace.SolaceReply.html">libsolace.SolaceReply module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../libsolace.SolaceXMLBuilder.html">libsolace.SolaceXMLBuilder module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../libsolace.plugin.html">libsolace.plugin module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../libsolace.settingsloader.html">libsolace.settingsloader module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../libsolace.util.html">libsolace.util module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../libsolace.xml2dict.html">libsolace.xml2dict module</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="../../libsolace.html">libsolace</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../../libsolace.html">Docs</a> &raquo;</li>
+      
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+      
+    <li>libsolace.SolaceProvision</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for libsolace.SolaceProvision</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">solacehelper is a class to construct solace commands and sets of commands.</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">from</span> <span class="nn">libsolace.SolaceAPI</span> <span class="kn">import</span> <span class="n">SolaceAPI</span>
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">import</span> <span class="nn">simplejson</span> <span class="kn">as</span> <span class="nn">json</span>
+<span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+    <span class="kn">import</span> <span class="nn">json</span>
+
+
+<div class="viewcode-block" id="SolaceProvision"><a class="viewcode-back" href="../../libsolace.SolaceProvision.html#libsolace.SolaceProvision.SolaceProvision">[docs]</a><span class="k">class</span> <span class="nc">SolaceProvision</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot; Provision the CLIENT_PROFILE, VPN, ACL_PROFILE, QUEUES and USERS</span>
+
+<span class="sd">    :type vpn_dict: dictionary</span>
+<span class="sd">        eg: {&#39;owner&#39;: u&#39;SolaceTest&#39;, &#39;spool_size&#39;: u&#39;4096&#39;, &#39;password&#39;: u&#39;d0nt_u5se_thIs&#39;, &#39;name&#39;: u&#39;dev_testvpn&#39;}</span>
+<span class="sd">    :type queue_dict: list</span>
+<span class="sd">        eg: [</span>
+<span class="sd">              {&quot;exclusive&quot;: u&quot;true&quot;, &quot;type&quot;: &quot;&quot;, &quot;name&quot;: u&quot;testqueue1&quot;, &quot;queue_size&quot;: u&quot;4096&quot;},</span>
+<span class="sd">              {&quot;exclusive&quot;: u&quot;false&quot;, &quot;type&quot;: &quot;&quot;, &quot;name&quot;: u&quot;testqueue2&quot;, &quot;queue_size&quot;: u&quot;4096&quot;}</span>
+<span class="sd">            ]</span>
+<span class="sd">    :type environment: str</span>
+<span class="sd">    :type client_profile: str</span>
+<span class="sd">    :type users: list</span>
+<span class="sd">    :type testmode: bool</span>
+<span class="sd">    :type create_queues: bool</span>
+<span class="sd">    :type shutdown_on_apply: bool</span>
+
+<span class="sd">    :param vpn_dict: vpn dictionary</span>
+<span class="sd">    :param queue_dict: queue dictionary list</span>
+<span class="sd">    :param environment: name of environment</span>
+<span class="sd">    :param client_profile: name of client_profile, default=&#39;glassfish&#39;</span>
+<span class="sd">    :param users: list of user dictionaries to provision</span>
+<span class="sd">        eg: [{&#39;username&#39;: u&#39;dev_marcom3&#39;, &#39;password&#39;: u&#39;dev_marcompass&#39;}]</span>
+<span class="sd">    :param testmode: only test, dont apply changes</span>
+<span class="sd">    :param create_queues: disable queue creation, default = True</span>
+<span class="sd">    :param shutdown_on_apply: force shutdown Queue and User for config change, default = False</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+
+        <span class="k">if</span> <span class="n">kwargs</span> <span class="o">==</span> <span class="p">{}:</span>
+            <span class="k">return</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">vpn_dict</span> <span class="o">=</span> <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;vpn_dict&#39;</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">vpn_name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">vpn_dict</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">queue_dict</span> <span class="o">=</span> <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;queue_dict&#39;</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">environment_name</span> <span class="o">=</span> <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;environment&#39;</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">client_profile_name</span> <span class="o">=</span> <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;client_profile&#39;</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">users_dict</span> <span class="o">=</span> <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;users_dict&#39;</span><span class="p">]</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;USERS_DICT: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">users_dict</span> <span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">testmode</span> <span class="o">=</span> <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;testmode&#39;</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">create_queues</span> <span class="o">=</span> <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;create_queues&#39;</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">shutdown_on_apply</span> <span class="o">=</span> <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;shutdown_on_apply&#39;</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">version</span> <span class="o">=</span> <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;version&#39;</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">detect_status</span> <span class="o">=</span> <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;detect_status&#39;</span><span class="p">]</span>
+        <span class="k">except</span> <span class="ne">Exception</span><span class="p">,</span> <span class="n">e</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span><span class="s1">&#39;missing kwarg </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">e</span><span class="p">)</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;vpn_dict: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">vpn_dict</span><span class="p">)</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;vpn_name: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">vpn_name</span><span class="p">)</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Command line SolOS-TR version override: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">version</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">queueMgr</span> <span class="o">=</span> <span class="bp">None</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">testmode</span><span class="p">:</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;TESTMODE ACTIVE&#39;</span><span class="p">)</span>
+
+        <span class="c1"># create a connection for RPC calls to the environment</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">connection</span> <span class="o">=</span> <span class="n">SolaceAPI</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">environment_name</span><span class="p">,</span> <span class="n">testmode</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">testmode</span><span class="p">,</span> <span class="n">version</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">version</span><span class="p">,</span>
+                                    <span class="n">detect_status</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">detect_status</span><span class="p">)</span>
+
+        <span class="c1"># get version of semp TODO FIXME, this should not be needed after Plugin implemented</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">version</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">version</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">connection</span><span class="o">.</span><span class="n">version</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s2">&quot;Overriding default semp version </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">version</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">version</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">version</span>
+
+        <span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;VPN Data Node: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">vpn_dict</span><span class="p">),</span> <span class="n">ensure_ascii</span><span class="o">=</span><span class="bp">False</span><span class="p">))</span>
+
+        <span class="c1"># prepare vpn commands</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">vpn</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">connection</span><span class="o">.</span><span class="n">manage</span><span class="p">(</span><span class="s2">&quot;SolaceVPN&quot;</span><span class="p">,</span>
+                                          <span class="n">vpn_name</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">vpn_name</span><span class="p">,</span>
+                                          <span class="n">owner_name</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">vpn_name</span><span class="p">,</span>
+                                          <span class="n">max_spool_usage</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">vpn_dict</span><span class="p">[</span><span class="s1">&#39;vpn_config&#39;</span><span class="p">][</span><span class="s1">&#39;spool_size&#39;</span><span class="p">])</span>
+
+        <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Create VPN </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">vpn_name</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">cmd</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">vpn</span><span class="o">.</span><span class="n">commands</span><span class="o">.</span><span class="n">commands</span><span class="p">:</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">cmd</span><span class="p">))</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">testmode</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">connection</span><span class="o">.</span><span class="n">rpc</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">cmd</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span> <span class="o">**</span><span class="n">cmd</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+
+        <span class="c1"># prepare the client_profile commands</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">client_profile</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">connection</span><span class="o">.</span><span class="n">manage</span><span class="p">(</span><span class="s2">&quot;SolaceClientProfile&quot;</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">client_profile_name</span><span class="p">,</span>
+                                                     <span class="n">vpn_name</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">vpn_name</span><span class="p">,</span> <span class="n">version</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">version</span><span class="p">)</span>
+
+        <span class="c1"># prepare acl_profile commands, we create a profile named the same as the VPN for simplicity</span>
+        <span class="c1"># self.acl_profile = SolaceACLProfile(self.environment_name, self.vpn_name, self.vpn_name, version=self.version)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">acl_profile</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">connection</span><span class="o">.</span><span class="n">manage</span><span class="p">(</span><span class="s2">&quot;SolaceACLProfile&quot;</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">vpn_name</span><span class="p">,</span> <span class="n">vpn_name</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">vpn_name</span><span class="p">)</span>
+
+        <span class="c1"># prepare the user that owns this vpn</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;self.vpn_name: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">vpn_name</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_is_vpn_owner_user_present</span><span class="p">():</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;VPN owner user </span><span class="si">%s</span><span class="s2"> for VPN </span><span class="si">%s</span><span class="s2"> not present in CMDB, appending to the list of users to be created&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">vpn_name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">vpn_name</span><span class="p">))</span>
+            <span class="n">vpn_owner_user</span> <span class="o">=</span> <span class="p">[</span>
+                <span class="p">{</span>
+                    <span class="s1">&#39;username&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">vpn_name</span><span class="p">,</span>
+                    <span class="s1">&#39;password&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">vpn_dict</span><span class="p">[</span><span class="s1">&#39;password&#39;</span><span class="p">]</span>
+                <span class="p">}</span>
+            <span class="p">]</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">users_dict</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">vpn_owner_user</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">userMgr</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">connection</span><span class="o">.</span><span class="n">manage</span><span class="p">(</span><span class="s2">&quot;SolaceUsers&quot;</span><span class="p">,</span>
+                                              <span class="n">users</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">users_dict</span><span class="p">,</span>
+                                              <span class="n">vpn_name</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">vpn_name</span><span class="p">,</span>
+                                              <span class="n">client_profile</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">client_profile</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+                                              <span class="n">acl_profile</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">acl_profile</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+                                              <span class="n">testmode</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">testmode</span><span class="p">,</span>
+                                              <span class="n">shutdown_on_apply</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">shutdown_on_apply</span><span class="p">)</span>
+
+        <span class="c1"># self.users = [self.connection.manage(&quot;SolaceUser&quot;,</span>
+        <span class="c1">#                             username = self.vpn_name,</span>
+        <span class="c1">#                             password = self.vpn_dict[&#39;password&#39;],</span>
+        <span class="c1">#                             vpn_name = self.vpn_name,</span>
+        <span class="c1">#                             client_profile = self.client_profile.name,</span>
+        <span class="c1">#                             acl_profile = self.acl_profile.name,</span>
+        <span class="c1">#                             testmode = self.testmode,</span>
+        <span class="c1">#                             shutdown_on_apply = self.shutdown_on_apply)]</span>
+        <span class="c1">#</span>
+        <span class="c1"># logging.info(&quot;self.users: %s&quot; % self.users)</span>
+
+        <span class="c1"># prepare the queues for the vpn ( if any )</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Queue datanodes </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">queue_dict</span><span class="p">)</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">queue_dict</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Stacking queue commands for VPN: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">vpn_name</span><span class="p">)</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">queueMgr</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">connection</span><span class="o">.</span><span class="n">manage</span><span class="p">(</span><span class="s2">&quot;SolaceQueue&quot;</span><span class="p">,</span>
+                                                           <span class="n">vpn_name</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">vpn_name</span><span class="p">,</span>
+                                                           <span class="n">queues</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">queue_dict</span><span class="p">,</span>
+                                                           <span class="n">shutdown_on_apply</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">shutdown_on_apply</span><span class="p">)</span>
+                <span class="k">except</span> <span class="ne">Exception</span><span class="p">,</span> <span class="n">e</span><span class="p">:</span>
+                    <span class="k">raise</span>
+                    <span class="c1"># raise BaseException(&quot;Something bad has happened which was unforseen by developers: %s&quot; % e)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">logging</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;No Queue dictionary was passed, disabling queue creation&quot;</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">create_queues</span> <span class="o">=</span> <span class="bp">False</span>
+        <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;No queue declaration for this vpn in site-config, skipping&quot;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">create_queues</span> <span class="o">=</span> <span class="bp">False</span>
+            <span class="k">raise</span>
+
+        <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Create Client Profile&quot;</span><span class="p">)</span>
+        <span class="c1"># Provision profile now already since we need to link to it.</span>
+        <span class="k">for</span> <span class="n">cmd</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">client_profile</span><span class="o">.</span><span class="n">commands</span><span class="o">.</span><span class="n">commands</span><span class="p">:</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">cmd</span><span class="p">))</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">testmode</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">connection</span><span class="o">.</span><span class="n">rpc</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">cmd</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span> <span class="o">**</span><span class="n">cmd</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+
+        <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Create ACL Profile for vpn </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">vpn_name</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">cmd</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">acl_profile</span><span class="o">.</span><span class="n">commands</span><span class="o">.</span><span class="n">commands</span><span class="p">:</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">cmd</span><span class="p">))</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">testmode</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">connection</span><span class="o">.</span><span class="n">rpc</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">cmd</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span> <span class="o">**</span><span class="n">cmd</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+
+        <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Creating users for vpn </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">vpn_name</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">cmd</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">userMgr</span><span class="o">.</span><span class="n">commands</span><span class="o">.</span><span class="n">commands</span><span class="p">:</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="n">cmd</span><span class="p">)</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">testmode</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">connection</span><span class="o">.</span><span class="n">rpc</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">cmd</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span> <span class="o">**</span><span class="n">cmd</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+
+        <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Create Queues Bool?: </span><span class="si">%s</span><span class="s2"> in </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">create_queues</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">vpn_name</span><span class="p">))</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">create_queues</span><span class="p">:</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Create Queues for vpn </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">vpn_name</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">cmd</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">queueMgr</span><span class="o">.</span><span class="n">commands</span><span class="o">.</span><span class="n">commands</span><span class="p">:</span>
+                <span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="n">cmd</span><span class="p">)</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">testmode</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">connection</span><span class="o">.</span><span class="n">rpc</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">cmd</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span> <span class="o">**</span><span class="n">cmd</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+
+    <span class="k">def</span> <span class="nf">__set_vpn_confg__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="c1"># Check if there is environment overide for VPN</span>
+            <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">vpn_dict</span><span class="o">.</span><span class="n">env</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">e</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">environment_name</span><span class="p">:</span>
+                    <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;setting vpn_config to </span><span class="si">%s</span><span class="s1"> values&#39;</span> <span class="o">%</span> <span class="n">e</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">vpn_dict</span><span class="o">.</span><span class="n">vpn_config</span> <span class="o">=</span> <span class="n">e</span><span class="o">.</span><span class="n">vpn_config</span>
+                    <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Spool Size: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">vpn_dict</span><span class="o">.</span><span class="n">vpn_config</span><span class="p">[</span><span class="s1">&#39;spool_size&#39;</span><span class="p">])</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;No environment overides for vpn: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">vpn_dict</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+            <span class="k">pass</span>
+
+    <span class="k">def</span> <span class="nf">_is_vpn_owner_user_present</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Checks if the special vpn_owner user is already configured in the CMDB</span>
+<span class="sd">        Returns boolean</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">True</span> <span class="ow">in</span> <span class="p">[</span><span class="bp">True</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">users_dict</span> <span class="k">if</span> <span class="n">x</span><span class="p">[</span><span class="s2">&quot;username&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">vpn_name</span><span class="p">]</span></div>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2016, Kegan Holtzhausen, Johan Lyheden.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../',
+            VERSION:'1.0',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

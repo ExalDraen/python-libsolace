@@ -1,0 +1,394 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>libsolace.util module &mdash; libsolace 1.0 documentation</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+    <link rel="top" title="libsolace 1.0 documentation" href="index.html"/>
+        <link rel="next" title="libsolace.xml2dict module" href="libsolace.xml2dict.html"/>
+        <link rel="prev" title="libsolace.settingsloader module" href="libsolace.settingsloader.html"/> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="libsolace.html" class="icon icon-home"> libsolace
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                1.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+                <ul>
+<li class="toctree-l1"><a class="reference internal" href="libsolace.data.html">libsolace.data package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="libsolace.items.html">libsolace.items package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="libsolace.plugins.html">libsolace.plugins package</a></li>
+</ul>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="libsolace.Decorators.html">libsolace.Decorators module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="libsolace.Exceptions.html">libsolace.Exceptions module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="libsolace.Kwargs.html">libsolace.Kwargs module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="libsolace.Naming.html">libsolace.Naming module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="libsolace.SolaceAPI.html">libsolace.SolaceAPI module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="libsolace.SolaceCommandQueue.html">libsolace.SolaceCommandQueue module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="libsolace.SolaceNode.html">libsolace.SolaceNode module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="libsolace.SolaceProvision.html">libsolace.SolaceProvision module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="libsolace.SolaceReply.html">libsolace.SolaceReply module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="libsolace.SolaceXMLBuilder.html">libsolace.SolaceXMLBuilder module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="libsolace.plugin.html">libsolace.plugin module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="libsolace.settingsloader.html">libsolace.settingsloader module</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">libsolace.util module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="libsolace.xml2dict.html">libsolace.xml2dict module</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="libsolace.html">libsolace</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+ 
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="libsolace.html">Docs</a> &raquo;</li>
+      
+    <li>libsolace.util module</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="_sources/libsolace.util.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="libsolace-util-module">
+<h1>libsolace.util module<a class="headerlink" href="#libsolace-util-module" title="Permalink to this headline">¶</a></h1>
+<dl class="function">
+<dt id="libsolace.util.httpRequest">
+<code class="descclassname">libsolace.util.</code><code class="descname">httpRequest</code><span class="sig-paren">(</span><em>url</em>, <em>fields=None</em>, <em>headers=None</em>, <em>method='GET'</em>, <em>timeout=3</em>, <em>protocol='http'</em>, <em>verifySsl=False</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/libsolace/util.html#httpRequest"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#libsolace.util.httpRequest" title="Permalink to this definition">¶</a></dt>
+<dd><p>Performs HTTP request</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>url</strong> (<em>str</em>) &#8211; URL accessed</li>
+<li><strong>kwargs</strong> (<em>dict</em>) &#8211; </li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">Tuple containing data, headers and responsecode</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">tuple</p>
+</td>
+</tr>
+</tbody>
+</table>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">l</span> <span class="o">=</span> <span class="n">httpRequest</span><span class="p">(</span><span class="s1">&#39;http://www.google.se&#39;</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;GET&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">type</span><span class="p">(</span><span class="n">l</span><span class="p">)</span>
+<span class="go">&lt;type &#39;tuple&#39;&gt;</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="libsolace.util.generateBasicAuthHeader">
+<code class="descclassname">libsolace.util.</code><code class="descname">generateBasicAuthHeader</code><span class="sig-paren">(</span><em>username</em>, <em>password</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/libsolace/util.html#generateBasicAuthHeader"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#libsolace.util.generateBasicAuthHeader" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generates a basic auth header</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>username</strong> (<em>str</em>) &#8211; Username of user</li>
+<li><strong>password</strong> (<em>str</em>) &#8211; Password of user</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">Dict containing basic auth header</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">dict</p>
+</td>
+</tr>
+</tbody>
+</table>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">generateBasicAuthHeader</span><span class="p">(</span><span class="s1">&#39;test&#39;</span><span class="p">,</span><span class="s1">&#39;test&#39;</span><span class="p">)</span>
+<span class="go">{&#39;Authorization&#39;: &#39;Basic dGVzdDp0ZXN0&#39;}</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="libsolace.util.generateRequestHeaders">
+<code class="descclassname">libsolace.util.</code><code class="descname">generateRequestHeaders</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/libsolace/util.html#generateRequestHeaders"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#libsolace.util.generateRequestHeaders" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generates a dict of headers</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>kwargs</strong> (<em>dict</em>) &#8211; Dict of headers</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">Dict containing headers</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">dict</td>
+</tr>
+</tbody>
+</table>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">generateRequestHeaders</span><span class="p">(</span><span class="n">someheaders</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;header1&#39;</span><span class="p">:</span><span class="s1">&#39;value1&#39;</span><span class="p">})</span>
+<span class="go">{&#39;header1&#39;: &#39;value1&#39;, &#39;User-agent&#39;: &#39;libsolace/doctest&#39;}</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="libsolace.util.version_equal_or_greater_than">
+<code class="descclassname">libsolace.util.</code><code class="descname">version_equal_or_greater_than</code><span class="sig-paren">(</span><em>left</em>, <em>right</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/libsolace/util.html#version_equal_or_greater_than"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#libsolace.util.version_equal_or_greater_than" title="Permalink to this definition">¶</a></dt>
+<dd><p>Checks if right is equals or greater than left</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>left</strong> (<em>str</em>) &#8211; soltr_version string</li>
+<li><strong>right</strong> (<em>str</em>) &#8211; soltr_version string</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">result of comparison</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">bool</p>
+</td>
+</tr>
+</tbody>
+</table>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">version_equal_or_greater_than</span><span class="p">(</span><span class="s1">&#39;soltr/6_0&#39;</span><span class="p">,</span> <span class="s1">&#39;soltr/6_2&#39;</span><span class="p">)</span>
+<span class="go">True</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="libsolace.util.get_key_from_kwargs">
+<code class="descclassname">libsolace.util.</code><code class="descname">get_key_from_kwargs</code><span class="sig-paren">(</span><em>key</em>, <em>kwargs</em>, <em>default=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/libsolace/util.html#get_key_from_kwargs"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#libsolace.util.get_key_from_kwargs" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a key from kwargs or raises exception is no key is present</p>
+<p>Example:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">get_key_from_kwargs</span><span class="p">(</span><span class="s2">&quot;vpn_name&quot;</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">)</span>
+<span class="go">&#39;dev_testvpn&#39;</span>
+</pre></div>
+</div>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">get_key_from_kwargs</span><span class="p">(</span><span class="s2">&quot;missing_key&quot;</span><span class="p">,</span> <span class="n">other_dict</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="go">True</span>
+</pre></div>
+</div>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">get_key_from_kwargs</span><span class="p">(</span><span class="s2">&quot;missin_key&quot;</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">)</span>
+<span class="gt">Traceback (most recent call last):</span>
+  File <span class="nb">&quot;&lt;stdin&gt;&quot;</span>, line <span class="m">1</span>, in <span class="n">&lt;module&gt;</span>
+  File <span class="nb">&quot;/Users/keghol/Development/libsolace/libsolace/util.py&quot;</span>, line <span class="m">303</span>, in <span class="n">get_key_from_kwargs</span>
+    <span class="k">raise</span><span class="p">(</span><span class="n">MissingProperty</span><span class="p">(</span><span class="n">key</span><span class="p">))</span>
+<span class="gr">libsolace.Exceptions.MissingProperty</span>: <span class="n">missing_key</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="libsolace.util.get_key_from_settings">
+<code class="descclassname">libsolace.util.</code><code class="descname">get_key_from_settings</code><span class="sig-paren">(</span><em>key</em>, <em>kwargs</em>, <em>default=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/libsolace/util.html#get_key_from_settings"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#libsolace.util.get_key_from_settings" title="Permalink to this definition">¶</a></dt>
+<dd><p>Same as above, but different error message</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="libsolace.util.get_plugin">
+<code class="descclassname">libsolace.util.</code><code class="descname">get_plugin</code><span class="sig-paren">(</span><em>plugin_name</em>, <em>solace_api</em>, <em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/libsolace/util.html#get_plugin"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#libsolace.util.get_plugin" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a new plugin configured for the environment</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>plugin_name</strong> &#8211; name of the plugun</li>
+<li><strong>solace_api</strong> &#8211; a instance of SolaceAPI</li>
+<li><strong>kwargs</strong> &#8211; </li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"></p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="libsolace.util.get_calling_module">
+<code class="descclassname">libsolace.util.</code><code class="descname">get_calling_module</code><span class="sig-paren">(</span><em>point=2</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/libsolace/util.html#get_calling_module"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#libsolace.util.get_calling_module" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a module at a different point in the stack.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>point</strong> &#8211; the number of calls backwards in the stack.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+
+
+           </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="libsolace.xml2dict.html" class="btn btn-neutral float-right" title="libsolace.xml2dict module" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="libsolace.settingsloader.html" class="btn btn-neutral" title="libsolace.settingsloader module" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2016, Kegan Holtzhausen, Johan Lyheden.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'./',
+            VERSION:'1.0',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="_static/jquery.js"></script>
+      <script type="text/javascript" src="_static/underscore.js"></script>
+      <script type="text/javascript" src="_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

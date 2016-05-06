@@ -1,0 +1,360 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>libsolace.plugin module &mdash; libsolace 1.0 documentation</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+    <link rel="top" title="libsolace 1.0 documentation" href="index.html"/>
+        <link rel="next" title="libsolace.settingsloader module" href="libsolace.settingsloader.html"/>
+        <link rel="prev" title="libsolace.SolaceXMLBuilder module" href="libsolace.SolaceXMLBuilder.html"/> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="libsolace.html" class="icon icon-home"> libsolace
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                1.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+                <ul>
+<li class="toctree-l1"><a class="reference internal" href="libsolace.data.html">libsolace.data package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="libsolace.items.html">libsolace.items package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="libsolace.plugins.html">libsolace.plugins package</a></li>
+</ul>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="libsolace.Decorators.html">libsolace.Decorators module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="libsolace.Exceptions.html">libsolace.Exceptions module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="libsolace.Kwargs.html">libsolace.Kwargs module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="libsolace.Naming.html">libsolace.Naming module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="libsolace.SolaceAPI.html">libsolace.SolaceAPI module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="libsolace.SolaceCommandQueue.html">libsolace.SolaceCommandQueue module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="libsolace.SolaceNode.html">libsolace.SolaceNode module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="libsolace.SolaceProvision.html">libsolace.SolaceProvision module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="libsolace.SolaceReply.html">libsolace.SolaceReply module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="libsolace.SolaceXMLBuilder.html">libsolace.SolaceXMLBuilder module</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">libsolace.plugin module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="libsolace.settingsloader.html">libsolace.settingsloader module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="libsolace.util.html">libsolace.util module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="libsolace.xml2dict.html">libsolace.xml2dict module</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="libsolace.html">libsolace</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+ 
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="libsolace.html">Docs</a> &raquo;</li>
+      
+    <li>libsolace.plugin module</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="_sources/libsolace.plugin.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="libsolace-plugin-module">
+<h1>libsolace.plugin module<a class="headerlink" href="#libsolace-plugin-module" title="Permalink to this headline">¶</a></h1>
+<span class="target" id="module-libsolace.plugin"></span><dl class="class">
+<dt id="libsolace.plugin.Plugin">
+<em class="property">class </em><code class="descclassname">libsolace.plugin.</code><code class="descname">Plugin</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/libsolace/plugin.html#Plugin"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#libsolace.plugin.Plugin" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<p>This is the plugin core object where all plugins should extend from and register too.</p>
+<p>Plugin Example:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">pprint</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">libsolace</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">libsolace.plugin</span> <span class="k">import</span> <span class="n">Plugin</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">libsolace</span><span class="o">.</span><span class="n">plugin_registry</span> <span class="o">=</span> <span class="n">Plugin</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nd">@libsolace</span><span class="o">.</span><span class="n">plugin_registry</span><span class="o">.</span><span class="n">register</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">class</span> <span class="nc">Bar</span><span class="p">(</span><span class="n">Plugin</span><span class="p">):</span>
+<span class="gp">&gt;&gt;&gt; </span>    <span class="n">plugin_name</span> <span class="o">=</span> <span class="s2">&quot;BarPlugin&quot;</span>
+<span class="gp">&gt;&gt;&gt; </span>    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="gp">&gt;&gt;&gt; </span>        <span class="k">pass</span>
+<span class="gp">&gt;&gt;&gt; </span>    <span class="c1"># Instance methods work!</span>
+<span class="gp">&gt;&gt;&gt; </span>    <span class="k">def</span> <span class="nf">hello</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+<span class="gp">&gt;&gt;&gt; </span>        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Hello </span><span class="si">%s</span><span class="s2"> from </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="bp">self</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span>    <span class="c1"># Static methods work too!</span>
+<span class="gp">&gt;&gt;&gt; </span>    <span class="nd">@staticmethod</span>
+<span class="gp">&gt;&gt;&gt; </span>    <span class="k">def</span> <span class="nf">gbye</span><span class="p">():</span>
+<span class="gp">&gt;&gt;&gt; </span>        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Cheers!&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">libsolace</span><span class="o">.</span><span class="n">plugin_registry</span><span class="p">(</span><span class="s1">&#39;BarPlugin&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">hello</span><span class="p">(</span><span class="s2">&quot;dude&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">libsolace</span><span class="o">.</span><span class="n">plugin_registry</span><span class="p">(</span><span class="s1">&#39;BarPlugin&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">gbye</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">pprint</span><span class="o">.</span><span class="n">pprint</span><span class="p">(</span><span class="nb">dir</span><span class="p">(</span><span class="n">libsolace</span><span class="o">.</span><span class="n">plugin_registry</span><span class="p">(</span><span class="s1">&#39;BarPlugin&#39;</span><span class="p">)))</span>
+</pre></div>
+</div>
+<p>Plugin Instantiation:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">libsolace.settingsloader</span> <span class="k">as</span> <span class="nn">settings</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">libsolace.SolaceAPI</span> <span class="k">import</span> <span class="n">SolaceAPI</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">api</span> <span class="o">=</span> <span class="n">SolaceAPI</span><span class="p">(</span><span class="s2">&quot;dev&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">my_plugin</span> <span class="o">=</span> <span class="n">api</span><span class="o">.</span><span class="n">manage</span><span class="p">(</span><span class="s2">&quot;NullPlugin&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">type</span><span class="p">(</span><span class="n">my_plugin</span><span class="p">)</span>
+<span class="go">&lt;class &#39;libsolace.items.NullPlugin.NullPlugin&#39;&gt;</span>
+</pre></div>
+</div>
+<p>Direct Instantiation:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">libsolace.settingsloader</span> <span class="k">as</span> <span class="nn">settings</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">libsolace</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">my_clazz</span> <span class="o">=</span> <span class="n">libsolace</span><span class="o">.</span><span class="n">plugin_registry</span><span class="p">(</span><span class="s2">&quot;NullPlugin&quot;</span><span class="p">,</span> <span class="n">settings</span><span class="o">=</span><span class="n">settings</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">my_instance</span> <span class="o">=</span> <span class="n">my_clazz</span><span class="p">(</span><span class="n">settings</span><span class="o">=</span><span class="n">settings</span><span class="p">)</span>
+</pre></div>
+</div>
+<dl class="attribute">
+<dt id="libsolace.plugin.Plugin.exists">
+<code class="descname">exists</code><em class="property"> = False</em><a class="headerlink" href="#libsolace.plugin.Plugin.exists" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="libsolace.plugin.Plugin.plugin_name">
+<code class="descname">plugin_name</code><em class="property"> = 'Plugin'</em><a class="headerlink" href="#libsolace.plugin.Plugin.plugin_name" title="Permalink to this definition">¶</a></dt>
+<dd><p>the plugin&#8217;s name, override this in the derived class!</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="libsolace.plugin.Plugin.plugins">
+<code class="descname">plugins</code><em class="property"> = [&lt;class 'libsolace.items.NullPlugin.NullPlugin'&gt;, &lt;class 'libsolace.items.SolaceACLProfile.SolaceACLProfile'&gt;, &lt;class 'libsolace.items.SolaceUser.SolaceUser'&gt;, &lt;class 'libsolace.items.SolaceUsers.SolaceUsers'&gt;, &lt;class 'libsolace.items.SolaceVPN.SolaceVPN'&gt;, &lt;class 'libsolace.items.SolaceQueue.SolaceQueue'&gt;, &lt;class 'libsolace.plugins.NamingStandard.NamingStandard'&gt;, &lt;class 'libsolace.plugins.ZoinksNamingStandard.ZoinksNamingStandard'&gt;, &lt;class 'libsolace.items.SolaceClientProfile.SolaceClientProfile'&gt;, &lt;class 'libsolace.plugins.Utilities.Utilities'&gt;, &lt;class 'libsolace.plugins.InfluxDBClient.InfluxDBClient'&gt;, &lt;class 'libsolace.plugins.YAMLClient.YAMLClient'&gt;, &lt;class 'libsolace.items.SolaceBridge.SolaceBridge'&gt;]</em><a class="headerlink" href="#libsolace.plugin.Plugin.plugins" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="libsolace.plugin.Plugin.plugins_dict">
+<code class="descname">plugins_dict</code><em class="property"> = OrderedDict([('NullPlugin', &lt;class 'libsolace.items.NullPlugin.NullPlugin'&gt;), ('SolaceACLProfile', &lt;class 'libsolace.items.SolaceACLProfile.SolaceACLProfile'&gt;), ('SolaceUser', &lt;class 'libsolace.items.SolaceUser.SolaceUser'&gt;), ('SolaceUsers', &lt;class 'libsolace.items.SolaceUsers.SolaceUsers'&gt;), ('SolaceVPN', &lt;class 'libsolace.items.SolaceVPN.SolaceVPN'&gt;), ('SolaceQueue', &lt;class 'libsolace.items.SolaceQueue.SolaceQueue'&gt;), ('NamingStandard', &lt;class 'libsolace.plugins.NamingStandard.NamingStandard'&gt;), ('ZoinksNamingStandard', &lt;class 'libsolace.plugins.ZoinksNamingStandard.ZoinksNamingStandard'&gt;), ('SolaceClientProfile', &lt;class 'libsolace.items.SolaceClientProfile.SolaceClientProfile'&gt;), ('Utilities', &lt;class 'libsolace.plugins.Utilities.Utilities'&gt;), ('InfluxDBClient', &lt;class 'libsolace.plugins.InfluxDBClient.InfluxDBClient'&gt;), ('YAMLClient', &lt;class 'libsolace.plugins.YAMLClient.YAMLClient'&gt;), ('Plugin', &lt;class 'libsolace.items.SolaceBridge.SolaceBridge'&gt;)])</em><a class="headerlink" href="#libsolace.plugin.Plugin.plugins_dict" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="libsolace.plugin.Plugin.register">
+<code class="descname">register</code><span class="sig-paren">(</span><em>object_class</em>, <em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/libsolace/plugin.html#Plugin.register"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#libsolace.plugin.Plugin.register" title="Permalink to this definition">¶</a></dt>
+<dd><p>Registers a object with the plugin registry, typically used as a decorator.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>object_class</strong> &#8211; the class to register as a plugin</td>
+</tr>
+</tbody>
+</table>
+<dl class="docutils">
+<dt>Example:</dt>
+<dd><div class="first last highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="nd">@libsolace</span><span class="o">.</span><span class="n">plugin_registry</span><span class="o">.</span><span class="n">register</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">class</span> <span class="nc">Foo</span><span class="p">(</span><span class="n">Plugin</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="o">...</span>
+</pre></div>
+</div>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="libsolace.plugin.Plugin.set_exists">
+<code class="descname">set_exists</code><span class="sig-paren">(</span><em>state</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/libsolace/plugin.html#Plugin.set_exists"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#libsolace.plugin.Plugin.set_exists" title="Permalink to this definition">¶</a></dt>
+<dd><p>set_exists is used as caching in order to cut down on SEMP queries to validate existence of items. For example,
+if you create a new VPN in &#8220;batch&#8221; mode, After the &#8220;create-vpn&#8221; XML is generated, set_exists is set to True so
+subsequent requests decorated with the <cite>only_if_exists</cite> will function correctly since set_exists states that the
+object will exist.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>state</strong> (<em>bool</em>) &#8211; the existence state of the object</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="libsolace.plugin.PluginClass">
+<em class="property">class </em><code class="descclassname">libsolace.plugin.</code><code class="descname">PluginClass</code><a class="reference internal" href="_modules/libsolace/plugin.html#PluginClass"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#libsolace.plugin.PluginClass" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">type</span></code></p>
+<p>This is a metaclass for construction only, see Plugin rather</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="libsolace.plugin.PluginResponse">
+<em class="property">class </em><code class="descclassname">libsolace.plugin.</code><code class="descname">PluginResponse</code><span class="sig-paren">(</span><em>xml</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/libsolace/plugin.html#PluginResponse"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#libsolace.plugin.PluginResponse" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<p>Encapsulating class for holding SEMP requests and their accompanying kwargs.</p>
+<p>Example:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">request</span> <span class="o">=</span> <span class="n">PluginResponse</span><span class="p">(</span><span class="s1">&#39;&lt;rpc semp-version=&quot;soltr/7_1_1&quot;&gt;&lt;show&gt;&lt;memory/&gt;&lt;/show&gt;&lt;/rpc&gt;&#39;</span><span class="p">,</span> <span class="n">primaryOnly</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">request</span><span class="o">.</span><span class="n">xml</span>
+<span class="go">&#39;&lt;rpc semp-version=&quot;soltr/7_1_1&quot;&gt;&lt;show&gt;&lt;memory/&gt;&lt;/show&gt;&lt;/rpc&gt;&#39;</span>
+</pre></div>
+</div>
+<dl class="attribute">
+<dt id="libsolace.plugin.PluginResponse.kwargs">
+<code class="descname">kwargs</code><em class="property"> = None</em><a class="headerlink" href="#libsolace.plugin.PluginResponse.kwargs" title="Permalink to this definition">¶</a></dt>
+<dd><p>the kwargs</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="libsolace.plugin.PluginResponse.xml">
+<code class="descname">xml</code><em class="property"> = None</em><a class="headerlink" href="#libsolace.plugin.PluginResponse.xml" title="Permalink to this definition">¶</a></dt>
+<dd><p>the XML</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+           </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="libsolace.settingsloader.html" class="btn btn-neutral float-right" title="libsolace.settingsloader module" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="libsolace.SolaceXMLBuilder.html" class="btn btn-neutral" title="libsolace.SolaceXMLBuilder module" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2016, Kegan Holtzhausen, Johan Lyheden.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'./',
+            VERSION:'1.0',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="_static/jquery.js"></script>
+      <script type="text/javascript" src="_static/underscore.js"></script>
+      <script type="text/javascript" src="_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

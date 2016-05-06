@@ -1,0 +1,856 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>libsolace.items.SolaceQueue &mdash; libsolace 1.0 documentation</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+    <link rel="top" title="libsolace 1.0 documentation" href="../../../index.html"/>
+        <link rel="up" title="Module code" href="../../index.html"/> 
+
+  
+  <script src="../../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../../libsolace.html" class="icon icon-home"> libsolace
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                1.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+                <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../libsolace.data.html">libsolace.data package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../libsolace.items.html">libsolace.items package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../libsolace.plugins.html">libsolace.plugins package</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../libsolace.Decorators.html">libsolace.Decorators module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../libsolace.Exceptions.html">libsolace.Exceptions module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../libsolace.Kwargs.html">libsolace.Kwargs module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../libsolace.Naming.html">libsolace.Naming module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../libsolace.SolaceAPI.html">libsolace.SolaceAPI module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../libsolace.SolaceCommandQueue.html">libsolace.SolaceCommandQueue module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../libsolace.SolaceNode.html">libsolace.SolaceNode module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../libsolace.SolaceProvision.html">libsolace.SolaceProvision module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../libsolace.SolaceReply.html">libsolace.SolaceReply module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../libsolace.SolaceXMLBuilder.html">libsolace.SolaceXMLBuilder module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../libsolace.plugin.html">libsolace.plugin module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../libsolace.settingsloader.html">libsolace.settingsloader module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../libsolace.util.html">libsolace.util module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../libsolace.xml2dict.html">libsolace.xml2dict module</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="../../../libsolace.html">libsolace</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../../../libsolace.html">Docs</a> &raquo;</li>
+      
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+      
+    <li>libsolace.items.SolaceQueue</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for libsolace.items.SolaceQueue</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">logging</span>
+
+<span class="kn">import</span> <span class="nn">libsolace</span>
+<span class="kn">from</span> <span class="nn">libsolace.Decorators</span> <span class="kn">import</span> <span class="n">only_on_shutdown</span><span class="p">,</span> <span class="n">only_if_not_exists</span><span class="p">,</span> <span class="n">only_if_exists</span><span class="p">,</span> <span class="n">primary</span><span class="p">,</span> <span class="n">deprecation_warning</span>
+<span class="kn">from</span> <span class="nn">libsolace.SolaceCommandQueue</span> <span class="kn">import</span> <span class="n">SolaceCommandQueue</span>
+<span class="kn">from</span> <span class="nn">libsolace.SolaceXMLBuilder</span> <span class="kn">import</span> <span class="n">SolaceXMLBuilder</span>
+<span class="kn">from</span> <span class="nn">libsolace.plugin</span> <span class="kn">import</span> <span class="n">Plugin</span><span class="p">,</span> <span class="n">PluginResponse</span>
+<span class="kn">from</span> <span class="nn">libsolace.util</span> <span class="kn">import</span> <span class="n">get_key_from_kwargs</span>
+
+
+<span class="nd">@libsolace.plugin_registry.register</span>
+<div class="viewcode-block" id="SolaceQueue"><a class="viewcode-back" href="../../../libsolace.items.SolaceQueue.html#libsolace.items.SolaceQueue.SolaceQueue">[docs]</a><span class="k">class</span> <span class="nc">SolaceQueue</span><span class="p">(</span><span class="n">Plugin</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Manage a Solace Queue</span>
+
+<span class="sd">    Description</span>
+<span class="sd">    ===========</span>
+<span class="sd">        This plugin manages Queues within Solace. Typically you should invoke this plugin via L{SolaceAPI.SolaceAPI}.</span>
+
+<span class="sd">        Please see L{plugin.Plugin} for how plugins are instantiated and used.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">plugin_name</span> <span class="o">=</span> <span class="s2">&quot;SolaceQueue&quot;</span>
+
+    <span class="c1"># defaults should be provided from the settingsloader key</span>
+    <span class="n">defaults</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">&quot;retries&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+        <span class="s2">&quot;exclusive&quot;</span><span class="p">:</span> <span class="s2">&quot;true&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;queue_size&quot;</span><span class="p">:</span> <span class="mi">1024</span><span class="p">,</span>
+        <span class="s2">&quot;consume&quot;</span><span class="p">:</span> <span class="s2">&quot;all&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;max_bind_count&quot;</span><span class="p">:</span> <span class="mi">1000</span><span class="p">,</span>
+        <span class="s2">&quot;owner&quot;</span><span class="p">:</span> <span class="s2">&quot;default&quot;</span>
+    <span class="p">}</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        :param api: The instance of SolaceAPI if not called from SolaceAPI.manage</span>
+<span class="sd">        :param queue_name: the queue name in Query mode</span>
+<span class="sd">        :param queues: list of queue dictionaries with keys: name, queue_config</span>
+<span class="sd">        :param vpn_name: name of the VPN to scope the ACL to</span>
+<span class="sd">        :param defaults: dictionary of queue properties, see `defaults` in SolaceQueue class</span>
+<span class="sd">        :type api: SolaceAPI</span>
+<span class="sd">        :type queue_name: str</span>
+<span class="sd">        :type vpn_name: str</span>
+<span class="sd">        :type defaults: dict</span>
+<span class="sd">        :returns: instance with batch requests on SolaceACLProfile.commands.commands</span>
+<span class="sd">        :rtype: SolaceClientProfile</span>
+
+<span class="sd">        Example:</span>
+
+<span class="sd">        &gt;&gt;&gt; api = SolaceAPI(&quot;dev&quot;)</span>
+<span class="sd">        &gt;&gt;&gt; sq = api.manage(&quot;SolaceQueue&quot;)</span>
+<span class="sd">        &gt;&gt;&gt; dict_queue = sq.get(vpn_name=&quot;dev_testvpn&quot;, queue_name=&quot;testqueue1&quot;)</span>
+<span class="sd">        &gt;&gt;&gt; api.rpc(sq.max_bind_count(vpn_name=&quot;dev_testvpn&quot;, queue_name=&quot;testqueue1&quot;, max_bind_count=10))</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">api</span> <span class="o">=</span> <span class="n">get_key_from_kwargs</span><span class="p">(</span><span class="s2">&quot;api&quot;</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">commands</span> <span class="o">=</span> <span class="n">SolaceCommandQueue</span><span class="p">(</span><span class="n">version</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">api</span><span class="o">.</span><span class="n">version</span><span class="p">)</span>
+        <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;api&quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">kwargs</span> <span class="o">==</span> <span class="p">{}:</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Query Mode&quot;</span><span class="p">)</span>
+            <span class="k">return</span>
+
+        <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Provision mode: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">kwargs</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">vpn_name</span> <span class="o">=</span> <span class="n">get_key_from_kwargs</span><span class="p">(</span><span class="s2">&quot;vpn_name&quot;</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="s2">&quot;default&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">testmode</span> <span class="o">=</span> <span class="n">get_key_from_kwargs</span><span class="p">(</span><span class="s2">&quot;testmode&quot;</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">queues</span> <span class="o">=</span> <span class="n">get_key_from_kwargs</span><span class="p">(</span><span class="s2">&quot;queues&quot;</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="p">{})</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">shutdown_on_apply</span> <span class="o">=</span> <span class="n">get_key_from_kwargs</span><span class="p">(</span><span class="s2">&quot;shutdown_on_apply&quot;</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">defaults</span> <span class="o">=</span> <span class="n">get_key_from_kwargs</span><span class="p">(</span><span class="s1">&#39;defaults&#39;</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">defaults</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">options</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Queues: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">queues</span><span class="p">)</span>
+
+        <span class="c1"># backwards compatibility for None options passed to still execute &quot;add&quot; code</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">options</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+                    <span class="s2">&quot;No options passed, assuming you meant &#39;add&#39;, please update usage of this class to pass a OptionParser instance&quot;</span><span class="p">)</span>
+
+            <span class="k">for</span> <span class="n">queue</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">queues</span><span class="p">:</span>
+
+                <span class="n">queueName</span> <span class="o">=</span> <span class="n">queue</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]</span>
+
+                <span class="n">queue_config</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_queue_config</span><span class="p">(</span><span class="n">queue</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">create_queue</span><span class="p">(</span><span class="n">queue_name</span><span class="o">=</span><span class="n">queueName</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">shutdown_egress</span><span class="p">(</span><span class="n">queue_name</span><span class="o">=</span><span class="n">queueName</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">queue_config</span><span class="p">[</span><span class="s1">&#39;exclusive&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s2">&quot;true&quot;</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">exclusive</span><span class="p">(</span><span class="n">queue_name</span><span class="o">=</span><span class="n">queueName</span><span class="p">,</span> <span class="n">exclusive</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">exclusive</span><span class="p">(</span><span class="n">queue_name</span><span class="o">=</span><span class="n">queueName</span><span class="p">,</span> <span class="n">exclusive</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">owner</span><span class="p">(</span><span class="n">queue_name</span><span class="o">=</span><span class="n">queueName</span><span class="p">,</span> <span class="n">owner_username</span><span class="o">=</span><span class="n">queue_config</span><span class="p">[</span><span class="s1">&#39;owner&#39;</span><span class="p">],</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">max_bind_count</span><span class="p">(</span><span class="n">queue_name</span><span class="o">=</span><span class="n">queueName</span><span class="p">,</span> <span class="n">max_bind_count</span><span class="o">=</span><span class="n">queue_config</span><span class="p">[</span><span class="s1">&#39;max_bind_count&#39;</span><span class="p">],</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">consume</span><span class="p">(</span><span class="n">queue_name</span><span class="o">=</span><span class="n">queueName</span><span class="p">,</span> <span class="n">consume</span><span class="o">=</span><span class="n">queue_config</span><span class="p">[</span><span class="s1">&#39;consume&#39;</span><span class="p">],</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">spool_size</span><span class="p">(</span><span class="n">queue_name</span><span class="o">=</span><span class="n">queueName</span><span class="p">,</span> <span class="n">queue_size</span><span class="o">=</span><span class="n">queue_config</span><span class="p">[</span><span class="s1">&#39;queue_size&#39;</span><span class="p">],</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">retries</span><span class="p">(</span><span class="n">queue_name</span><span class="o">=</span><span class="n">queueName</span><span class="p">,</span> <span class="n">retries</span><span class="o">=</span><span class="n">queue_config</span><span class="p">[</span><span class="s1">&#39;retries&#39;</span><span class="p">],</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">reject_on_discard</span><span class="p">(</span><span class="n">queue_name</span><span class="o">=</span><span class="n">queueName</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">enable</span><span class="p">(</span><span class="n">queue_name</span><span class="o">=</span><span class="n">queueName</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+<div class="viewcode-block" id="SolaceQueue.get"><a class="viewcode-back" href="../../../libsolace.items.SolaceQueue.html#libsolace.items.SolaceQueue.SolaceQueue.get">[docs]</a>    <span class="k">def</span> <span class="nf">get</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Fetch a queue from the appliance</span>
+
+<span class="sd">        :type queue_name: str</span>
+<span class="sd">        :type vpn_name: str</span>
+<span class="sd">        :param queue_name: Queue name or filter</span>
+<span class="sd">        :param vpn_name: name of the VPN</span>
+<span class="sd">        :rtype: plugin.PluginResponse</span>
+<span class="sd">        :returns: the queue(s)</span>
+
+<span class="sd">        Examples:</span>
+
+<span class="sd">        &gt;&gt;&gt; api = SolaceAPI(&quot;dev&quot;)</span>
+<span class="sd">        &gt;&gt;&gt; list_queues = api.manage(&quot;SolaceQueue&quot;).get(queue_name=&#39;*&#39;, vpn_name=&#39;dev_testvpn&#39;)</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">queue_name</span> <span class="o">=</span> <span class="n">get_key_from_kwargs</span><span class="p">(</span><span class="s2">&quot;queue_name&quot;</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">)</span>
+        <span class="n">vpn_name</span> <span class="o">=</span> <span class="n">get_key_from_kwargs</span><span class="p">(</span><span class="s2">&quot;vpn_name&quot;</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">)</span>
+        <span class="n">detail</span> <span class="o">=</span> <span class="n">get_key_from_kwargs</span><span class="p">(</span><span class="s2">&quot;detail&quot;</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+
+        <span class="c1"># if this request is not specifically targeted at the backup, default to primary</span>
+        <span class="k">if</span> <span class="n">get_key_from_kwargs</span><span class="p">(</span><span class="s2">&quot;backupOnly&quot;</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span> <span class="ow">is</span> <span class="bp">False</span><span class="p">:</span>
+            <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;primaryOnly&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">True</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">api</span><span class="o">.</span><span class="n">x</span> <span class="o">=</span> <span class="n">SolaceXMLBuilder</span><span class="p">(</span><span class="s2">&quot;Querying Queue </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">queue_name</span><span class="p">,</span> <span class="n">version</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">api</span><span class="o">.</span><span class="n">version</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">api</span><span class="o">.</span><span class="n">x</span><span class="o">.</span><span class="n">show</span><span class="o">.</span><span class="n">queue</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">queue_name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">api</span><span class="o">.</span><span class="n">x</span><span class="o">.</span><span class="n">show</span><span class="o">.</span><span class="n">queue</span><span class="o">.</span><span class="n">vpn_name</span> <span class="o">=</span> <span class="n">vpn_name</span>
+        <span class="k">if</span> <span class="n">detail</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">api</span><span class="o">.</span><span class="n">x</span><span class="o">.</span><span class="n">show</span><span class="o">.</span><span class="n">queue</span><span class="o">.</span><span class="n">detail</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">commands</span><span class="o">.</span><span class="n">enqueue</span><span class="p">(</span><span class="n">PluginResponse</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">api</span><span class="o">.</span><span class="n">x</span><span class="p">),</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">))</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">api</span><span class="o">.</span><span class="n">rpc</span><span class="p">(</span><span class="n">PluginResponse</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">api</span><span class="o">.</span><span class="n">x</span><span class="p">),</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">))</span></div>
+
+<div class="viewcode-block" id="SolaceQueue.get_queue_config"><a class="viewcode-back" href="../../../libsolace.items.SolaceQueue.html#libsolace.items.SolaceQueue.SolaceQueue.get_queue_config">[docs]</a>    <span class="k">def</span> <span class="nf">get_queue_config</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">queue</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Returns a queue config for the queue and overrides where neccessary</span>
+
+<span class="sd">        :param queue: single queue dictionary e.g.</span>
+<span class="sd">            {</span>
+<span class="sd">                &quot;name&quot;: &quot;foo&quot;,</span>
+<span class="sd">                &quot;env&quot;: [</span>
+<span class="sd">                    &quot;qa1&quot;: {</span>
+<span class="sd">                        &quot;queue_config&quot;: {</span>
+<span class="sd">                            &quot;retries&quot;: 0,</span>
+<span class="sd">                            &quot;exclusive&quot;: &quot;false&quot;,</span>
+<span class="sd">                            &quot;queue_size&quot;: 1024,</span>
+<span class="sd">                            &quot;consume&quot;: &quot;all&quot;,</span>
+<span class="sd">                            &quot;max_bind_count&quot;: 1000,</span>
+<span class="sd">                            &quot;owner&quot;: &quot;dev_testuser&quot;</span>
+<span class="sd">                        }</span>
+<span class="sd">                    }</span>
+<span class="sd">                ]</span>
+<span class="sd">            }</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># get the queue name from the queue dictionary as passed to this method</span>
+        <span class="n">queue_name</span> <span class="o">=</span> <span class="n">get_key_from_kwargs</span><span class="p">(</span><span class="s2">&quot;name&quot;</span><span class="p">,</span> <span class="n">queue</span><span class="p">)</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Checking env overrides for queue </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">queue</span><span class="p">[</span><span class="s1">&#39;env&#39;</span><span class="p">])</span>
+            <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">queue</span><span class="p">[</span><span class="s1">&#39;env&#39;</span><span class="p">]:</span>
+                <span class="k">if</span> <span class="n">e</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">api</span><span class="o">.</span><span class="n">environment</span><span class="p">:</span>
+                    <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;setting queue_config to environment </span><span class="si">%s</span><span class="s1"> values&#39;</span> <span class="o">%</span> <span class="n">e</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">])</span>
+                    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__apply_default_config__</span><span class="p">(</span><span class="n">e</span><span class="p">[</span><span class="s1">&#39;queue_config&#39;</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">defaults</span><span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s2">&quot;No environment overides for queue </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">queue_name</span><span class="p">)</span>
+            <span class="k">pass</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__apply_default_config__</span><span class="p">(</span><span class="n">queue</span><span class="p">[</span><span class="s1">&#39;queue_config&#39;</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">defaults</span><span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;No queue_config for queue: </span><span class="si">%s</span><span class="s2"> found, please check site-config&quot;</span> <span class="o">%</span> <span class="n">queue_name</span><span class="p">)</span>
+            <span class="k">raise</span></div>
+
+    <span class="k">def</span> <span class="nf">__apply_default_config__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">config</span><span class="p">,</span> <span class="n">default</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; copys keys from default dict to config dict when not present &quot;&quot;&quot;</span>
+
+        <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Applying default config after config&quot;</span><span class="p">)</span>
+
+        <span class="n">final_config</span> <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">default</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">config</span><span class="p">:</span>
+                <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Config key: </span><span class="si">%s</span><span class="s2"> to </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">v</span><span class="p">))</span>
+                <span class="n">final_config</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">config</span><span class="p">[</span><span class="n">k</span><span class="p">]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Default config key: </span><span class="si">%s</span><span class="s2"> to </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">v</span><span class="p">))</span>
+                <span class="n">final_config</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">v</span>
+        <span class="k">return</span> <span class="n">final_config</span>
+
+    <span class="c1"># perform the if_exists on the primary only</span>
+    <span class="nd">@only_if_not_exists</span><span class="p">(</span><span class="s1">&#39;get&#39;</span><span class="p">,</span> <span class="s1">&#39;rpc-reply.rpc.show.queue.queues.queue.info&#39;</span><span class="p">,</span> <span class="n">primaryOnly</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+    <span class="nd">@primary</span><span class="p">()</span>
+<div class="viewcode-block" id="SolaceQueue.create_queue"><a class="viewcode-back" href="../../../libsolace.items.SolaceQueue.html#libsolace.items.SolaceQueue.SolaceQueue.create_queue">[docs]</a>    <span class="k">def</span> <span class="nf">create_queue</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Create a queue / endpoint only if it doesnt exist.</span>
+
+<span class="sd">        :param queue_name: the queue name</span>
+<span class="sd">        :param vpn_name: the vpn name</span>
+<span class="sd">        :type queue_name: str</span>
+<span class="sd">        :type vpn_name: str</span>
+<span class="sd">        :type: plugin.PluginResponse</span>
+<span class="sd">        :returns: single SEMP request</span>
+
+<span class="sd">        Example 1: Create Request, then Execute</span>
+<span class="sd">        &gt;&gt;&gt; api = SolaceAPI(&quot;dev&quot;)</span>
+<span class="sd">        &gt;&gt;&gt; request = api.manage(&quot;SolaceQueue&quot;).create_queue(vpn_name=&quot;dev_testvpn&quot;, queue_name=&quot;my_test_queue&quot;)</span>
+<span class="sd">        &gt;&gt;&gt; # response = api.rpc(request)</span>
+
+<span class="sd">        Example 2: One Shot</span>
+<span class="sd">        &gt;&gt;&gt; api = SolaceAPI(&quot;dev&quot;)</span>
+<span class="sd">        &gt;&gt;&gt; request = api.manage(&quot;SolaceQueue&quot;).create_queue(vpn_name=&quot;dev_testvpn&quot;, queue_name=&quot;my_test_queue2&quot;)</span>
+<span class="sd">        &gt;&gt;&gt; # response = api.rpc(request)</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">queue_name</span> <span class="o">=</span> <span class="n">get_key_from_kwargs</span><span class="p">(</span><span class="s2">&quot;queue_name&quot;</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">)</span>
+        <span class="n">vpn_name</span> <span class="o">=</span> <span class="n">get_key_from_kwargs</span><span class="p">(</span><span class="s2">&quot;vpn_name&quot;</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">)</span>
+
+        <span class="c1"># Create a queue</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">api</span><span class="o">.</span><span class="n">x</span> <span class="o">=</span> <span class="n">SolaceXMLBuilder</span><span class="p">(</span><span class="s2">&quot;Creating Queue </span><span class="si">%s</span><span class="s2"> in vpn: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">queue_name</span><span class="p">,</span> <span class="n">vpn_name</span><span class="p">),</span> <span class="n">version</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">api</span><span class="o">.</span><span class="n">version</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">api</span><span class="o">.</span><span class="n">x</span><span class="o">.</span><span class="n">message_spool</span><span class="o">.</span><span class="n">vpn_name</span> <span class="o">=</span> <span class="n">vpn_name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">api</span><span class="o">.</span><span class="n">x</span><span class="o">.</span><span class="n">message_spool</span><span class="o">.</span><span class="n">create</span><span class="o">.</span><span class="n">queue</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">queue_name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">commands</span><span class="o">.</span><span class="n">enqueue</span><span class="p">(</span><span class="n">PluginResponse</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">api</span><span class="o">.</span><span class="n">x</span><span class="p">),</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">PluginResponse</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">api</span><span class="o">.</span><span class="n">x</span><span class="p">),</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+
+    <span class="c1"># perform the if_exists on the primary only</span>
+    <span class="nd">@only_if_exists</span><span class="p">(</span><span class="s1">&#39;get&#39;</span><span class="p">,</span> <span class="s1">&#39;rpc-reply.rpc.show.queue.queues.queue.info&#39;</span><span class="p">,</span> <span class="n">primaryOnly</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+    <span class="nd">@only_on_shutdown</span><span class="p">(</span><span class="s1">&#39;queue&#39;</span><span class="p">)</span>
+    <span class="nd">@primary</span><span class="p">()</span>
+<div class="viewcode-block" id="SolaceQueue.shutdown_egress"><a class="viewcode-back" href="../../../libsolace.items.SolaceQueue.html#libsolace.items.SolaceQueue.SolaceQueue.shutdown_egress">[docs]</a>    <span class="k">def</span> <span class="nf">shutdown_egress</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Shutdown egress for a queue</span>
+
+<span class="sd">        :param shutdown_on_apply: is shutdown permitted boolean or char</span>
+<span class="sd">        :param vpn_name: name of the vpn</span>
+<span class="sd">        :param queue_name: name of the queue</span>
+<span class="sd">        :type shutdown_on_apply: char or bool</span>
+<span class="sd">        :type queue_name: str</span>
+<span class="sd">        :type vpn_name: str</span>
+<span class="sd">        :rtype: plugin.PluginResponse</span>
+<span class="sd">        :returns: single SEMP request</span>
+
+<span class="sd">        Example 1: One Shot</span>
+
+<span class="sd">        &gt;&gt;&gt; api = SolaceAPI(&quot;dev&quot;)</span>
+<span class="sd">        &gt;&gt;&gt; request = api.manage(&quot;SolaceQueue&quot;).shutdown_egress(shutdown_on_apply=True, vpn_name=&quot;dev_testvpn&quot;, queue_name=&quot;testqueue1&quot;)</span>
+<span class="sd">        &gt;&gt;&gt; # response = api.rpc(request)</span>
+<span class="sd">        &quot;&quot;</span>
+
+<span class="sd">        Example 2: Create Request, then Execute</span>
+
+<span class="sd">        &gt;&gt;&gt; api = SolaceAPI(&quot;dev&quot;)</span>
+<span class="sd">        &gt;&gt;&gt; request = api.manage(&quot;SolaceQueue&quot;).shutdown_egress(shutdown_on_apply=True, vpn_name=&quot;dev_testvpn&quot;, queue_name=&quot;testqueue1&quot;)</span>
+<span class="sd">        &gt;&gt;&gt; # response = api.rpc(request)</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">shutdown_on_apply</span> <span class="o">=</span> <span class="n">get_key_from_kwargs</span><span class="p">(</span><span class="s2">&quot;shutdown_on_apply&quot;</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">)</span>
+        <span class="n">vpn_name</span> <span class="o">=</span> <span class="n">get_key_from_kwargs</span><span class="p">(</span><span class="s2">&quot;vpn_name&quot;</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">)</span>
+        <span class="n">queue_name</span> <span class="o">=</span> <span class="n">get_key_from_kwargs</span><span class="p">(</span><span class="s2">&quot;queue_name&quot;</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="p">(</span><span class="n">shutdown_on_apply</span> <span class="o">==</span> <span class="s1">&#39;b&#39;</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="n">shutdown_on_apply</span> <span class="o">==</span> <span class="s1">&#39;q&#39;</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="n">shutdown_on_apply</span> <span class="ow">is</span> <span class="bp">True</span><span class="p">):</span>
+            <span class="c1"># Lets only shutdown the egress of the queue</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">api</span><span class="o">.</span><span class="n">x</span> <span class="o">=</span> <span class="n">SolaceXMLBuilder</span><span class="p">(</span><span class="s2">&quot;Shutting down egress for queue:</span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">queue_name</span><span class="p">,</span> <span class="n">version</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">api</span><span class="o">.</span><span class="n">version</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">api</span><span class="o">.</span><span class="n">x</span><span class="o">.</span><span class="n">message_spool</span><span class="o">.</span><span class="n">vpn_name</span> <span class="o">=</span> <span class="n">vpn_name</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">api</span><span class="o">.</span><span class="n">x</span><span class="o">.</span><span class="n">message_spool</span><span class="o">.</span><span class="n">queue</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">queue_name</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">api</span><span class="o">.</span><span class="n">x</span><span class="o">.</span><span class="n">message_spool</span><span class="o">.</span><span class="n">queue</span><span class="o">.</span><span class="n">shutdown</span><span class="o">.</span><span class="n">egress</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">commands</span><span class="o">.</span><span class="n">enqueue</span><span class="p">(</span><span class="n">PluginResponse</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">api</span><span class="o">.</span><span class="n">x</span><span class="p">),</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">))</span>
+            <span class="k">return</span> <span class="n">PluginResponse</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">api</span><span class="o">.</span><span class="n">x</span><span class="p">),</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;Not disabling Queue, commands could fail since shutdown_on_apply = </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">shutdown_on_apply</span><span class="p">)</span></div>
+
+    <span class="c1"># perform the if_exists on the primary only</span>
+    <span class="nd">@only_if_exists</span><span class="p">(</span><span class="s1">&#39;get&#39;</span><span class="p">,</span> <span class="s1">&#39;rpc-reply.rpc.show.queue.queues.queue.info&#39;</span><span class="p">,</span> <span class="n">primaryOnly</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+    <span class="nd">@only_on_shutdown</span><span class="p">(</span><span class="s1">&#39;queue&#39;</span><span class="p">)</span>
+    <span class="nd">@primary</span><span class="p">()</span>
+<div class="viewcode-block" id="SolaceQueue.shutdown_ingress"><a class="viewcode-back" href="../../../libsolace.items.SolaceQueue.html#libsolace.items.SolaceQueue.SolaceQueue.shutdown_ingress">[docs]</a>    <span class="k">def</span> <span class="nf">shutdown_ingress</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Shutdown the ingress of a queue</span>
+
+<span class="sd">        :param shutdown_on_apply: is shutdown permitted boolean or char</span>
+<span class="sd">        :param vpn_name: name of the vpn</span>
+<span class="sd">        :param queue_name: name of the queue</span>
+<span class="sd">        :type shutdown_on_apply: char or bool</span>
+<span class="sd">        :type queue_name: str</span>
+<span class="sd">        :type vpn_name: str</span>
+<span class="sd">        :rtype: plugin.PluginResponse</span>
+<span class="sd">        :returns: single SEMP request</span>
+
+<span class="sd">        Example 1: Instant Execution:</span>
+
+<span class="sd">        &gt;&gt;&gt; api = SolaceAPI(&quot;dev&quot;)</span>
+<span class="sd">        &gt;&gt;&gt; request = api.manage(&quot;SolaceQueue&quot;).shutdown_ingress(shutdown_on_apply=True, vpn_name=&quot;dev_testvpn&quot;, queue_name=&quot;testqueue1&quot;)</span>
+<span class="sd">        &gt;&gt;&gt; # response = api.rpc(request)</span>
+
+
+<span class="sd">        Example 2: Create Request, then Execute</span>
+
+<span class="sd">        &gt;&gt;&gt; api = SolaceAPI(&quot;dev&quot;)</span>
+<span class="sd">        &gt;&gt;&gt; request = api.manage(&quot;SolaceQueue&quot;).shutdown_ingress(shutdown_on_apply=True, vpn_name=&quot;dev_testvpn&quot;, queue_name=&quot;testqueue1&quot;)</span>
+<span class="sd">        &gt;&gt;&gt; # api.rpc(request)</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">shutdown_on_apply</span> <span class="o">=</span> <span class="n">get_key_from_kwargs</span><span class="p">(</span><span class="s2">&quot;shutdown_on_apply&quot;</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">)</span>
+        <span class="n">vpn_name</span> <span class="o">=</span> <span class="n">get_key_from_kwargs</span><span class="p">(</span><span class="s2">&quot;vpn_name&quot;</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">)</span>
+        <span class="n">queue_name</span> <span class="o">=</span> <span class="n">get_key_from_kwargs</span><span class="p">(</span><span class="s2">&quot;queue_name&quot;</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="p">(</span><span class="n">shutdown_on_apply</span> <span class="o">==</span> <span class="s1">&#39;b&#39;</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="n">shutdown_on_apply</span> <span class="o">==</span> <span class="s1">&#39;q&#39;</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="n">shutdown_on_apply</span> <span class="ow">is</span> <span class="bp">True</span><span class="p">):</span>
+            <span class="c1"># Lets only shutdown the egress of the queue</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">api</span><span class="o">.</span><span class="n">x</span> <span class="o">=</span> <span class="n">SolaceXMLBuilder</span><span class="p">(</span><span class="s2">&quot;Shutting down egress for queue:</span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">queue_name</span><span class="p">,</span> <span class="n">version</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">api</span><span class="o">.</span><span class="n">version</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">api</span><span class="o">.</span><span class="n">x</span><span class="o">.</span><span class="n">message_spool</span><span class="o">.</span><span class="n">vpn_name</span> <span class="o">=</span> <span class="n">vpn_name</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">api</span><span class="o">.</span><span class="n">x</span><span class="o">.</span><span class="n">message_spool</span><span class="o">.</span><span class="n">queue</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">queue_name</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">api</span><span class="o">.</span><span class="n">x</span><span class="o">.</span><span class="n">message_spool</span><span class="o">.</span><span class="n">queue</span><span class="o">.</span><span class="n">shutdown</span><span class="o">.</span><span class="n">ingress</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">commands</span><span class="o">.</span><span class="n">enqueue</span><span class="p">(</span><span class="n">PluginResponse</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">api</span><span class="o">.</span><span class="n">x</span><span class="p">),</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">))</span>
+            <span class="k">return</span> <span class="n">PluginResponse</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">api</span><span class="o">.</span><span class="n">x</span><span class="p">),</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;Not disabling Queue, commands could fail since shutdown_on_apply = </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">shutdown_on_apply</span><span class="p">)</span></div>
+
+    <span class="c1"># perform the if_exists on the primary only</span>
+    <span class="nd">@only_if_exists</span><span class="p">(</span><span class="s1">&#39;get&#39;</span><span class="p">,</span> <span class="s1">&#39;rpc-reply.rpc.show.queue.queues.queue.info&#39;</span><span class="p">,</span> <span class="n">primaryOnly</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+    <span class="nd">@only_on_shutdown</span><span class="p">(</span><span class="s1">&#39;queue&#39;</span><span class="p">)</span>
+    <span class="nd">@primary</span><span class="p">()</span>
+<div class="viewcode-block" id="SolaceQueue.exclusive"><a class="viewcode-back" href="../../../libsolace.items.SolaceQueue.html#libsolace.items.SolaceQueue.SolaceQueue.exclusive">[docs]</a>    <span class="k">def</span> <span class="nf">exclusive</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Set queue exclusivity</span>
+
+<span class="sd">        :param vpn_name: the name of the vpn</span>
+<span class="sd">        :param queue_name: the queue name</span>
+<span class="sd">        :param exclusive: state</span>
+<span class="sd">        :type vpn_name: str</span>
+<span class="sd">        :type queue_name: str</span>
+<span class="sd">        :type exclusive: bool</span>
+<span class="sd">        :rtype: plugin.PluginResponse</span>
+<span class="sd">        :returns: single SEMP request</span>
+
+<span class="sd">        Example: Shutdown, Set Exclusive, Start</span>
+
+<span class="sd">        &gt;&gt;&gt; api = SolaceAPI(&quot;dev&quot;)</span>
+<span class="sd">        &gt;&gt;&gt; requests = []</span>
+<span class="sd">        &gt;&gt;&gt; requests.append(api.manage(&quot;SolaceQueue&quot;).shutdown_ingress(queue_name=&quot;testqueue1&quot;, vpn_name=&quot;dev_testvpn&quot;, shutdown_on_apply=True))</span>
+<span class="sd">        &gt;&gt;&gt; requests.append(api.manage(&quot;SolaceQueue&quot;).exclusive(queue_name=&quot;testqueue1&quot;, vpn_name=&quot;dev_testvpn&quot;, exclusive=False, shutdown_on_apply=True))</span>
+<span class="sd">        &gt;&gt;&gt; requests.append(api.manage(&quot;SolaceQueue&quot;).enable(queue_name=&quot;testqueue1&quot;, vpn_name=&quot;dev_testvpn&quot;, shutdown_on_apply=True))</span>
+<span class="sd">        &gt;&gt;&gt; # [api.rpc(x) for x in requests]</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">vpn_name</span> <span class="o">=</span> <span class="n">get_key_from_kwargs</span><span class="p">(</span><span class="s2">&quot;vpn_name&quot;</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">)</span>
+        <span class="n">queue_name</span> <span class="o">=</span> <span class="n">get_key_from_kwargs</span><span class="p">(</span><span class="s2">&quot;queue_name&quot;</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">)</span>
+        <span class="n">exclusive</span> <span class="o">=</span> <span class="n">get_key_from_kwargs</span><span class="p">(</span><span class="s2">&quot;exclusive&quot;</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">)</span>
+
+        <span class="c1"># Default to NON Exclusive queue</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">exclusive</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">api</span><span class="o">.</span><span class="n">x</span> <span class="o">=</span> <span class="n">SolaceXMLBuilder</span><span class="p">(</span><span class="s2">&quot;Set Queue </span><span class="si">%s</span><span class="s2"> to Non Exclusive &quot;</span> <span class="o">%</span> <span class="n">queue_name</span><span class="p">,</span> <span class="n">version</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">api</span><span class="o">.</span><span class="n">version</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">api</span><span class="o">.</span><span class="n">x</span><span class="o">.</span><span class="n">message_spool</span><span class="o">.</span><span class="n">vpn_name</span> <span class="o">=</span> <span class="n">vpn_name</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">api</span><span class="o">.</span><span class="n">x</span><span class="o">.</span><span class="n">message_spool</span><span class="o">.</span><span class="n">queue</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">queue_name</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">api</span><span class="o">.</span><span class="n">x</span><span class="o">.</span><span class="n">message_spool</span><span class="o">.</span><span class="n">queue</span><span class="o">.</span><span class="n">access_type</span><span class="o">.</span><span class="n">non_exclusive</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># Non Exclusive queue</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">api</span><span class="o">.</span><span class="n">x</span> <span class="o">=</span> <span class="n">SolaceXMLBuilder</span><span class="p">(</span><span class="s2">&quot;Set Queue </span><span class="si">%s</span><span class="s2"> to Exclusive &quot;</span> <span class="o">%</span> <span class="n">queue_name</span><span class="p">,</span> <span class="n">version</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">api</span><span class="o">.</span><span class="n">version</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">api</span><span class="o">.</span><span class="n">x</span><span class="o">.</span><span class="n">message_spool</span><span class="o">.</span><span class="n">vpn_name</span> <span class="o">=</span> <span class="n">vpn_name</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">api</span><span class="o">.</span><span class="n">x</span><span class="o">.</span><span class="n">message_spool</span><span class="o">.</span><span class="n">queue</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">queue_name</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">api</span><span class="o">.</span><span class="n">x</span><span class="o">.</span><span class="n">message_spool</span><span class="o">.</span><span class="n">queue</span><span class="o">.</span><span class="n">access_type</span><span class="o">.</span><span class="n">exclusive</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">commands</span><span class="o">.</span><span class="n">enqueue</span><span class="p">(</span><span class="n">PluginResponse</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">api</span><span class="o">.</span><span class="n">x</span><span class="p">),</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">PluginResponse</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">api</span><span class="o">.</span><span class="n">x</span><span class="p">),</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+
+    <span class="nd">@only_if_exists</span><span class="p">(</span><span class="s1">&#39;get&#39;</span><span class="p">,</span> <span class="s1">&#39;rpc-reply.rpc.show.queue.queues.queue.info&#39;</span><span class="p">,</span> <span class="n">primaryOnly</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+    <span class="nd">@only_on_shutdown</span><span class="p">(</span><span class="s1">&#39;queue&#39;</span><span class="p">)</span>
+    <span class="nd">@primary</span><span class="p">()</span>
+<div class="viewcode-block" id="SolaceQueue.owner"><a class="viewcode-back" href="../../../libsolace.items.SolaceQueue.html#libsolace.items.SolaceQueue.SolaceQueue.owner">[docs]</a>    <span class="k">def</span> <span class="nf">owner</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Set the owner</span>
+
+<span class="sd">        :param vpn_name: the name of the vpn</span>
+<span class="sd">        :param queue_name: the queue name</span>
+<span class="sd">        :param owner: the owner client-username</span>
+<span class="sd">        :type vpn_name: str</span>
+<span class="sd">        :type queue_name: str</span>
+<span class="sd">        :type owner: str</span>
+<span class="sd">        :rtype: plugin.PluginResponse</span>
+<span class="sd">        :returns: single SEMP request</span>
+
+<span class="sd">        Example:</span>
+
+<span class="sd">        &gt;&gt;&gt; api = SolaceAPI(&quot;dev&quot;)</span>
+<span class="sd">        &gt;&gt;&gt; requests = []</span>
+<span class="sd">        &gt;&gt;&gt; requests.append(api.manage(&quot;SolaceQueue&quot;).shutdown_ingress(queue_name=&quot;testqueue1&quot;, vpn_name=&quot;dev_testvpn&quot;, shutdown_on_apply=True))</span>
+<span class="sd">        &gt;&gt;&gt; requests.append(api.manage(&quot;SolaceQueue&quot;).shutdown_egress(queue_name=&quot;testqueue1&quot;, vpn_name=&quot;dev_testvpn&quot;, shutdown_on_apply=True))</span>
+<span class="sd">        &gt;&gt;&gt; requests.append(api.manage(&quot;SolaceQueue&quot;).owner(vpn_name=&quot;dev_testvpn&quot;, queue_name=&quot;testqueue1&quot;, owner_username=&quot;dev_testproductA&quot;))</span>
+<span class="sd">        &gt;&gt;&gt; requests.append(api.manage(&quot;SolaceQueue&quot;).enable(queue_name=&quot;testqueue1&quot;, vpn_name=&quot;dev_testvpn&quot;))</span>
+<span class="sd">        &gt;&gt;&gt; # [api.rpc(x) for x in requests]</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">vpn_name</span> <span class="o">=</span> <span class="n">get_key_from_kwargs</span><span class="p">(</span><span class="s2">&quot;vpn_name&quot;</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">)</span>
+        <span class="n">queue_name</span> <span class="o">=</span> <span class="n">get_key_from_kwargs</span><span class="p">(</span><span class="s2">&quot;queue_name&quot;</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">)</span>
+        <span class="n">owner</span> <span class="o">=</span> <span class="n">get_key_from_kwargs</span><span class="p">(</span><span class="s2">&quot;owner_username&quot;</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">owner</span> <span class="o">==</span> <span class="s2">&quot;</span><span class="si">%ls</span><span class="s2">VPN&quot;</span><span class="p">:</span>
+            <span class="n">owner</span> <span class="o">=</span> <span class="n">vpn_name</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Owner being set  to VPN itself: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">owner</span><span class="p">)</span>
+
+        <span class="c1"># Queue Owner</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">api</span><span class="o">.</span><span class="n">x</span> <span class="o">=</span> <span class="n">SolaceXMLBuilder</span><span class="p">(</span><span class="s2">&quot;Set Queue </span><span class="si">%s</span><span class="s2"> owner to </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">queue_name</span><span class="p">,</span> <span class="n">vpn_name</span><span class="p">),</span> <span class="n">version</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">api</span><span class="o">.</span><span class="n">version</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">api</span><span class="o">.</span><span class="n">x</span><span class="o">.</span><span class="n">message_spool</span><span class="o">.</span><span class="n">vpn_name</span> <span class="o">=</span> <span class="n">vpn_name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">api</span><span class="o">.</span><span class="n">x</span><span class="o">.</span><span class="n">message_spool</span><span class="o">.</span><span class="n">queue</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">queue_name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">api</span><span class="o">.</span><span class="n">x</span><span class="o">.</span><span class="n">message_spool</span><span class="o">.</span><span class="n">queue</span><span class="o">.</span><span class="n">owner</span><span class="o">.</span><span class="n">owner</span> <span class="o">=</span> <span class="n">owner</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">commands</span><span class="o">.</span><span class="n">enqueue</span><span class="p">(</span><span class="n">PluginResponse</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">api</span><span class="o">.</span><span class="n">x</span><span class="p">),</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">PluginResponse</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">api</span><span class="o">.</span><span class="n">x</span><span class="p">),</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+
+    <span class="nd">@only_if_exists</span><span class="p">(</span><span class="s1">&#39;get&#39;</span><span class="p">,</span> <span class="s1">&#39;rpc-reply.rpc.show.queue.queues.queue.info&#39;</span><span class="p">,</span> <span class="n">primaryOnly</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+    <span class="nd">@primary</span><span class="p">()</span>
+<div class="viewcode-block" id="SolaceQueue.max_bind_count"><a class="viewcode-back" href="../../../libsolace.items.SolaceQueue.html#libsolace.items.SolaceQueue.SolaceQueue.max_bind_count">[docs]</a>    <span class="k">def</span> <span class="nf">max_bind_count</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Limit the max bind count</span>
+
+<span class="sd">        :param vpn_name: the name of the vpn</span>
+<span class="sd">        :param queue_name: the queue name</span>
+<span class="sd">        :param max_bind_count: max bind count</span>
+<span class="sd">        :type vpn_name: str</span>
+<span class="sd">        :type queue_name: str</span>
+<span class="sd">        :type max_bind_count: int</span>
+<span class="sd">        :rtype: plugin.PluginResponse</span>
+<span class="sd">        :returns: single SEMP request</span>
+
+<span class="sd">        Example:</span>
+
+<span class="sd">        &gt;&gt;&gt; api = SolaceAPI(&quot;dev&quot;)</span>
+<span class="sd">        &gt;&gt;&gt; requests = api.manage(&quot;SolaceQueue&quot;).max_bind_count(vpn_name=&quot;dev_testvpn&quot;, queue_name=&quot;testqueue1&quot;, max_bind_count=50)</span>
+<span class="sd">        &gt;&gt;&gt; # response = api.rpc(requests)</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">vpn_name</span> <span class="o">=</span> <span class="n">get_key_from_kwargs</span><span class="p">(</span><span class="s2">&quot;vpn_name&quot;</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">)</span>
+        <span class="n">queue_name</span> <span class="o">=</span> <span class="n">get_key_from_kwargs</span><span class="p">(</span><span class="s2">&quot;queue_name&quot;</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">)</span>
+        <span class="n">max_bind_count</span> <span class="o">=</span> <span class="n">get_key_from_kwargs</span><span class="p">(</span><span class="s2">&quot;max_bind_count&quot;</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">api</span><span class="o">.</span><span class="n">x</span> <span class="o">=</span> <span class="n">SolaceXMLBuilder</span><span class="p">(</span><span class="s2">&quot;Settings Queue </span><span class="si">%s</span><span class="s2"> max bind count to </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">queue_name</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">max_bind_count</span><span class="p">)),</span>
+                                      <span class="n">version</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">api</span><span class="o">.</span><span class="n">version</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">api</span><span class="o">.</span><span class="n">x</span><span class="o">.</span><span class="n">message_spool</span><span class="o">.</span><span class="n">vpn_name</span> <span class="o">=</span> <span class="n">vpn_name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">api</span><span class="o">.</span><span class="n">x</span><span class="o">.</span><span class="n">message_spool</span><span class="o">.</span><span class="n">queue</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">queue_name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">api</span><span class="o">.</span><span class="n">x</span><span class="o">.</span><span class="n">message_spool</span><span class="o">.</span><span class="n">queue</span><span class="o">.</span><span class="n">max_bind_count</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="n">max_bind_count</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">commands</span><span class="o">.</span><span class="n">enqueue</span><span class="p">(</span><span class="n">PluginResponse</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">api</span><span class="o">.</span><span class="n">x</span><span class="p">),</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">PluginResponse</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">api</span><span class="o">.</span><span class="n">x</span><span class="p">),</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+
+    <span class="nd">@only_if_exists</span><span class="p">(</span><span class="s1">&#39;get&#39;</span><span class="p">,</span> <span class="s1">&#39;rpc-reply.rpc.show.queue.queues.queue.info&#39;</span><span class="p">,</span> <span class="n">primaryOnly</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">backupOnly</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+    <span class="nd">@only_on_shutdown</span><span class="p">(</span><span class="s1">&#39;queue&#39;</span><span class="p">)</span>
+    <span class="nd">@primary</span><span class="p">()</span>
+    <span class="nd">@deprecation_warning</span><span class="p">(</span><span class="s2">&quot;Please implement the use of the &#39;permission&#39; method instead of relying on this&quot;</span><span class="p">)</span>
+<div class="viewcode-block" id="SolaceQueue.consume"><a class="viewcode-back" href="../../../libsolace.items.SolaceQueue.html#libsolace.items.SolaceQueue.SolaceQueue.consume">[docs]</a>    <span class="k">def</span> <span class="nf">consume</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Sets consume permission. add `consume` kwarg to allow non-owner users to consume.</span>
+
+<span class="sd">        :param vpn_name: the name of the vpn</span>
+<span class="sd">        :param queue_name: the queue name</span>
+<span class="sd">        :param consume: set to &quot;all&quot; to allow ALL appliance client-users to &quot;consume&quot;</span>
+<span class="sd">        :type vpn_name: str</span>
+<span class="sd">        :type queue_name: str</span>
+<span class="sd">        :type consume: str</span>
+<span class="sd">        :rtype: plugin.PluginResponse</span>
+<span class="sd">        :returns: single SEMP request</span>
+<span class="sd">        .. deprecated:: 2.0</span>
+<span class="sd">             Use :func:`permission` instead.</span>
+
+<span class="sd">        Example:</span>
+
+<span class="sd">        &gt;&gt;&gt; api = SolaceAPI(&quot;dev&quot;)</span>
+<span class="sd">        &gt;&gt;&gt; request = api.manage(&quot;SolaceQueue&quot;).consume(queue_name=&quot;testqueue1&quot;, vpn_name=&quot;dev_testvpn&quot;, shutdown_on_apply=True, consume=&quot;all&quot;)</span>
+<span class="sd">        &gt;&gt;&gt; # response = api.rpc(request)</span>
+<span class="sd">        &quot;&quot;</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">vpn_name</span> <span class="o">=</span> <span class="n">get_key_from_kwargs</span><span class="p">(</span><span class="s2">&quot;vpn_name&quot;</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">)</span>
+        <span class="n">queue_name</span> <span class="o">=</span> <span class="n">get_key_from_kwargs</span><span class="p">(</span><span class="s2">&quot;queue_name&quot;</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">)</span>
+        <span class="n">consume</span> <span class="o">=</span> <span class="n">get_key_from_kwargs</span><span class="p">(</span><span class="s2">&quot;consume&quot;</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">)</span>
+
+        <span class="c1"># Open Access</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">api</span><span class="o">.</span><span class="n">x</span> <span class="o">=</span> <span class="n">SolaceXMLBuilder</span><span class="p">(</span><span class="s2">&quot;Settings Queue </span><span class="si">%s</span><span class="s2"> Permission to Consume&quot;</span> <span class="o">%</span> <span class="n">queue_name</span><span class="p">,</span> <span class="n">version</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">api</span><span class="o">.</span><span class="n">version</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">api</span><span class="o">.</span><span class="n">x</span><span class="o">.</span><span class="n">message_spool</span><span class="o">.</span><span class="n">vpn_name</span> <span class="o">=</span> <span class="n">vpn_name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">api</span><span class="o">.</span><span class="n">x</span><span class="o">.</span><span class="n">message_spool</span><span class="o">.</span><span class="n">queue</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">queue_name</span>
+        <span class="k">if</span> <span class="n">consume</span> <span class="o">==</span> <span class="s2">&quot;all&quot;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">api</span><span class="o">.</span><span class="n">x</span><span class="o">.</span><span class="n">message_spool</span><span class="o">.</span><span class="n">queue</span><span class="o">.</span><span class="n">permission</span><span class="o">.</span><span class="n">all</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">api</span><span class="o">.</span><span class="n">x</span><span class="o">.</span><span class="n">message_spool</span><span class="o">.</span><span class="n">queue</span><span class="o">.</span><span class="n">permission</span><span class="o">.</span><span class="n">consume</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">commands</span><span class="o">.</span><span class="n">enqueue</span><span class="p">(</span><span class="n">PluginResponse</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">api</span><span class="o">.</span><span class="n">x</span><span class="p">),</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">PluginResponse</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">api</span><span class="o">.</span><span class="n">x</span><span class="p">),</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+
+    <span class="nd">@only_if_exists</span><span class="p">(</span><span class="s1">&#39;get&#39;</span><span class="p">,</span> <span class="s1">&#39;rpc-reply.rpc.show.queue.queues.queue.info&#39;</span><span class="p">,</span> <span class="n">primaryOnly</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">backupOnly</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+    <span class="nd">@only_on_shutdown</span><span class="p">(</span><span class="s1">&#39;queue&#39;</span><span class="p">)</span>
+    <span class="nd">@primary</span><span class="p">()</span>
+<div class="viewcode-block" id="SolaceQueue.permission"><a class="viewcode-back" href="../../../libsolace.items.SolaceQueue.html#libsolace.items.SolaceQueue.SolaceQueue.permission">[docs]</a>    <span class="k">def</span> <span class="nf">permission</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Sets permission on a queue</span>
+
+<span class="sd">        :param vpn_name: the name of the vpn</span>
+<span class="sd">        :param queue_name: the queue name</span>
+<span class="sd">        :param permission: which permission to grant non-owner users. e.g. &quot;consume&quot;, &quot;delete&quot;, &quot;modify-topic&quot;, &quot;read-only&quot;</span>
+<span class="sd">        :type vpn_name: str</span>
+<span class="sd">        :type queue_name: str</span>
+<span class="sd">        :type permission: str</span>
+<span class="sd">        :rtype: plugin.PluginResponse</span>
+<span class="sd">        :returns: single SEMP request</span>
+
+<span class="sd">        Example:</span>
+
+<span class="sd">        &gt;&gt;&gt; api = SolaceAPI(&quot;dev&quot;)</span>
+<span class="sd">        &gt;&gt;&gt; request = api.manage(&quot;SolaceQueue&quot;).permission(queue_name=&quot;testqueue1&quot;, vpn_name=&quot;dev_testvpn&quot;, shutdown_on_apply=True, permission=&quot;consume&quot;)</span>
+<span class="sd">        &gt;&gt;&gt; # api.rpc(request)</span>
+
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">vpn_name</span> <span class="o">=</span> <span class="n">get_key_from_kwargs</span><span class="p">(</span><span class="s2">&quot;vpn_name&quot;</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">)</span>
+        <span class="n">queue_name</span> <span class="o">=</span> <span class="n">get_key_from_kwargs</span><span class="p">(</span><span class="s2">&quot;queue_name&quot;</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">)</span>
+        <span class="n">permission</span> <span class="o">=</span> <span class="n">get_key_from_kwargs</span><span class="p">(</span><span class="s2">&quot;permission&quot;</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">)</span>
+
+        <span class="c1"># Open Access</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">api</span><span class="o">.</span><span class="n">x</span> <span class="o">=</span> <span class="n">SolaceXMLBuilder</span><span class="p">(</span><span class="s2">&quot;Settings Queue </span><span class="si">%s</span><span class="s2"> Permission to </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">queue_name</span><span class="p">,</span> <span class="n">permission</span><span class="p">),</span>
+                                      <span class="n">version</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">api</span><span class="o">.</span><span class="n">version</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">api</span><span class="o">.</span><span class="n">x</span><span class="o">.</span><span class="n">message_spool</span><span class="o">.</span><span class="n">vpn_name</span> <span class="o">=</span> <span class="n">vpn_name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">api</span><span class="o">.</span><span class="n">x</span><span class="o">.</span><span class="n">message_spool</span><span class="o">.</span><span class="n">queue</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">queue_name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">api</span><span class="o">.</span><span class="n">x</span><span class="o">.</span><span class="n">message_spool</span><span class="o">.</span><span class="n">queue</span><span class="o">.</span><span class="n">permission</span><span class="o">.</span><span class="n">all</span>
+        <span class="k">if</span> <span class="n">permission</span> <span class="o">==</span> <span class="s2">&quot;consume&quot;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">api</span><span class="o">.</span><span class="n">x</span><span class="o">.</span><span class="n">message_spool</span><span class="o">.</span><span class="n">queue</span><span class="o">.</span><span class="n">permission</span><span class="o">.</span><span class="n">consume</span>
+        <span class="k">elif</span> <span class="n">permission</span> <span class="o">==</span> <span class="s2">&quot;delete&quot;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">api</span><span class="o">.</span><span class="n">x</span><span class="o">.</span><span class="n">message_spool</span><span class="o">.</span><span class="n">queue</span><span class="o">.</span><span class="n">permission</span><span class="o">.</span><span class="n">delete</span>
+        <span class="k">elif</span> <span class="n">permission</span> <span class="o">==</span> <span class="s2">&quot;modify-topic&quot;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">api</span><span class="o">.</span><span class="n">x</span><span class="o">.</span><span class="n">message_spool</span><span class="o">.</span><span class="n">queue</span><span class="o">.</span><span class="n">permission</span><span class="o">.</span><span class="n">modify_topic</span>
+        <span class="k">elif</span> <span class="n">permission</span> <span class="o">==</span> <span class="s2">&quot;read-only&quot;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">api</span><span class="o">.</span><span class="n">x</span><span class="o">.</span><span class="n">message_spool</span><span class="o">.</span><span class="n">queue</span><span class="o">.</span><span class="n">permission</span><span class="o">.</span><span class="n">read_only</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">commands</span><span class="o">.</span><span class="n">enqueue</span><span class="p">(</span><span class="n">PluginResponse</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">api</span><span class="o">.</span><span class="n">x</span><span class="p">),</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">PluginResponse</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">api</span><span class="o">.</span><span class="n">x</span><span class="p">),</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+
+    <span class="nd">@only_if_exists</span><span class="p">(</span><span class="s1">&#39;get&#39;</span><span class="p">,</span> <span class="s1">&#39;rpc-reply.rpc.show.queue.queues.queue.info&#39;</span><span class="p">,</span> <span class="n">primaryOnly</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+    <span class="nd">@primary</span><span class="p">()</span>
+<div class="viewcode-block" id="SolaceQueue.spool_size"><a class="viewcode-back" href="../../../libsolace.items.SolaceQueue.html#libsolace.items.SolaceQueue.SolaceQueue.spool_size">[docs]</a>    <span class="k">def</span> <span class="nf">spool_size</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Set the spool size</span>
+
+<span class="sd">        :param vpn_name: the name of the vpn</span>
+<span class="sd">        :param queue_name: the queue name</span>
+<span class="sd">        :param queue_size: size of the spool in mb</span>
+<span class="sd">        :type vpn_name: str</span>
+<span class="sd">        :type queue_name: str</span>
+<span class="sd">        :type queue_size: int</span>
+<span class="sd">        :rtype: plugin.PluginResponse</span>
+<span class="sd">        :returns: single SEMP request</span>
+
+<span class="sd">        Example:</span>
+
+<span class="sd">        &gt;&gt;&gt; api = SolaceAPI(&quot;dev&quot;)</span>
+<span class="sd">        &gt;&gt;&gt; request = api.manage(&quot;SolaceQueue&quot;).spool_size(vpn_name=&quot;dev_testvpn&quot;, queue_name=&quot;testqueue1&quot;, queue_size=64)</span>
+<span class="sd">        &gt;&gt;&gt; # response = api.rpc(request)</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">vpn_name</span> <span class="o">=</span> <span class="n">get_key_from_kwargs</span><span class="p">(</span><span class="s2">&quot;vpn_name&quot;</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">)</span>
+        <span class="n">queue_name</span> <span class="o">=</span> <span class="n">get_key_from_kwargs</span><span class="p">(</span><span class="s2">&quot;queue_name&quot;</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">)</span>
+        <span class="n">queue_size</span> <span class="o">=</span> <span class="n">get_key_from_kwargs</span><span class="p">(</span><span class="s2">&quot;queue_size&quot;</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">)</span>
+
+        <span class="c1"># Configure Queue Spool Usage</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">api</span><span class="o">.</span><span class="n">x</span> <span class="o">=</span> <span class="n">SolaceXMLBuilder</span><span class="p">(</span><span class="s2">&quot;Set Queue </span><span class="si">%s</span><span class="s2"> spool size: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">queue_name</span><span class="p">,</span> <span class="n">queue_size</span><span class="p">),</span>
+                                      <span class="n">version</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">api</span><span class="o">.</span><span class="n">version</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">api</span><span class="o">.</span><span class="n">x</span><span class="o">.</span><span class="n">message_spool</span><span class="o">.</span><span class="n">vpn_name</span> <span class="o">=</span> <span class="n">vpn_name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">api</span><span class="o">.</span><span class="n">x</span><span class="o">.</span><span class="n">message_spool</span><span class="o">.</span><span class="n">queue</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">queue_name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">api</span><span class="o">.</span><span class="n">x</span><span class="o">.</span><span class="n">message_spool</span><span class="o">.</span><span class="n">queue</span><span class="o">.</span><span class="n">max_spool_usage</span><span class="o">.</span><span class="n">size</span> <span class="o">=</span> <span class="n">queue_size</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">commands</span><span class="o">.</span><span class="n">enqueue</span><span class="p">(</span><span class="n">PluginResponse</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">api</span><span class="o">.</span><span class="n">x</span><span class="p">),</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">PluginResponse</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">api</span><span class="o">.</span><span class="n">x</span><span class="p">),</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+
+    <span class="nd">@only_if_exists</span><span class="p">(</span><span class="s1">&#39;get&#39;</span><span class="p">,</span> <span class="s1">&#39;rpc-reply.rpc.show.queue.queues.queue.info&#39;</span><span class="p">,</span> <span class="n">primaryOnly</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+    <span class="nd">@primary</span><span class="p">()</span>
+<div class="viewcode-block" id="SolaceQueue.retries"><a class="viewcode-back" href="../../../libsolace.items.SolaceQueue.html#libsolace.items.SolaceQueue.SolaceQueue.retries">[docs]</a>    <span class="k">def</span> <span class="nf">retries</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Delivery retries before failing the message</span>
+
+<span class="sd">        :param vpn_name: the name of the vpn</span>
+<span class="sd">        :param queue_name: the queue name</span>
+<span class="sd">        :param retries: number of retries</span>
+<span class="sd">        :type vpn_name: str</span>
+<span class="sd">        :type queue_name: str</span>
+<span class="sd">        :type retries: int</span>
+<span class="sd">        :rtype: plugin.PluginResponse</span>
+<span class="sd">        :returns: single SEMP request</span>
+
+<span class="sd">        Example:</span>
+
+<span class="sd">        &gt;&gt;&gt; api = SolaceAPI(&quot;dev&quot;)</span>
+<span class="sd">        &gt;&gt;&gt; request = api.manage(&quot;SolaceQueue&quot;).retries(vpn_name=&quot;dev_testvpn&quot;, queue_name=&quot;testqueue1&quot;, retries=5)</span>
+<span class="sd">        &gt;&gt;&gt; # response = api.rpc(request)</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">vpn_name</span> <span class="o">=</span> <span class="n">get_key_from_kwargs</span><span class="p">(</span><span class="s2">&quot;vpn_name&quot;</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">)</span>
+        <span class="n">queue_name</span> <span class="o">=</span> <span class="n">get_key_from_kwargs</span><span class="p">(</span><span class="s2">&quot;queue_name&quot;</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">)</span>
+        <span class="n">retries</span> <span class="o">=</span> <span class="n">get_key_from_kwargs</span><span class="p">(</span><span class="s2">&quot;retries&quot;</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">api</span><span class="o">.</span><span class="n">x</span> <span class="o">=</span> <span class="n">SolaceXMLBuilder</span><span class="p">(</span><span class="s2">&quot;Tuning max-redelivery retries for </span><span class="si">%s</span><span class="s2"> to </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">queue_name</span><span class="p">,</span> <span class="n">retries</span><span class="p">),</span>
+                                      <span class="n">version</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">api</span><span class="o">.</span><span class="n">version</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">api</span><span class="o">.</span><span class="n">x</span><span class="o">.</span><span class="n">message_spool</span><span class="o">.</span><span class="n">vpn_name</span> <span class="o">=</span> <span class="n">vpn_name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">api</span><span class="o">.</span><span class="n">x</span><span class="o">.</span><span class="n">message_spool</span><span class="o">.</span><span class="n">queue</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">queue_name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">api</span><span class="o">.</span><span class="n">x</span><span class="o">.</span><span class="n">message_spool</span><span class="o">.</span><span class="n">queue</span><span class="o">.</span><span class="n">max_redelivery</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="n">retries</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">commands</span><span class="o">.</span><span class="n">enqueue</span><span class="p">(</span><span class="n">PluginResponse</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">api</span><span class="o">.</span><span class="n">x</span><span class="p">),</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">PluginResponse</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">api</span><span class="o">.</span><span class="n">x</span><span class="p">),</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+
+    <span class="nd">@only_if_exists</span><span class="p">(</span><span class="s1">&#39;get&#39;</span><span class="p">,</span> <span class="s1">&#39;rpc-reply.rpc.show.queue.queues.queue.info&#39;</span><span class="p">,</span> <span class="n">primaryOnly</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+    <span class="nd">@primary</span><span class="p">()</span>
+<div class="viewcode-block" id="SolaceQueue.enable"><a class="viewcode-back" href="../../../libsolace.items.SolaceQueue.html#libsolace.items.SolaceQueue.SolaceQueue.enable">[docs]</a>    <span class="k">def</span> <span class="nf">enable</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Enable a the queue</span>
+
+<span class="sd">        :param vpn_name: the name of the vpn</span>
+<span class="sd">        :param queue_name: the queue name</span>
+<span class="sd">        :type vpn_name: str</span>
+<span class="sd">        :type queue_name: str</span>
+<span class="sd">        :rtype: plugin.PluginResponse</span>
+<span class="sd">        :returns: single SEMP request</span>
+
+<span class="sd">        Example:</span>
+
+<span class="sd">        &gt;&gt;&gt; api = SolaceAPI(&quot;dev&quot;)</span>
+<span class="sd">        &gt;&gt;&gt; request = api.manage(&quot;SolaceQueue&quot;).enable(queue_name=&quot;testqueue1&quot;, vpn_name=&quot;dev_testvpn&quot;)</span>
+<span class="sd">        &gt;&gt;&gt; # response = api.rpc(request)</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">vpn_name</span> <span class="o">=</span> <span class="n">get_key_from_kwargs</span><span class="p">(</span><span class="s2">&quot;vpn_name&quot;</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">)</span>
+        <span class="n">queue_name</span> <span class="o">=</span> <span class="n">get_key_from_kwargs</span><span class="p">(</span><span class="s2">&quot;queue_name&quot;</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">)</span>
+
+        <span class="c1"># Enable the Queue</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">api</span><span class="o">.</span><span class="n">x</span> <span class="o">=</span> <span class="n">SolaceXMLBuilder</span><span class="p">(</span><span class="s2">&quot;Enabling Queue </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">queue_name</span><span class="p">,</span> <span class="n">version</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">api</span><span class="o">.</span><span class="n">version</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">api</span><span class="o">.</span><span class="n">x</span><span class="o">.</span><span class="n">message_spool</span><span class="o">.</span><span class="n">vpn_name</span> <span class="o">=</span> <span class="n">vpn_name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">api</span><span class="o">.</span><span class="n">x</span><span class="o">.</span><span class="n">message_spool</span><span class="o">.</span><span class="n">queue</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">queue_name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">api</span><span class="o">.</span><span class="n">x</span><span class="o">.</span><span class="n">message_spool</span><span class="o">.</span><span class="n">queue</span><span class="o">.</span><span class="n">no</span><span class="o">.</span><span class="n">shutdown</span><span class="o">.</span><span class="n">full</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">commands</span><span class="o">.</span><span class="n">enqueue</span><span class="p">(</span><span class="n">PluginResponse</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">api</span><span class="o">.</span><span class="n">x</span><span class="p">),</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">PluginResponse</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">api</span><span class="o">.</span><span class="n">x</span><span class="p">),</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+
+    <span class="nd">@only_if_exists</span><span class="p">(</span><span class="s1">&#39;get&#39;</span><span class="p">,</span> <span class="s1">&#39;rpc-reply.rpc.show.queue.queues.queue.info&#39;</span><span class="p">,</span> <span class="n">primaryOnly</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+    <span class="nd">@primary</span><span class="p">()</span>
+<div class="viewcode-block" id="SolaceQueue.reject_on_discard"><a class="viewcode-back" href="../../../libsolace.items.SolaceQueue.html#libsolace.items.SolaceQueue.SolaceQueue.reject_on_discard">[docs]</a>    <span class="k">def</span> <span class="nf">reject_on_discard</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Reject to sender on discard</span>
+
+<span class="sd">        :param vpn_name: the name of the vpn</span>
+<span class="sd">        :param queue_name: the queue name</span>
+<span class="sd">        :type vpn_name: str</span>
+<span class="sd">        :type queue_name: str</span>
+<span class="sd">        :rtype: plugin.PluginResponse</span>
+<span class="sd">        :returns: single SEMP request</span>
+
+<span class="sd">        Example:</span>
+
+<span class="sd">        &gt;&gt;&gt; api = SolaceAPI(&quot;dev&quot;)</span>
+<span class="sd">        &gt;&gt;&gt; request = api.manage(&quot;SolaceQueue&quot;).reject_on_discard(vpn_name=&quot;dev_testvpn&quot;, queue_name=&quot;testqueue1&quot;)</span>
+<span class="sd">        &gt;&gt;&gt; # response = api.rpc(request)</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">vpn_name</span> <span class="o">=</span> <span class="n">get_key_from_kwargs</span><span class="p">(</span><span class="s2">&quot;vpn_name&quot;</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">)</span>
+        <span class="n">queue_name</span> <span class="o">=</span> <span class="n">get_key_from_kwargs</span><span class="p">(</span><span class="s2">&quot;queue_name&quot;</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">api</span><span class="o">.</span><span class="n">x</span> <span class="o">=</span> <span class="n">SolaceXMLBuilder</span><span class="p">(</span><span class="s2">&quot;Setting Queue to Reject Drops&quot;</span><span class="p">,</span> <span class="n">version</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">api</span><span class="o">.</span><span class="n">version</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">api</span><span class="o">.</span><span class="n">x</span><span class="o">.</span><span class="n">message_spool</span><span class="o">.</span><span class="n">vpn_name</span> <span class="o">=</span> <span class="n">vpn_name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">api</span><span class="o">.</span><span class="n">x</span><span class="o">.</span><span class="n">message_spool</span><span class="o">.</span><span class="n">queue</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">queue_name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">api</span><span class="o">.</span><span class="n">x</span><span class="o">.</span><span class="n">message_spool</span><span class="o">.</span><span class="n">queue</span><span class="o">.</span><span class="n">reject_msg_to_sender_on_discard</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">commands</span><span class="o">.</span><span class="n">enqueue</span><span class="p">(</span><span class="n">PluginResponse</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">api</span><span class="o">.</span><span class="n">x</span><span class="p">),</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">PluginResponse</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">api</span><span class="o">.</span><span class="n">x</span><span class="p">),</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div></div>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2016, Kegan Holtzhausen, Johan Lyheden.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../../',
+            VERSION:'1.0',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="../../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../../_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

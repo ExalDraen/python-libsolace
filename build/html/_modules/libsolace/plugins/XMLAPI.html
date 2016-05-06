@@ -1,0 +1,431 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>libsolace.plugins.XMLAPI &mdash; libsolace 1.0 documentation</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+    <link rel="top" title="libsolace 1.0 documentation" href="../../../index.html"/>
+        <link rel="up" title="Module code" href="../../index.html"/> 
+
+  
+  <script src="../../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../../libsolace.html" class="icon icon-home"> libsolace
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                1.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+                <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../libsolace.data.html">libsolace.data package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../libsolace.items.html">libsolace.items package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../libsolace.plugins.html">libsolace.plugins package</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../libsolace.Decorators.html">libsolace.Decorators module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../libsolace.Exceptions.html">libsolace.Exceptions module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../libsolace.Kwargs.html">libsolace.Kwargs module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../libsolace.Naming.html">libsolace.Naming module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../libsolace.SolaceAPI.html">libsolace.SolaceAPI module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../libsolace.SolaceCommandQueue.html">libsolace.SolaceCommandQueue module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../libsolace.SolaceNode.html">libsolace.SolaceNode module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../libsolace.SolaceProvision.html">libsolace.SolaceProvision module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../libsolace.SolaceReply.html">libsolace.SolaceReply module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../libsolace.SolaceXMLBuilder.html">libsolace.SolaceXMLBuilder module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../libsolace.plugin.html">libsolace.plugin module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../libsolace.settingsloader.html">libsolace.settingsloader module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../libsolace.util.html">libsolace.util module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../libsolace.xml2dict.html">libsolace.xml2dict module</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="../../../libsolace.html">libsolace</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../../../libsolace.html">Docs</a> &raquo;</li>
+      
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+      
+    <li>libsolace.plugins.XMLAPI</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for libsolace.plugins.XMLAPI</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">import</span> <span class="nn">libsolace</span>
+<span class="kn">from</span> <span class="nn">libsolace.util</span> <span class="kn">import</span> <span class="n">httpRequest</span><span class="p">,</span> <span class="n">generateRequestHeaders</span><span class="p">,</span> <span class="n">generateBasicAuthHeader</span><span class="p">,</span> <span class="n">xml2obj</span>
+<span class="kn">from</span> <span class="nn">libsolace.plugin</span> <span class="kn">import</span> <span class="n">Plugin</span>
+<span class="kn">from</span> <span class="nn">lxml</span> <span class="kn">import</span> <span class="n">etree</span> <span class="k">as</span> <span class="n">ET</span>
+
+
+<span class="nd">@libsolace.plugin_registry.register</span>
+<div class="viewcode-block" id="XMLAPI"><a class="viewcode-back" href="../../../libsolace.plugins.XMLAPI.html#libsolace.plugins.XMLAPI.XMLAPI">[docs]</a><span class="k">class</span> <span class="nc">XMLAPI</span><span class="p">(</span><span class="n">Plugin</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; LEGACY XML API handles reading the XML configuiration from URL or FILE.</span>
+
+<span class="sd">        cmdbapi = libsolace.plugin_registry(settings.SOLACE_CMDB_PLUGIN)</span>
+<span class="sd">        cmdbapi.configure(settings=settings)</span>
+<span class="sd">        vpns = cmdbapi.get_vpns_by_owner(options.product, environment=options.env)</span>
+<span class="sd">        users = cmdbapi.get_users_of_vpn(vpn[&#39;name&#39;], environment=options.env)</span>
+<span class="sd">        queues = cmdbapi.get_queues_of_vpn(vpn[&#39;name&#39;], environment=options.env)</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">plugin_name</span> <span class="o">=</span> <span class="s2">&quot;XMLAPI&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;LEGACY xml plugin is being used, please port to JSON API!&quot;</span><span class="p">)</span>
+        <span class="k">pass</span>
+
+    <span class="c1">#def __init__(self, url=None, username=None, password=None, timeout=10, xml_file=None, use_etree=False,</span>
+    <span class="c1">#             use_xml2obj=True, etree_case_insensitive=False, **kwargs):</span>
+    <span class="k">def</span> <span class="nf">configure</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">settings</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+
+        <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">settings</span><span class="p">)</span>
+
+        <span class="n">url</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">CMDB_URL</span>
+        <span class="n">username</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">CMDB_USER</span>
+        <span class="n">password</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">CMDB_PASS</span>
+        <span class="n">timeout</span> <span class="o">=</span> <span class="mi">10</span>
+        <span class="n">xml_file</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">CMDB_FILE</span>
+        <span class="n">use_etree</span> <span class="o">=</span> <span class="bp">False</span>
+        <span class="n">use_xml2obj</span> <span class="o">=</span> <span class="bp">True</span>
+        <span class="n">etree_case_insensitive</span> <span class="o">=</span> <span class="bp">False</span>
+
+        <span class="sd">&quot;&quot;&quot; Fetches data from site-config XML over URL or localfs and returns subsets of the data as requested.</span>
+
+<span class="sd">        :type url: string</span>
+<span class="sd">        :type username: string</span>
+<span class="sd">        :type password: string</span>
+<span class="sd">        :type timeout: int</span>
+<span class="sd">        :type xml_file: file.io</span>
+<span class="sd">        :type use_etree: bool</span>
+<span class="sd">        :type use_xml2obj: bool</span>
+<span class="sd">        :type etree_case_insensitive: bool</span>
+
+<span class="sd">        :param url: url to source index.xml from</span>
+<span class="sd">        :param username: username to auth as</span>
+<span class="sd">        :param password: users password</span>
+<span class="sd">        :param timeout: rest call timeout, default 10 seconds</span>
+<span class="sd">        :param xml_file: file to open if available</span>
+<span class="sd">        :param use_etree: enables etree parsing of index.xml for methods that use it</span>
+<span class="sd">        :param use_xml2obj: enables the default libsolace.gfmisc.xml2obj implementation</span>
+<span class="sd">        :param etree_case_insensitive: downcases index.xml and all method param values which uses it</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">deploydata</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">components</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">etree_case_insensitive</span> <span class="o">=</span> <span class="n">etree_case_insensitive</span>
+
+        <span class="k">if</span> <span class="n">xml_file</span><span class="p">:</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;Local file will be read, REST Calls disabled&#39;</span><span class="p">)</span>
+            <span class="n">xml_file</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">xml_file</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">xml_file_data</span> <span class="o">=</span> <span class="n">xml_file</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">xml_file_data</span> <span class="o">=</span> <span class="bp">None</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">username</span> <span class="o">=</span> <span class="n">username</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">password</span> <span class="o">=</span> <span class="n">password</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">timeout</span> <span class="o">=</span> <span class="n">timeout</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">url</span> <span class="o">=</span> <span class="n">url</span>
+        <span class="k">if</span> <span class="n">use_etree</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">root</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__get_et_root_object</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">namespace</span> <span class="o">=</span> <span class="n">ET</span><span class="o">.</span><span class="n">QName</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">root</span><span class="o">.</span><span class="n">tag</span><span class="p">)</span><span class="o">.</span><span class="n">namespace</span>
+        <span class="k">if</span> <span class="n">use_xml2obj</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">populateDeployData</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">__route_call</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">url</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Determines if the call should be routed via urllib or read from local file.</span>
+
+<span class="sd">        :param url: url to call</span>
+<span class="sd">        :param kwargs:</span>
+<span class="sd">        :return: response from correct interface</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">xml_file_data</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__read_file</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;route call: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">url</span><span class="p">)</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__restcall</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__read_file</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; returns the file data from self.xml_file_data</span>
+
+<span class="sd">        :param kwargs:</span>
+<span class="sd">        :return: file contents</span>
+<span class="sd">        :rtype: str</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">xml_file_data</span>
+
+    <span class="k">def</span> <span class="nf">__restcall</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">url</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;GET&#39;</span><span class="p">,</span> <span class="n">fields</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Uses urllib to read a data from a webservice, if self.xml_file_data = None, else returns the local file contents</span>
+
+<span class="sd">        :type url: str</span>
+<span class="sd">        :param url: url to call</span>
+<span class="sd">        :param kwargs:</span>
+<span class="sd">        :return: response data</span>
+<span class="sd">        :rtype: str</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">request_headers</span> <span class="o">=</span> <span class="n">generateRequestHeaders</span><span class="p">(</span>
+            <span class="n">default_headers</span> <span class="o">=</span> <span class="p">{</span>
+              <span class="s1">&#39;Content-type&#39;</span><span class="p">:</span> <span class="s1">&#39;application/json&#39;</span><span class="p">,</span>
+              <span class="s1">&#39;Accept&#39;</span><span class="p">:</span> <span class="s1">&#39;application/json&#39;</span>
+            <span class="p">})</span>
+        <span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">response_headers</span><span class="p">,</span> <span class="n">code</span><span class="p">)</span> <span class="o">=</span> <span class="n">httpRequest</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="n">method</span><span class="p">,</span> <span class="n">headers</span><span class="o">=</span><span class="n">request_headers</span><span class="p">,</span> <span class="n">fields</span><span class="o">=</span><span class="n">fields</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">timeout</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">data</span>
+
+    <span class="k">def</span> <span class="nf">__get_et_root_object</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns elementtree root object representation of index.xml</span>
+
+<span class="sd">        :return: Element object</span>
+<span class="sd">        :rtype: xml.etree.ElementTree.Element</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">xml_file_data</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">etree_case_insensitive</span><span class="p">:</span>
+                <span class="n">et_xml</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">xml_file_data</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">et_xml</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">xml_file_data</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">etree_case_insensitive</span><span class="p">:</span>
+                <span class="n">et_xml</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__route_call</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">url</span><span class="p">)</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">et_xml</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__route_call</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">url</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">ET</span><span class="o">.</span><span class="n">fromstring</span><span class="p">(</span><span class="n">et_xml</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">populateDeployData</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Returns the entire deployment data ( entire xml ) as a python dict style object</span>
+<span class="sd">        :return: all deployment data in a single dictionary object</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">xml_file_data</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">deploydata</span> <span class="o">=</span> <span class="n">xml2obj</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">xml_file_data</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">myXML</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__route_call</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">url</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">deploydata</span> <span class="o">=</span> <span class="n">xml2obj</span><span class="p">(</span><span class="n">myXML</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">get_vpn</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vpn</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Return a VPN by name</span>
+
+<span class="sd">        :return: a solace vpn</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">populateDeployData</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">deploydata</span><span class="o">.</span><span class="n">solace</span><span class="o">.</span><span class="n">vpn</span><span class="p">:</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;VPN: </span><span class="si">%s</span><span class="s2"> in solace&quot;</span> <span class="o">%</span> <span class="n">v</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">v</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="n">vpn</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">v</span>
+        <span class="k">raise</span> <span class="ne">BaseException</span><span class="p">(</span><span class="s1">&#39;Unable to find solace configuration for vpn: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">vpn</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">get_vpns_by_owner</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">owner</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return a VPN by owner</span>
+
+<span class="sd">        :type owner: str</span>
+
+<span class="sd">        :return list of vpns</span>
+<span class="sd">        :rtype libsolace.gfmisc.DataNode</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">populateDeployData</span><span class="p">()</span>
+        <span class="n">vpns</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">deploydata</span><span class="o">.</span><span class="n">solace</span><span class="o">.</span><span class="n">vpn</span><span class="p">:</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;VPN: </span><span class="si">%s</span><span class="s2"> in solace&quot;</span> <span class="o">%</span> <span class="n">v</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;document: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">v</span><span class="o">.</span><span class="n">_attrs</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">v</span><span class="o">.</span><span class="n">owner</span> <span class="o">==</span> <span class="n">owner</span><span class="p">:</span>
+                <span class="n">vpns</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">v</span><span class="o">.</span><span class="n">_attrs</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">vpns</span>
+
+    <span class="k">def</span> <span class="nf">get_queues_of_vpn</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">populateDeployData</span><span class="p">()</span>
+        <span class="n">queues</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">deploydata</span><span class="o">.</span><span class="n">solace</span><span class="o">.</span><span class="n">vpn</span><span class="p">:</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;VPN: </span><span class="si">%s</span><span class="s2"> in solace&quot;</span> <span class="o">%</span> <span class="n">v</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">v</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="n">name</span><span class="p">:</span>
+                <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Getting queues for </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">v</span><span class="o">.</span><span class="n">name</span> <span class="p">)</span>
+                <span class="n">vd</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_vpn</span><span class="p">(</span><span class="n">v</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+                <span class="k">return</span> <span class="n">vd</span><span class="o">.</span><span class="n">queue</span>
+
+    <span class="k">def</span> <span class="nf">get_users_of_vpn</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vpn</span><span class="p">,</span> <span class="n">environment</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Returns all products users who use a specifig messaging VPN</span>
+
+<span class="sd">        :type vpn: str</span>
+<span class="sd">        :param vpn: name of vpn to search for users of</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">populateDeployData</span><span class="p">()</span>
+        <span class="n">users</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s1">&#39;Scaning for Products using vpn: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">vpn</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">deploydata</span><span class="o">.</span><span class="n">product</span><span class="p">:</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;Scanning Product: </span><span class="si">%s</span><span class="s1"> for messaging declarations&#39;</span> <span class="o">%</span> <span class="n">p</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">p</span><span class="o">.</span><span class="n">messaging</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="n">p</span><span class="o">.</span><span class="n">messaging</span><span class="p">:</span>
+                    <span class="c1">#  &lt;messaging name=&quot;my_%s_sitemq&quot; user=&quot;%s_um&quot; password=&quot;somepassword&quot;&gt;&lt;/messaging&gt;</span>
+                    <span class="k">if</span> <span class="n">m</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="n">vpn</span><span class="p">:</span>
+                        <span class="n">password</span> <span class="o">=</span> <span class="n">m</span><span class="o">.</span><span class="n">password</span>
+                        <span class="k">try</span><span class="p">:</span>
+                            <span class="c1">#logging.debug(&quot;Dumping messaging environments: %s&quot; % pprint.pprint(m.__dict__))</span>
+                            <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">m</span><span class="o">.</span><span class="n">env</span><span class="p">:</span>
+                                <span class="c1">#logging.info(&quot;Env Searching %s&quot; % e.name)</span>
+                                <span class="k">if</span> <span class="n">e</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="n">environment</span><span class="p">:</span>
+                                    <span class="c1">#logging.info(&quot;Env Matched %s&quot; % e.name)</span>
+                                    <span class="k">for</span> <span class="n">myp</span> <span class="ow">in</span> <span class="n">e</span><span class="o">.</span><span class="n">messaging_conf</span><span class="p">:</span>
+                                        <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Setting password </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">myp</span><span class="o">.</span><span class="n">password</span><span class="p">)</span>
+                                        <span class="n">password</span> <span class="o">=</span> <span class="n">myp</span><span class="o">.</span><span class="n">password</span>
+                        <span class="k">except</span> <span class="ne">Exception</span><span class="p">,</span> <span class="n">e</span><span class="p">:</span>
+                            <span class="n">logging</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s2">&quot;No Environment Password Overrides </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">e</span><span class="p">)</span>
+                            <span class="k">pass</span>
+
+                        <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Product: </span><span class="si">%s</span><span class="s1"> using VPN: </span><span class="si">%s</span><span class="s1">, adding user </span><span class="si">%s</span><span class="s1"> to users list&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">vpn</span><span class="p">,</span> <span class="n">m</span><span class="o">.</span><span class="n">username</span><span class="p">))</span>
+                        <span class="n">users</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s1">&#39;username&#39;</span><span class="p">:</span> <span class="n">m</span><span class="o">.</span><span class="n">username</span><span class="p">,</span> <span class="s1">&#39;password&#39;</span><span class="p">:</span> <span class="n">password</span><span class="p">})</span>
+        <span class="k">return</span> <span class="n">users</span></div>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2016, Kegan Holtzhausen, Johan Lyheden.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../../',
+            VERSION:'1.0',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="../../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../../_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

@@ -1,0 +1,555 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>libsolace.items.SolaceVPN module &mdash; libsolace 1.0 documentation</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+    <link rel="top" title="libsolace 1.0 documentation" href="index.html"/>
+        <link rel="up" title="libsolace.items package" href="libsolace.items.html"/>
+        <link rel="next" title="libsolace.plugins package" href="libsolace.plugins.html"/>
+        <link rel="prev" title="libsolace.items.SolaceUsers module" href="libsolace.items.SolaceUsers.html"/> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="libsolace.html" class="icon icon-home"> libsolace
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                1.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+                <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="libsolace.data.html">libsolace.data package</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="libsolace.items.html">libsolace.items package</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="libsolace.items.html#submodules">Submodules</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="libsolace.items.SolaceACLProfile.html">libsolace.items.SolaceACLProfile module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="libsolace.items.SolaceBridge.html">libsolace.items.SolaceBridge module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="libsolace.items.SolaceClientProfile.html">libsolace.items.SolaceClientProfile module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="libsolace.items.SolaceQueue.html">libsolace.items.SolaceQueue module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="libsolace.items.SolaceUser.html">libsolace.items.SolaceUser module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="libsolace.items.SolaceUsers.html">libsolace.items.SolaceUsers module</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">libsolace.items.SolaceVPN module</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="libsolace.plugins.html">libsolace.plugins package</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="libsolace.Decorators.html">libsolace.Decorators module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="libsolace.Exceptions.html">libsolace.Exceptions module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="libsolace.Kwargs.html">libsolace.Kwargs module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="libsolace.Naming.html">libsolace.Naming module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="libsolace.SolaceAPI.html">libsolace.SolaceAPI module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="libsolace.SolaceCommandQueue.html">libsolace.SolaceCommandQueue module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="libsolace.SolaceNode.html">libsolace.SolaceNode module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="libsolace.SolaceProvision.html">libsolace.SolaceProvision module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="libsolace.SolaceReply.html">libsolace.SolaceReply module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="libsolace.SolaceXMLBuilder.html">libsolace.SolaceXMLBuilder module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="libsolace.plugin.html">libsolace.plugin module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="libsolace.settingsloader.html">libsolace.settingsloader module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="libsolace.util.html">libsolace.util module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="libsolace.xml2dict.html">libsolace.xml2dict module</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="libsolace.html">libsolace</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+ 
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="libsolace.html">Docs</a> &raquo;</li>
+      
+          <li><a href="libsolace.items.html">libsolace.items package</a> &raquo;</li>
+      
+    <li>libsolace.items.SolaceVPN module</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="_sources/libsolace.items.SolaceVPN.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="libsolace-items-solacevpn-module">
+<h1>libsolace.items.SolaceVPN module<a class="headerlink" href="#libsolace-items-solacevpn-module" title="Permalink to this headline">¶</a></h1>
+<dl class="class">
+<dt id="libsolace.items.SolaceVPN.SolaceVPN">
+<em class="property">class </em><code class="descclassname">libsolace.items.SolaceVPN.</code><code class="descname">SolaceVPN</code><a class="reference internal" href="_modules/libsolace/items/SolaceVPN.html#SolaceVPN"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#libsolace.items.SolaceVPN.SolaceVPN" title="Permalink to this definition">¶</a></dt>
+<dd><p>Manage a Solace VPN</p>
+<p>If <cite>vpn_name</cite> is passed as a kwarg, this plugin enters provision/batch mode, if it is omitted, the plugin will go into
+single query mode.</p>
+<p>In provision/batch mode, this plugin generates all the neccesary SEMP requests to create a VPN. You also need to pass a
+<cite>owner_name</cite> and a existing <cite>acl_profile</cite> name. If these are omitted, the vpn_name property is used.</p>
+<p>In single query mode, this plugin creates single SEMP requests, you need only pass a SolaceAPI into <cite>api</cite>, or invoke
+via SolaceAPI(&#8220;dev&#8221;).manage(&#8220;SolaceVPN&#8221;)</p>
+<blockquote>
+<div><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">param api:</th><td class="field-body">The instance of SolaceAPI if not called from SolaceAPI.manage</td>
+</tr>
+<tr class="field-even field"><th class="field-name">param vpn_name:</th><td class="field-body">name of the VPN to scope the ACL to</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">type api:</th><td class="field-body">SolaceAPI</td>
+</tr>
+<tr class="field-even field"><th class="field-name">type vpn_name:</th><td class="field-body">str</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">rtype:</th><td class="field-body">SolaceVPN</td>
+</tr>
+</tbody>
+</table>
+</div></blockquote>
+<p>Query/Single Mode Example Direct Access:</p>
+<p><code class="docutils literal"><span class="pre">`python</span>
+<span class="pre">&gt;&gt;&gt;</span> <span class="pre">import</span> <span class="pre">libsolace.settingsloader</span> <span class="pre">as</span> <span class="pre">settings</span>
+<span class="pre">&gt;&gt;&gt;</span> <span class="pre">import</span> <span class="pre">libsolace</span>
+<span class="pre">&gt;&gt;&gt;</span> <span class="pre">from</span> <span class="pre">libsolace.SolaceAPI</span> <span class="pre">import</span> <span class="pre">SolaceAPI</span>
+<span class="pre">&gt;&gt;&gt;</span> <span class="pre">clazz</span> <span class="pre">=</span> <span class="pre">libsolace.plugin_registry(&quot;SolaceVPN&quot;,</span> <span class="pre">settings=settings)</span>
+<span class="pre">&gt;&gt;&gt;</span> <span class="pre">api</span> <span class="pre">=</span> <span class="pre">SolaceAPI(&quot;dev&quot;)</span>
+<span class="pre">&gt;&gt;&gt;</span> <span class="pre">solaceVpnPlugin</span> <span class="pre">=</span> <span class="pre">clazz(settings=settings,</span> <span class="pre">api=api)</span>
+<span class="pre">&gt;&gt;&gt;</span> <span class="pre">solaceVpnPlugin.get(vpn_name=&quot;default&quot;)</span>
+<span class="pre">`</span></code></p>
+<p>Provision/Batch Mode Example via SolaceAPI</p>
+<p><code class="docutils literal"><span class="pre">`python</span>
+<span class="pre">&gt;&gt;&gt;</span> <span class="pre">api</span> <span class="pre">=</span> <span class="pre">SolaceAPI(&quot;dev&quot;)</span>
+<span class="pre">&gt;&gt;&gt;</span> <span class="pre">vpn</span> <span class="pre">=</span> <span class="pre">api.manage(&quot;SolaceVPN&quot;,</span> <span class="pre">vpn_name=&quot;my_vpn&quot;,</span> <span class="pre">owner_name=&quot;someuser&quot;,</span> <span class="pre">acl_profile=&quot;default&quot;,</span> <span class="pre">max_spool_usage=1024)</span>
+<span class="pre">&gt;&gt;&gt;</span> <span class="pre">for</span> <span class="pre">req</span> <span class="pre">in</span> <span class="pre">vpn.commands.commands:</span>
+<span class="pre">&gt;&gt;&gt;</span>&nbsp;&nbsp;&nbsp; <span class="pre">api.rpc(str(req[0]),</span> <span class="pre">**req[1])</span>
+<span class="pre">`</span></code></p>
+<dl class="attribute">
+<dt id="libsolace.items.SolaceVPN.SolaceVPN.api">
+<code class="descname">api</code><em class="property"> = 'None'</em><a class="headerlink" href="#libsolace.items.SolaceVPN.SolaceVPN.api" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="libsolace.items.SolaceVPN.SolaceVPN.clear_radius">
+<code class="descname">clear_radius</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/libsolace/items/SolaceVPN.html#SolaceVPN.clear_radius"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#libsolace.items.SolaceVPN.SolaceVPN.clear_radius" title="Permalink to this definition">¶</a></dt>
+<dd><p>Clears radius authentication mechanism</p>
+<blockquote>
+<div><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">param vpn_name:</th><td class="field-body">The name of the VPN</td>
+</tr>
+<tr class="field-even field"><th class="field-name">type vpn_name:</th><td class="field-body">str</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">return:</th><td class="field-body">tuple SEMP request and kwargs</td>
+</tr>
+</tbody>
+</table>
+</div></blockquote>
+<p>Example:</p>
+<p><code class="docutils literal"><span class="pre">`python</span>
+<span class="pre">&gt;&gt;&gt;</span> <span class="pre">api</span> <span class="pre">=</span> <span class="pre">SolaceAPI(&quot;dev&quot;)</span>
+<span class="pre">&gt;&gt;&gt;</span> <span class="pre">tuple_request</span> <span class="pre">=</span> <span class="pre">api.manage(&quot;SolaceVPN&quot;).clear_radius(vpn_name=&quot;my_vpn&quot;)</span>
+<span class="pre">&gt;&gt;&gt;</span> <span class="pre">api.rpc(tuple_request)</span>
+<span class="pre">`</span></code></p>
+<p>Example 2:</p>
+<p><code class="docutils literal"><span class="pre">`python</span>
+<span class="pre">&gt;&gt;&gt;</span> <span class="pre">api</span> <span class="pre">=</span> <span class="pre">SolaceAPI(&quot;dev&quot;)</span>
+<span class="pre">&gt;&gt;&gt;</span> <span class="pre">api.rpc(api.manage(&quot;SolaceVPN&quot;).clear_radius(vpn_name=&quot;my_vpn&quot;))</span>
+<span class="pre">`</span></code></p>
+</dd></dl>
+
+<dl class="method">
+<dt id="libsolace.items.SolaceVPN.SolaceVPN.create_vpn">
+<code class="descname">create_vpn</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/libsolace/items/SolaceVPN.html#SolaceVPN.create_vpn"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#libsolace.items.SolaceVPN.SolaceVPN.create_vpn" title="Permalink to this definition">¶</a></dt>
+<dd><p>New VPN SEMP Request generator.</p>
+<blockquote>
+<div><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">param vpn_name:</th><td class="field-body">The name of the VPN</td>
+</tr>
+<tr class="field-even field"><th class="field-name">type vpn_name:</th><td class="field-body">str</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">return:</th><td class="field-body">tuple SEMP request and kwargs</td>
+</tr>
+</tbody>
+</table>
+</div></blockquote>
+<p>Example:</p>
+<p><code class="docutils literal"><span class="pre">`python</span>
+<span class="pre">&gt;&gt;&gt;</span> <span class="pre">api</span> <span class="pre">=</span> <span class="pre">SolaceAPI(&quot;dev&quot;)</span>
+<span class="pre">&gt;&gt;&gt;</span> <span class="pre">tuple_request</span> <span class="pre">=</span> <span class="pre">api.manage(&quot;SolaceVPN&quot;).create_vpn(vpn_name=&quot;my_vpn&quot;)</span>
+<span class="pre">&gt;&gt;&gt;</span> <span class="pre">api.rpc(tuple_request)</span>
+<span class="pre">`</span></code></p>
+<p>Example2:</p>
+<p><code class="docutils literal"><span class="pre">`python</span>
+<span class="pre">&gt;&gt;&gt;</span> <span class="pre">api</span> <span class="pre">=</span> <span class="pre">SolaceAPI(&quot;dev&quot;)</span>
+<span class="pre">&gt;&gt;&gt;</span> <span class="pre">api.rpc(api.manage(&quot;SolaceVPN&quot;).create_vpn(vpn_name=&quot;my_vpn&quot;))</span>
+<span class="pre">`</span></code></p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="libsolace.items.SolaceVPN.SolaceVPN.default_settings">
+<code class="descname">default_settings</code><em class="property"> = {'max_spool_usage': 4096, 'large_message_threshold': 4096}</em><a class="headerlink" href="#libsolace.items.SolaceVPN.SolaceVPN.default_settings" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="libsolace.items.SolaceVPN.SolaceVPN.enable_vpn">
+<code class="descname">enable_vpn</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/libsolace/items/SolaceVPN.html#SolaceVPN.enable_vpn"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#libsolace.items.SolaceVPN.SolaceVPN.enable_vpn" title="Permalink to this definition">¶</a></dt>
+<dd><p>Enable a VPN</p>
+<blockquote>
+<div><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">param vpn_name:</th><td class="field-body">The name of the VPN</td>
+</tr>
+<tr class="field-even field"><th class="field-name">type vpn_name:</th><td class="field-body">str</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">return:</th><td class="field-body">tuple SEMP request and kwargs</td>
+</tr>
+</tbody>
+</table>
+</div></blockquote>
+<p>Example:</p>
+<p><code class="docutils literal"><span class="pre">`python</span>
+<span class="pre">&gt;&gt;&gt;</span> <span class="pre">api</span> <span class="pre">=</span> <span class="pre">SolaceAPI(&quot;dev&quot;)</span>
+<span class="pre">&gt;&gt;&gt;</span> <span class="pre">request_tuple</span> <span class="pre">=</span> <span class="pre">api.manage(&quot;SolaceVPN&quot;).enable_vpn(vpn_name=&quot;my_vpn&quot;)</span>
+<span class="pre">&gt;&gt;&gt;</span> <span class="pre">api.rpc(request_tuple)</span>
+<span class="pre">`</span></code></p>
+</dd></dl>
+
+<dl class="method">
+<dt id="libsolace.items.SolaceVPN.SolaceVPN.get">
+<code class="descname">get</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/libsolace/items/SolaceVPN.html#SolaceVPN.get"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#libsolace.items.SolaceVPN.SolaceVPN.get" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a VPN from the appliance immediately. This method calls the api instance so it MUST be referenced through the SolaceAPI instance, or passed a <cite>api</cite> kwarg.</p>
+<blockquote>
+<div><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">param vpn_name:</th><td class="field-body">The name of the VPN</td>
+</tr>
+<tr class="field-even field"><th class="field-name">param detail:</th><td class="field-body">return details</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">type vpn_name:</th><td class="field-body">str</td>
+</tr>
+<tr class="field-even field"><th class="field-name">type detail:</th><td class="field-body">bool</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">return:</th><td class="field-body">dict</td>
+</tr>
+</tbody>
+</table>
+</div></blockquote>
+<p>Example:</p>
+<p><code class="docutils literal"><span class="pre">`python</span>
+<span class="pre">&gt;&gt;&gt;</span> <span class="pre">api</span> <span class="pre">=</span> <span class="pre">SolaceAPI(&quot;dev&quot;)</span>
+<span class="pre">&gt;&gt;&gt;</span> <span class="pre">dict_vpn</span> <span class="pre">=</span> <span class="pre">api.manage(&quot;SolaceVPN&quot;).get(vpn_name=&quot;my_vpn&quot;,</span> <span class="pre">detail=True)</span>
+<span class="pre">`</span></code></p>
+</dd></dl>
+
+<dl class="method">
+<dt id="libsolace.items.SolaceVPN.SolaceVPN.list_vpns">
+<code class="descname">list_vpns</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/libsolace/items/SolaceVPN.html#SolaceVPN.list_vpns"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#libsolace.items.SolaceVPN.SolaceVPN.list_vpns" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a list of vpns from first / primary node only</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>vpn_name</strong> (<em>str</em>) &#8211; the vpn_name or search pattern</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"></td>
+</tr>
+</tbody>
+</table>
+<p>Example:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">api</span> <span class="o">=</span> <span class="n">SolaceAPI</span><span class="p">(</span><span class="s2">&quot;dev&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">list_dict</span> <span class="o">=</span> <span class="n">api</span><span class="o">.</span><span class="n">manage</span><span class="p">(</span><span class="s2">&quot;SolaceVPN&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">list_vpns</span><span class="p">(</span><span class="n">vpn_name</span><span class="o">=</span><span class="s2">&quot;*&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="libsolace.items.SolaceVPN.SolaceVPN.plugin_name">
+<code class="descname">plugin_name</code><em class="property"> = 'SolaceVPN'</em><a class="headerlink" href="#libsolace.items.SolaceVPN.SolaceVPN.plugin_name" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="libsolace.items.SolaceVPN.SolaceVPN.set_internal_auth">
+<code class="descname">set_internal_auth</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/libsolace/items/SolaceVPN.html#SolaceVPN.set_internal_auth"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#libsolace.items.SolaceVPN.SolaceVPN.set_internal_auth" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set authentication method to internal</p>
+<blockquote>
+<div><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">param vpn_name:</th><td class="field-body">The name of the VPN</td>
+</tr>
+<tr class="field-even field"><th class="field-name">type vpn_name:</th><td class="field-body">str</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">return:</th><td class="field-body">tuple SEMP request and kwargs</td>
+</tr>
+</tbody>
+</table>
+</div></blockquote>
+<p>Example:</p>
+<p><code class="docutils literal"><span class="pre">`python</span>
+<span class="pre">&gt;&gt;&gt;</span> <span class="pre">api</span> <span class="pre">=</span> <span class="pre">SolaceAPI(&quot;dev&quot;)</span>
+<span class="pre">&gt;&gt;&gt;</span> <span class="pre">tuple_request</span> <span class="pre">=</span> <span class="pre">api.manage(&quot;SolaceVPN&quot;).set_internal_auth(vpn_name=&quot;my_vpn&quot;)</span>
+<span class="pre">&gt;&gt;&gt;</span> <span class="pre">api.rpc(tuple_request)</span>
+<span class="pre">`</span></code></p>
+</dd></dl>
+
+<dl class="method">
+<dt id="libsolace.items.SolaceVPN.SolaceVPN.set_large_message_threshold">
+<code class="descname">set_large_message_threshold</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/libsolace/items/SolaceVPN.html#SolaceVPN.set_large_message_threshold"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#libsolace.items.SolaceVPN.SolaceVPN.set_large_message_threshold" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sets the large message threshold</p>
+<blockquote>
+<div><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">param vpn_name:</th><td class="field-body">The name of the VPN</td>
+</tr>
+<tr class="field-even field"><th class="field-name" colspan="2">param large_message_threshold:</th></tr>
+<tr class="field-even field"><td>&nbsp;</td><td class="field-body">size in bytes</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">type vpn_name:</th><td class="field-body">str</td>
+</tr>
+<tr class="field-even field"><th class="field-name" colspan="2">type large_message_threshold:</th></tr>
+<tr class="field-even field"><td>&nbsp;</td><td class="field-body">int</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">return:</th><td class="field-body">tuple SEMP request and kwargs</td>
+</tr>
+</tbody>
+</table>
+</div></blockquote>
+<p>Example:</p>
+<p><code class="docutils literal"><span class="pre">`python</span>
+<span class="pre">&gt;&gt;&gt;</span> <span class="pre">api</span> <span class="pre">=</span> <span class="pre">SolaceAPI(&quot;dev&quot;)</span>
+<span class="pre">&gt;&gt;&gt;</span> <span class="pre">request_tuple</span> <span class="pre">=</span> <span class="pre">api.manage(&quot;SolaceVPN&quot;).set_large_message_threshold(vpn_name=&quot;my_vpn&quot;,</span> <span class="pre">large_message_threshold=4096)</span>
+<span class="pre">&gt;&gt;&gt;</span> <span class="pre">api.rpc(request_tuple)</span>
+<span class="pre">`</span></code></p>
+</dd></dl>
+
+<dl class="method">
+<dt id="libsolace.items.SolaceVPN.SolaceVPN.set_logging_tag">
+<code class="descname">set_logging_tag</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/libsolace/items/SolaceVPN.html#SolaceVPN.set_logging_tag"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#libsolace.items.SolaceVPN.SolaceVPN.set_logging_tag" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sets the VPN logging tag, default = vpn_name</p>
+<blockquote>
+<div><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">param vpn_name:</th><td class="field-body">The name of the VPN</td>
+</tr>
+<tr class="field-even field"><th class="field-name">param tag:</th><td class="field-body">string to use in logging tag</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">type vpn_name:</th><td class="field-body">str</td>
+</tr>
+<tr class="field-even field"><th class="field-name">type tag:</th><td class="field-body">str</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">return:</th><td class="field-body">tuple SEMP request and kwargs</td>
+</tr>
+</tbody>
+</table>
+</div></blockquote>
+<p>Example:</p>
+<p><code class="docutils literal"><span class="pre">`python</span>
+<span class="pre">&gt;&gt;&gt;</span> <span class="pre">api</span> <span class="pre">=</span> <span class="pre">SolaceAPI(&quot;dev&quot;)</span>
+<span class="pre">&gt;&gt;&gt;</span> <span class="pre">request_tuple</span> <span class="pre">=</span> <span class="pre">api.manage(&quot;SolaceVPN&quot;).set_logging_tag(vpn_name=&quot;my_vpn&quot;,</span> <span class="pre">tag=&quot;my_vpn_string&quot;)</span>
+<span class="pre">&gt;&gt;&gt;</span> <span class="pre">api.rpc(request_tuple)</span>
+<span class="pre">`</span></code></p>
+</dd></dl>
+
+<dl class="method">
+<dt id="libsolace.items.SolaceVPN.SolaceVPN.set_spool_size">
+<code class="descname">set_spool_size</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/libsolace/items/SolaceVPN.html#SolaceVPN.set_spool_size"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#libsolace.items.SolaceVPN.SolaceVPN.set_spool_size" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set the maximun spool size for the VPN</p>
+<blockquote>
+<div><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">param vpn_name:</th><td class="field-body">The name of the VPN</td>
+</tr>
+<tr class="field-even field"><th class="field-name" colspan="2">param max_spool_usage:</th></tr>
+<tr class="field-even field"><td>&nbsp;</td><td class="field-body">size in mb</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">type vpn_name:</th><td class="field-body">str</td>
+</tr>
+<tr class="field-even field"><th class="field-name" colspan="2">type max_spool_usage:</th></tr>
+<tr class="field-even field"><td>&nbsp;</td><td class="field-body">int</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">return:</th><td class="field-body">tuple SEMP request and kwargs</td>
+</tr>
+</tbody>
+</table>
+</div></blockquote>
+<p>Example:</p>
+<p><code class="docutils literal"><span class="pre">`python</span>
+<span class="pre">&gt;&gt;&gt;</span> <span class="pre">api</span> <span class="pre">=</span> <span class="pre">SolaceAPI(&quot;dev&quot;)</span>
+<span class="pre">&gt;&gt;&gt;</span> <span class="pre">request_tuple</span> <span class="pre">=</span> <span class="pre">api.manage(&quot;SolaceVPN&quot;).set_spool_size(vpn_name=&quot;my_vpn&quot;,</span> <span class="pre">max_spool_usage=4096)</span>
+<span class="pre">&gt;&gt;&gt;</span> <span class="pre">api.rpc(request_tuple)</span>
+<span class="pre">`</span></code></p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+           </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="libsolace.plugins.html" class="btn btn-neutral float-right" title="libsolace.plugins package" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="libsolace.items.SolaceUsers.html" class="btn btn-neutral" title="libsolace.items.SolaceUsers module" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2016, Kegan Holtzhausen, Johan Lyheden.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'./',
+            VERSION:'1.0',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="_static/jquery.js"></script>
+      <script type="text/javascript" src="_static/underscore.js"></script>
+      <script type="text/javascript" src="_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

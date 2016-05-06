@@ -1,0 +1,600 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>libsolace.items.SolaceVPN &mdash; libsolace 1.0 documentation</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+    <link rel="top" title="libsolace 1.0 documentation" href="../../../index.html"/>
+        <link rel="up" title="Module code" href="../../index.html"/> 
+
+  
+  <script src="../../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../../libsolace.html" class="icon icon-home"> libsolace
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                1.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+                <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../libsolace.data.html">libsolace.data package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../libsolace.items.html">libsolace.items package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../libsolace.plugins.html">libsolace.plugins package</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../libsolace.Decorators.html">libsolace.Decorators module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../libsolace.Exceptions.html">libsolace.Exceptions module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../libsolace.Kwargs.html">libsolace.Kwargs module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../libsolace.Naming.html">libsolace.Naming module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../libsolace.SolaceAPI.html">libsolace.SolaceAPI module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../libsolace.SolaceCommandQueue.html">libsolace.SolaceCommandQueue module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../libsolace.SolaceNode.html">libsolace.SolaceNode module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../libsolace.SolaceProvision.html">libsolace.SolaceProvision module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../libsolace.SolaceReply.html">libsolace.SolaceReply module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../libsolace.SolaceXMLBuilder.html">libsolace.SolaceXMLBuilder module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../libsolace.plugin.html">libsolace.plugin module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../libsolace.settingsloader.html">libsolace.settingsloader module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../libsolace.util.html">libsolace.util module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../libsolace.xml2dict.html">libsolace.xml2dict module</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="../../../libsolace.html">libsolace</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../../../libsolace.html">Docs</a> &raquo;</li>
+      
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+      
+    <li>libsolace.items.SolaceVPN</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for libsolace.items.SolaceVPN</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">import</span> <span class="nn">libsolace</span>
+<span class="kn">from</span> <span class="nn">libsolace.Decorators</span> <span class="kn">import</span> <span class="n">only_if_not_exists</span><span class="p">,</span> <span class="n">only_if_exists</span><span class="p">,</span> <span class="n">primary</span><span class="p">,</span> <span class="n">backup</span>
+<span class="kn">from</span> <span class="nn">libsolace.SolaceReply</span> <span class="kn">import</span> <span class="n">SolaceReplyHandler</span>
+<span class="kn">from</span> <span class="nn">libsolace.plugin</span> <span class="kn">import</span> <span class="n">Plugin</span><span class="p">,</span> <span class="n">PluginResponse</span>
+<span class="kn">from</span> <span class="nn">libsolace.SolaceCommandQueue</span> <span class="kn">import</span> <span class="n">SolaceCommandQueue</span>
+<span class="kn">from</span> <span class="nn">libsolace.SolaceXMLBuilder</span> <span class="kn">import</span> <span class="n">SolaceXMLBuilder</span>
+<span class="kn">from</span> <span class="nn">libsolace.util</span> <span class="kn">import</span> <span class="n">get_key_from_kwargs</span>
+
+
+<span class="nd">@libsolace.plugin_registry.register</span>
+<div class="viewcode-block" id="SolaceVPN"><a class="viewcode-back" href="../../../libsolace.items.SolaceVPN.html#libsolace.items.SolaceVPN.SolaceVPN">[docs]</a><span class="k">class</span> <span class="nc">SolaceVPN</span><span class="p">(</span><span class="n">Plugin</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Manage a Solace VPN</span>
+
+<span class="sd">If `vpn_name` is passed as a kwarg, this plugin enters provision/batch mode, if it is omitted, the plugin will go into</span>
+<span class="sd">single query mode.</span>
+
+<span class="sd">In provision/batch mode, this plugin generates all the neccesary SEMP requests to create a VPN. You also need to pass a</span>
+<span class="sd">`owner_name` and a existing `acl_profile` name. If these are omitted, the vpn_name property is used.</span>
+
+<span class="sd">In single query mode, this plugin creates single SEMP requests, you need only pass a SolaceAPI into `api`, or invoke</span>
+<span class="sd">via SolaceAPI(&quot;dev&quot;).manage(&quot;SolaceVPN&quot;)</span>
+
+<span class="sd">    :param api: The instance of SolaceAPI if not called from SolaceAPI.manage</span>
+<span class="sd">    :param vpn_name: name of the VPN to scope the ACL to</span>
+<span class="sd">    :type api: SolaceAPI</span>
+<span class="sd">    :type vpn_name: str</span>
+<span class="sd">    :rtype: SolaceVPN</span>
+
+<span class="sd">Query/Single Mode Example Direct Access:</span>
+
+<span class="sd">```python</span>
+<span class="sd">&gt;&gt;&gt; import libsolace.settingsloader as settings</span>
+<span class="sd">&gt;&gt;&gt; import libsolace</span>
+<span class="sd">&gt;&gt;&gt; from libsolace.SolaceAPI import SolaceAPI</span>
+<span class="sd">&gt;&gt;&gt; clazz = libsolace.plugin_registry(&quot;SolaceVPN&quot;, settings=settings)</span>
+<span class="sd">&gt;&gt;&gt; api = SolaceAPI(&quot;dev&quot;)</span>
+<span class="sd">&gt;&gt;&gt; solaceVpnPlugin = clazz(settings=settings, api=api)</span>
+<span class="sd">&gt;&gt;&gt; solaceVpnPlugin.get(vpn_name=&quot;default&quot;)</span>
+<span class="sd">```</span>
+
+<span class="sd">Provision/Batch Mode Example via SolaceAPI</span>
+
+<span class="sd">```python</span>
+<span class="sd">&gt;&gt;&gt; api = SolaceAPI(&quot;dev&quot;)</span>
+<span class="sd">&gt;&gt;&gt; vpn = api.manage(&quot;SolaceVPN&quot;, vpn_name=&quot;my_vpn&quot;, owner_name=&quot;someuser&quot;, acl_profile=&quot;default&quot;, max_spool_usage=1024)</span>
+<span class="sd">&gt;&gt;&gt; for req in vpn.commands.commands:</span>
+<span class="sd">&gt;&gt;&gt;    api.rpc(str(req[0]), **req[1])</span>
+<span class="sd">```</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">plugin_name</span> <span class="o">=</span> <span class="s2">&quot;SolaceVPN&quot;</span>
+    <span class="n">api</span> <span class="o">=</span> <span class="s2">&quot;None&quot;</span>
+
+    <span class="n">default_settings</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;max_spool_usage&#39;</span><span class="p">:</span> <span class="mi">4096</span><span class="p">,</span>
+                        <span class="s1">&#39;large_message_threshold&#39;</span><span class="p">:</span> <span class="mi">4096</span><span class="p">}</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">kwargs</span> <span class="o">==</span> <span class="p">{}:</span>
+            <span class="k">return</span>
+
+        <span class="c1"># decorator, for caching decorator creates and set this property, Missing exception is used also, so leave</span>
+        <span class="c1"># completely unassigned. this line is just here for reference.</span>
+        <span class="c1"># self.exists = None</span>
+
+        <span class="c1"># get the connection SolaceAPI instance</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">api</span> <span class="o">=</span> <span class="n">get_key_from_kwargs</span><span class="p">(</span><span class="s2">&quot;api&quot;</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">)</span>
+
+        <span class="c1"># create a commandqueue instance for queuing up XML and validating</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">commands</span> <span class="o">=</span> <span class="n">SolaceCommandQueue</span><span class="p">(</span><span class="n">version</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">api</span><span class="o">.</span><span class="n">version</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="s2">&quot;vpn_name&quot;</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="p">:</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;No vpn_name kwarg, assuming query mode&quot;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">vpn_name</span> <span class="o">=</span> <span class="n">get_key_from_kwargs</span><span class="p">(</span><span class="s2">&quot;vpn_name&quot;</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">owner_username</span> <span class="o">=</span> <span class="n">get_key_from_kwargs</span><span class="p">(</span><span class="s2">&quot;owner_username&quot;</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">vpn_name</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">acl_profile</span> <span class="o">=</span> <span class="n">get_key_from_kwargs</span><span class="p">(</span><span class="s2">&quot;acl_profile&quot;</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">vpn_name</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">options</span> <span class="o">=</span> <span class="bp">None</span>
+
+            <span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Creating vpn in env: </span><span class="si">%s</span><span class="s2"> vpn: </span><span class="si">%s</span><span class="s2">, kwargs: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">api</span><span class="o">.</span><span class="n">environment</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">vpn_name</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">))</span>
+
+            <span class="c1"># set defaults</span>
+            <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">default_settings</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Setting Key: </span><span class="si">%s</span><span class="s2"> to </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">v</span><span class="p">))</span>
+                <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span><span class="p">)</span>
+
+            <span class="c1"># use kwargs to tune defaults</span>
+            <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">default_settings</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                <span class="k">if</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="p">:</span>
+                    <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Overriding Key: </span><span class="si">%s</span><span class="s2"> to </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">[</span><span class="n">k</span><span class="p">]))</span>
+                    <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">[</span><span class="n">k</span><span class="p">])</span>
+
+            <span class="c1"># backwards compatibility for None options passed to still execute &quot;add&quot; code</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">options</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+                <span class="n">logging</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+                        <span class="s2">&quot;No options passed, assuming you meant &#39;add&#39;, please update usage of this class to pass a OptionParser instance&quot;</span><span class="p">)</span>
+                <span class="c1"># stack the commands</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">create_vpn</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">clear_radius</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">set_internal_auth</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">set_spool_size</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">set_large_message_threshold</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">set_logging_tag</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">enable_vpn</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+    <span class="nd">@only_if_not_exists</span><span class="p">(</span><span class="s2">&quot;get&quot;</span><span class="p">,</span> <span class="s1">&#39;rpc-reply.rpc.show.message-vpn.vpn&#39;</span><span class="p">)</span>
+<div class="viewcode-block" id="SolaceVPN.create_vpn"><a class="viewcode-back" href="../../../libsolace.items.SolaceVPN.html#libsolace.items.SolaceVPN.SolaceVPN.create_vpn">[docs]</a>    <span class="k">def</span> <span class="nf">create_vpn</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;New VPN SEMP Request generator.</span>
+
+<span class="sd">    :param vpn_name: The name of the VPN</span>
+<span class="sd">    :type vpn_name: str</span>
+<span class="sd">    :return: tuple SEMP request and kwargs</span>
+
+<span class="sd">Example:</span>
+
+<span class="sd">```python</span>
+<span class="sd">&gt;&gt;&gt; api = SolaceAPI(&quot;dev&quot;)</span>
+<span class="sd">&gt;&gt;&gt; tuple_request = api.manage(&quot;SolaceVPN&quot;).create_vpn(vpn_name=&quot;my_vpn&quot;)</span>
+<span class="sd">&gt;&gt;&gt; api.rpc(tuple_request)</span>
+<span class="sd">```</span>
+
+<span class="sd">Example2:</span>
+
+<span class="sd">```python</span>
+<span class="sd">&gt;&gt;&gt; api = SolaceAPI(&quot;dev&quot;)</span>
+<span class="sd">&gt;&gt;&gt; api.rpc(api.manage(&quot;SolaceVPN&quot;).create_vpn(vpn_name=&quot;my_vpn&quot;))</span>
+<span class="sd">```</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">vpn_name</span> <span class="o">=</span> <span class="n">get_key_from_kwargs</span><span class="p">(</span><span class="s2">&quot;vpn_name&quot;</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">)</span>
+
+        <span class="c1"># Create domain-event VPN, this can fail if VPN exists, but thats ok.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">api</span><span class="o">.</span><span class="n">x</span> <span class="o">=</span> <span class="n">SolaceXMLBuilder</span><span class="p">(</span><span class="s1">&#39;VPN Create new VPN </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">vpn_name</span><span class="p">,</span> <span class="n">version</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">api</span><span class="o">.</span><span class="n">version</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">api</span><span class="o">.</span><span class="n">x</span><span class="o">.</span><span class="n">create</span><span class="o">.</span><span class="n">message_vpn</span><span class="o">.</span><span class="n">vpn_name</span> <span class="o">=</span> <span class="n">vpn_name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">commands</span><span class="o">.</span><span class="n">enqueue</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">api</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">set_exists</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
+        <span class="k">return</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">api</span><span class="o">.</span><span class="n">x</span><span class="p">),</span> <span class="n">kwargs</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="SolaceVPN.get"><a class="viewcode-back" href="../../../libsolace.items.SolaceVPN.html#libsolace.items.SolaceVPN.SolaceVPN.get">[docs]</a>    <span class="k">def</span> <span class="nf">get</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Returns a VPN from the appliance immediately. This method calls the api instance so it MUST be referenced through the SolaceAPI instance, or passed a `api` kwarg.</span>
+
+<span class="sd">    :param vpn_name: The name of the VPN</span>
+<span class="sd">    :param detail: return details</span>
+<span class="sd">    :type vpn_name: str</span>
+<span class="sd">    :type detail: bool</span>
+<span class="sd">    :return: dict</span>
+
+<span class="sd">Example:</span>
+
+<span class="sd">```python</span>
+<span class="sd">&gt;&gt;&gt; api = SolaceAPI(&quot;dev&quot;)</span>
+<span class="sd">&gt;&gt;&gt; dict_vpn = api.manage(&quot;SolaceVPN&quot;).get(vpn_name=&quot;my_vpn&quot;, detail=True)</span>
+<span class="sd">```</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">vpn_name</span> <span class="o">=</span> <span class="n">get_key_from_kwargs</span><span class="p">(</span><span class="s2">&quot;vpn_name&quot;</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">)</span>
+        <span class="n">detail</span> <span class="o">=</span> <span class="n">get_key_from_kwargs</span><span class="p">(</span><span class="s2">&quot;detail&quot;</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Getting VPN: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">vpn_name</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">api</span><span class="o">.</span><span class="n">x</span> <span class="o">=</span> <span class="n">SolaceXMLBuilder</span><span class="p">(</span><span class="s2">&quot;Getting VPN </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">vpn_name</span><span class="p">,</span> <span class="n">version</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">api</span><span class="o">.</span><span class="n">version</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">api</span><span class="o">.</span><span class="n">x</span><span class="o">.</span><span class="n">show</span><span class="o">.</span><span class="n">message_vpn</span><span class="o">.</span><span class="n">vpn_name</span> <span class="o">=</span> <span class="n">vpn_name</span>
+        <span class="k">if</span> <span class="n">detail</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">api</span><span class="o">.</span><span class="n">x</span><span class="o">.</span><span class="n">show</span><span class="o">.</span><span class="n">message_vpn</span><span class="o">.</span><span class="n">detail</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">commands</span><span class="o">.</span><span class="n">enqueue</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">api</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">api</span><span class="o">.</span><span class="n">rpc</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">api</span><span class="o">.</span><span class="n">x</span><span class="p">))</span></div>
+
+    <span class="nd">@only_if_exists</span><span class="p">(</span><span class="s2">&quot;get&quot;</span><span class="p">,</span> <span class="s1">&#39;rpc-reply.rpc.show.message-vpn.vpn&#39;</span><span class="p">)</span>
+<div class="viewcode-block" id="SolaceVPN.clear_radius"><a class="viewcode-back" href="../../../libsolace.items.SolaceVPN.html#libsolace.items.SolaceVPN.SolaceVPN.clear_radius">[docs]</a>    <span class="k">def</span> <span class="nf">clear_radius</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Clears radius authentication mechanism</span>
+
+<span class="sd">    :param vpn_name: The name of the VPN</span>
+<span class="sd">    :type vpn_name: str</span>
+<span class="sd">    :return: tuple SEMP request and kwargs</span>
+
+<span class="sd">Example:</span>
+
+<span class="sd">```python</span>
+<span class="sd">&gt;&gt;&gt; api = SolaceAPI(&quot;dev&quot;)</span>
+<span class="sd">&gt;&gt;&gt; tuple_request = api.manage(&quot;SolaceVPN&quot;).clear_radius(vpn_name=&quot;my_vpn&quot;)</span>
+<span class="sd">&gt;&gt;&gt; api.rpc(tuple_request)</span>
+<span class="sd">```</span>
+
+<span class="sd">Example 2:</span>
+
+<span class="sd">```python</span>
+<span class="sd">&gt;&gt;&gt; api = SolaceAPI(&quot;dev&quot;)</span>
+<span class="sd">&gt;&gt;&gt; api.rpc(api.manage(&quot;SolaceVPN&quot;).clear_radius(vpn_name=&quot;my_vpn&quot;))</span>
+<span class="sd">```</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">vpn_name</span> <span class="o">=</span> <span class="n">get_key_from_kwargs</span><span class="p">(</span><span class="s2">&quot;vpn_name&quot;</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">)</span>
+
+        <span class="c1"># Switch Radius Domain to nothing</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">api</span><span class="o">.</span><span class="n">x</span> <span class="o">=</span> <span class="n">SolaceXMLBuilder</span><span class="p">(</span><span class="s2">&quot;VPN </span><span class="si">%s</span><span class="s2"> Clearing Radius&quot;</span> <span class="o">%</span> <span class="n">vpn_name</span><span class="p">,</span> <span class="n">version</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">api</span><span class="o">.</span><span class="n">version</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">api</span><span class="o">.</span><span class="n">x</span><span class="o">.</span><span class="n">message_vpn</span><span class="o">.</span><span class="n">vpn_name</span> <span class="o">=</span> <span class="n">vpn_name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">api</span><span class="o">.</span><span class="n">x</span><span class="o">.</span><span class="n">message_vpn</span><span class="o">.</span><span class="n">authentication</span><span class="o">.</span><span class="n">user_class</span><span class="o">.</span><span class="n">client</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">api</span><span class="o">.</span><span class="n">version</span> <span class="o">==</span> <span class="s2">&quot;soltr/7_1_1&quot;</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">api</span><span class="o">.</span><span class="n">version</span> <span class="o">==</span> <span class="s2">&quot;soltr/7_0&quot;</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">api</span><span class="o">.</span><span class="n">version</span> <span class="o">==</span> <span class="s2">&quot;soltr/6_2&quot;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">api</span><span class="o">.</span><span class="n">x</span><span class="o">.</span><span class="n">message_vpn</span><span class="o">.</span><span class="n">authentication</span><span class="o">.</span><span class="n">user_class</span><span class="o">.</span><span class="n">basic</span><span class="o">.</span><span class="n">radius_domain</span><span class="o">.</span><span class="n">radius_domain</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">api</span><span class="o">.</span><span class="n">x</span><span class="o">.</span><span class="n">message_vpn</span><span class="o">.</span><span class="n">authentication</span><span class="o">.</span><span class="n">user_class</span><span class="o">.</span><span class="n">radius_domain</span><span class="o">.</span><span class="n">radius_domain</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">commands</span><span class="o">.</span><span class="n">enqueue</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">api</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="k">return</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">api</span><span class="o">.</span><span class="n">x</span><span class="p">),</span> <span class="n">kwargs</span><span class="p">)</span></div>
+
+    <span class="nd">@only_if_exists</span><span class="p">(</span><span class="s2">&quot;get&quot;</span><span class="p">,</span> <span class="s1">&#39;rpc-reply.rpc.show.message-vpn.vpn&#39;</span><span class="p">)</span>
+<div class="viewcode-block" id="SolaceVPN.set_internal_auth"><a class="viewcode-back" href="../../../libsolace.items.SolaceVPN.html#libsolace.items.SolaceVPN.SolaceVPN.set_internal_auth">[docs]</a>    <span class="k">def</span> <span class="nf">set_internal_auth</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Set authentication method to internal</span>
+
+<span class="sd">    :param vpn_name: The name of the VPN</span>
+<span class="sd">    :type vpn_name: str</span>
+<span class="sd">    :return: tuple SEMP request and kwargs</span>
+
+<span class="sd">Example:</span>
+
+<span class="sd">```python</span>
+<span class="sd">&gt;&gt;&gt; api = SolaceAPI(&quot;dev&quot;)</span>
+<span class="sd">&gt;&gt;&gt; tuple_request = api.manage(&quot;SolaceVPN&quot;).set_internal_auth(vpn_name=&quot;my_vpn&quot;)</span>
+<span class="sd">&gt;&gt;&gt; api.rpc(tuple_request)</span>
+<span class="sd">```</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">vpn_name</span> <span class="o">=</span> <span class="n">get_key_from_kwargs</span><span class="p">(</span><span class="s2">&quot;vpn_name&quot;</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">)</span>
+
+        <span class="c1"># Switch to Internal Auth</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">api</span><span class="o">.</span><span class="n">version</span> <span class="o">==</span> <span class="s2">&quot;soltr/7_1_1&quot;</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">api</span><span class="o">.</span><span class="n">version</span> <span class="o">==</span> <span class="s2">&quot;soltr/7_0&quot;</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">api</span><span class="o">.</span><span class="n">version</span> <span class="o">==</span> <span class="s2">&quot;soltr/6_2&quot;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">api</span><span class="o">.</span><span class="n">x</span> <span class="o">=</span> <span class="n">SolaceXMLBuilder</span><span class="p">(</span><span class="s2">&quot;VPN </span><span class="si">%s</span><span class="s2"> Enable Internal Auth&quot;</span> <span class="o">%</span> <span class="n">vpn_name</span><span class="p">,</span> <span class="n">version</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">api</span><span class="o">.</span><span class="n">version</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">api</span><span class="o">.</span><span class="n">x</span><span class="o">.</span><span class="n">message_vpn</span><span class="o">.</span><span class="n">vpn_name</span> <span class="o">=</span> <span class="n">vpn_name</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">api</span><span class="o">.</span><span class="n">x</span><span class="o">.</span><span class="n">message_vpn</span><span class="o">.</span><span class="n">authentication</span><span class="o">.</span><span class="n">user_class</span><span class="o">.</span><span class="n">client</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">api</span><span class="o">.</span><span class="n">x</span><span class="o">.</span><span class="n">message_vpn</span><span class="o">.</span><span class="n">authentication</span><span class="o">.</span><span class="n">user_class</span><span class="o">.</span><span class="n">basic</span><span class="o">.</span><span class="n">auth_type</span><span class="o">.</span><span class="n">internal</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">api</span><span class="o">.</span><span class="n">x</span> <span class="o">=</span> <span class="n">SolaceXMLBuilder</span><span class="p">(</span><span class="s2">&quot;VPN </span><span class="si">%s</span><span class="s2"> Enable Internal Auth&quot;</span> <span class="o">%</span> <span class="n">vpn_name</span><span class="p">,</span> <span class="n">version</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">api</span><span class="o">.</span><span class="n">version</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">api</span><span class="o">.</span><span class="n">x</span><span class="o">.</span><span class="n">message_vpn</span><span class="o">.</span><span class="n">vpn_name</span> <span class="o">=</span> <span class="n">vpn_name</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">api</span><span class="o">.</span><span class="n">x</span><span class="o">.</span><span class="n">message_vpn</span><span class="o">.</span><span class="n">authentication</span><span class="o">.</span><span class="n">user_class</span><span class="o">.</span><span class="n">client</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">api</span><span class="o">.</span><span class="n">x</span><span class="o">.</span><span class="n">message_vpn</span><span class="o">.</span><span class="n">authentication</span><span class="o">.</span><span class="n">user_class</span><span class="o">.</span><span class="n">auth_type</span><span class="o">.</span><span class="n">internal</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">commands</span><span class="o">.</span><span class="n">enqueue</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">api</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="k">return</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">api</span><span class="o">.</span><span class="n">x</span><span class="p">),</span> <span class="n">kwargs</span><span class="p">)</span></div>
+
+    <span class="nd">@only_if_exists</span><span class="p">(</span><span class="s2">&quot;get&quot;</span><span class="p">,</span> <span class="s1">&#39;rpc-reply.rpc.show.message-vpn.vpn&#39;</span><span class="p">)</span>
+<div class="viewcode-block" id="SolaceVPN.set_spool_size"><a class="viewcode-back" href="../../../libsolace.items.SolaceVPN.html#libsolace.items.SolaceVPN.SolaceVPN.set_spool_size">[docs]</a>    <span class="k">def</span> <span class="nf">set_spool_size</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Set the maximun spool size for the VPN</span>
+
+<span class="sd">    :param vpn_name: The name of the VPN</span>
+<span class="sd">    :param max_spool_usage: size in mb</span>
+<span class="sd">    :type vpn_name: str</span>
+<span class="sd">    :type max_spool_usage: int</span>
+<span class="sd">    :return: tuple SEMP request and kwargs</span>
+
+<span class="sd">Example:</span>
+
+<span class="sd">```python</span>
+<span class="sd">&gt;&gt;&gt; api = SolaceAPI(&quot;dev&quot;)</span>
+<span class="sd">&gt;&gt;&gt; request_tuple = api.manage(&quot;SolaceVPN&quot;).set_spool_size(vpn_name=&quot;my_vpn&quot;, max_spool_usage=4096)</span>
+<span class="sd">&gt;&gt;&gt; api.rpc(request_tuple)</span>
+<span class="sd">```</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">vpn_name</span> <span class="o">=</span> <span class="n">get_key_from_kwargs</span><span class="p">(</span><span class="s2">&quot;vpn_name&quot;</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">)</span>
+        <span class="n">max_spool_usage</span> <span class="o">=</span> <span class="n">get_key_from_kwargs</span><span class="p">(</span><span class="s2">&quot;max_spool_usage&quot;</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">default_settings</span><span class="p">[</span><span class="s1">&#39;max_spool_usage&#39;</span><span class="p">])</span>
+
+        <span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Setting spool size to </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">max_spool_usage</span><span class="p">)</span>
+        <span class="c1"># Set the Spool Size</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">api</span><span class="o">.</span><span class="n">x</span> <span class="o">=</span> <span class="n">SolaceXMLBuilder</span><span class="p">(</span><span class="s2">&quot;VPN </span><span class="si">%s</span><span class="s2"> Set spool size to </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">vpn_name</span><span class="p">,</span> <span class="n">max_spool_usage</span><span class="p">),</span>
+                                      <span class="n">version</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">api</span><span class="o">.</span><span class="n">version</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">api</span><span class="o">.</span><span class="n">x</span><span class="o">.</span><span class="n">message_spool</span><span class="o">.</span><span class="n">vpn_name</span> <span class="o">=</span> <span class="n">vpn_name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">api</span><span class="o">.</span><span class="n">x</span><span class="o">.</span><span class="n">message_spool</span><span class="o">.</span><span class="n">max_spool_usage</span><span class="o">.</span><span class="n">size</span> <span class="o">=</span> <span class="n">max_spool_usage</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">commands</span><span class="o">.</span><span class="n">enqueue</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">api</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="k">return</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">api</span><span class="o">.</span><span class="n">x</span><span class="p">),</span> <span class="n">kwargs</span><span class="p">)</span></div>
+
+    <span class="nd">@only_if_exists</span><span class="p">(</span><span class="s2">&quot;get&quot;</span><span class="p">,</span> <span class="s1">&#39;rpc-reply.rpc.show.message-vpn.vpn&#39;</span><span class="p">)</span>
+<div class="viewcode-block" id="SolaceVPN.set_large_message_threshold"><a class="viewcode-back" href="../../../libsolace.items.SolaceVPN.html#libsolace.items.SolaceVPN.SolaceVPN.set_large_message_threshold">[docs]</a>    <span class="k">def</span> <span class="nf">set_large_message_threshold</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Sets the large message threshold</span>
+
+<span class="sd">    :param vpn_name: The name of the VPN</span>
+<span class="sd">    :param large_message_threshold: size in bytes</span>
+<span class="sd">    :type vpn_name: str</span>
+<span class="sd">    :type large_message_threshold: int</span>
+<span class="sd">    :return: tuple SEMP request and kwargs</span>
+
+<span class="sd">Example:</span>
+
+<span class="sd">```python</span>
+<span class="sd">&gt;&gt;&gt; api = SolaceAPI(&quot;dev&quot;)</span>
+<span class="sd">&gt;&gt;&gt; request_tuple = api.manage(&quot;SolaceVPN&quot;).set_large_message_threshold(vpn_name=&quot;my_vpn&quot;, large_message_threshold=4096)</span>
+<span class="sd">&gt;&gt;&gt; api.rpc(request_tuple)</span>
+<span class="sd">```</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">vpn_name</span> <span class="o">=</span> <span class="n">get_key_from_kwargs</span><span class="p">(</span><span class="s2">&quot;vpn_name&quot;</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">)</span>
+        <span class="n">large_message_threshold</span> <span class="o">=</span> <span class="n">get_key_from_kwargs</span><span class="p">(</span><span class="s2">&quot;large_message_threshold&quot;</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">,</span>
+                                                      <span class="bp">self</span><span class="o">.</span><span class="n">default_settings</span><span class="p">[</span><span class="s2">&quot;large_message_threshold&quot;</span><span class="p">])</span>
+
+        <span class="c1"># Large Message Threshold</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">api</span><span class="o">.</span><span class="n">x</span> <span class="o">=</span> <span class="n">SolaceXMLBuilder</span><span class="p">(</span>
+                <span class="s2">&quot;VPN </span><span class="si">%s</span><span class="s2"> Settings large message threshold event to </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">vpn_name</span><span class="p">,</span> <span class="n">large_message_threshold</span><span class="p">),</span>
+                <span class="n">version</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">api</span><span class="o">.</span><span class="n">version</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">api</span><span class="o">.</span><span class="n">x</span><span class="o">.</span><span class="n">message_vpn</span><span class="o">.</span><span class="n">vpn_name</span> <span class="o">=</span> <span class="n">vpn_name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">api</span><span class="o">.</span><span class="n">x</span><span class="o">.</span><span class="n">message_vpn</span><span class="o">.</span><span class="n">event</span><span class="o">.</span><span class="n">large_message_threshold</span><span class="o">.</span><span class="n">size</span> <span class="o">=</span> <span class="n">large_message_threshold</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">commands</span><span class="o">.</span><span class="n">enqueue</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">api</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="k">return</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">api</span><span class="o">.</span><span class="n">x</span><span class="p">),</span> <span class="n">kwargs</span><span class="p">)</span></div>
+
+    <span class="nd">@only_if_exists</span><span class="p">(</span><span class="s2">&quot;get&quot;</span><span class="p">,</span> <span class="s1">&#39;rpc-reply.rpc.show.message-vpn.vpn&#39;</span><span class="p">)</span>
+<div class="viewcode-block" id="SolaceVPN.set_logging_tag"><a class="viewcode-back" href="../../../libsolace.items.SolaceVPN.html#libsolace.items.SolaceVPN.SolaceVPN.set_logging_tag">[docs]</a>    <span class="k">def</span> <span class="nf">set_logging_tag</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Sets the VPN logging tag, default = vpn_name</span>
+
+<span class="sd">    :param vpn_name: The name of the VPN</span>
+<span class="sd">    :param tag: string to use in logging tag</span>
+<span class="sd">    :type vpn_name: str</span>
+<span class="sd">    :type tag: str</span>
+<span class="sd">    :return: tuple SEMP request and kwargs</span>
+
+<span class="sd">Example:</span>
+
+<span class="sd">```python</span>
+<span class="sd">&gt;&gt;&gt; api = SolaceAPI(&quot;dev&quot;)</span>
+<span class="sd">&gt;&gt;&gt; request_tuple = api.manage(&quot;SolaceVPN&quot;).set_logging_tag(vpn_name=&quot;my_vpn&quot;, tag=&quot;my_vpn_string&quot;)</span>
+<span class="sd">&gt;&gt;&gt; api.rpc(request_tuple)</span>
+<span class="sd">```</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">vpn_name</span> <span class="o">=</span> <span class="n">get_key_from_kwargs</span><span class="p">(</span><span class="s2">&quot;vpn_name&quot;</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">)</span>
+        <span class="n">tag</span> <span class="o">=</span> <span class="n">get_key_from_kwargs</span><span class="p">(</span><span class="s2">&quot;tag&quot;</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="n">vpn_name</span><span class="p">)</span>
+
+        <span class="c1"># Logging Tag for this VPN</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">api</span><span class="o">.</span><span class="n">x</span> <span class="o">=</span> <span class="n">SolaceXMLBuilder</span><span class="p">(</span><span class="s2">&quot;VPN </span><span class="si">%s</span><span class="s2"> Setting logging tag to </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">vpn_name</span><span class="p">,</span> <span class="n">vpn_name</span><span class="p">),</span>
+                                      <span class="n">version</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">api</span><span class="o">.</span><span class="n">version</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">api</span><span class="o">.</span><span class="n">x</span><span class="o">.</span><span class="n">message_vpn</span><span class="o">.</span><span class="n">vpn_name</span> <span class="o">=</span> <span class="n">vpn_name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">api</span><span class="o">.</span><span class="n">x</span><span class="o">.</span><span class="n">message_vpn</span><span class="o">.</span><span class="n">event</span><span class="o">.</span><span class="n">log_tag</span><span class="o">.</span><span class="n">tag_string</span> <span class="o">=</span> <span class="n">tag</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">commands</span><span class="o">.</span><span class="n">enqueue</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">api</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="k">return</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">api</span><span class="o">.</span><span class="n">x</span><span class="p">),</span> <span class="n">kwargs</span><span class="p">)</span></div>
+
+    <span class="nd">@only_if_exists</span><span class="p">(</span><span class="s2">&quot;get&quot;</span><span class="p">,</span> <span class="s1">&#39;rpc-reply.rpc.show.message-vpn.vpn&#39;</span><span class="p">)</span>
+<div class="viewcode-block" id="SolaceVPN.enable_vpn"><a class="viewcode-back" href="../../../libsolace.items.SolaceVPN.html#libsolace.items.SolaceVPN.SolaceVPN.enable_vpn">[docs]</a>    <span class="k">def</span> <span class="nf">enable_vpn</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Enable a VPN</span>
+
+<span class="sd">    :param vpn_name: The name of the VPN</span>
+<span class="sd">    :type vpn_name: str</span>
+<span class="sd">    :return: tuple SEMP request and kwargs</span>
+
+<span class="sd">Example:</span>
+
+<span class="sd">```python</span>
+<span class="sd">&gt;&gt;&gt; api = SolaceAPI(&quot;dev&quot;)</span>
+<span class="sd">&gt;&gt;&gt; request_tuple = api.manage(&quot;SolaceVPN&quot;).enable_vpn(vpn_name=&quot;my_vpn&quot;)</span>
+<span class="sd">&gt;&gt;&gt; api.rpc(request_tuple)</span>
+<span class="sd">```</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">vpn_name</span> <span class="o">=</span> <span class="n">get_key_from_kwargs</span><span class="p">(</span><span class="s2">&quot;vpn_name&quot;</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">)</span>
+
+        <span class="c1"># Enable the VPN</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">api</span><span class="o">.</span><span class="n">x</span> <span class="o">=</span> <span class="n">SolaceXMLBuilder</span><span class="p">(</span><span class="s2">&quot;VPN </span><span class="si">%s</span><span class="s2"> Enabling the vpn&quot;</span> <span class="o">%</span> <span class="n">vpn_name</span><span class="p">,</span> <span class="n">version</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">api</span><span class="o">.</span><span class="n">version</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">api</span><span class="o">.</span><span class="n">x</span><span class="o">.</span><span class="n">message_vpn</span><span class="o">.</span><span class="n">vpn_name</span> <span class="o">=</span> <span class="n">vpn_name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">api</span><span class="o">.</span><span class="n">x</span><span class="o">.</span><span class="n">message_vpn</span><span class="o">.</span><span class="n">no</span><span class="o">.</span><span class="n">shutdown</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">commands</span><span class="o">.</span><span class="n">enqueue</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">api</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="k">return</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">api</span><span class="o">.</span><span class="n">x</span><span class="p">),</span> <span class="n">kwargs</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="SolaceVPN.list_vpns"><a class="viewcode-back" href="../../../libsolace.items.SolaceVPN.html#libsolace.items.SolaceVPN.SolaceVPN.list_vpns">[docs]</a>    <span class="k">def</span> <span class="nf">list_vpns</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Returns a list of vpns from first / primary node only</span>
+
+<span class="sd">        :param vpn_name: the vpn_name or search pattern</span>
+<span class="sd">        :type vpn_name: str</span>
+<span class="sd">        :return:</span>
+
+<span class="sd">        Example:</span>
+
+<span class="sd">        &gt;&gt;&gt; api = SolaceAPI(&quot;dev&quot;)</span>
+<span class="sd">        &gt;&gt;&gt; list_dict = api.manage(&quot;SolaceVPN&quot;).list_vpns(vpn_name=&quot;*&quot;)</span>
+
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">vpn_name</span> <span class="o">=</span> <span class="n">get_key_from_kwargs</span><span class="p">(</span><span class="s2">&quot;vpn_name&quot;</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">api</span><span class="o">.</span><span class="n">x</span> <span class="o">=</span> <span class="n">SolaceXMLBuilder</span><span class="p">(</span><span class="s2">&quot;Getting list of VPNS&quot;</span><span class="p">,</span> <span class="n">version</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">api</span><span class="o">.</span><span class="n">version</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">api</span><span class="o">.</span><span class="n">x</span><span class="o">.</span><span class="n">show</span><span class="o">.</span><span class="n">message_vpn</span><span class="o">.</span><span class="n">vpn_name</span> <span class="o">=</span> <span class="n">vpn_name</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">commands</span><span class="o">.</span><span class="n">enqueue</span><span class="p">(</span><span class="n">PluginResponse</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">api</span><span class="o">.</span><span class="n">x</span><span class="p">),</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">))</span>
+        <span class="n">response</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">api</span><span class="o">.</span><span class="n">rpc</span><span class="p">(</span><span class="n">PluginResponse</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">api</span><span class="o">.</span><span class="n">x</span><span class="p">),</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">))</span>
+
+        <span class="c1"># response = SolaceReplyHandler(self.api.rpc(str(self.api.x), primaryOnly=True))</span>
+        <span class="c1"># logging.info(response)</span>
+
+        <span class="k">return</span> <span class="p">[</span><span class="n">vpn</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]</span> <span class="k">for</span> <span class="n">vpn</span> <span class="ow">in</span> <span class="n">response</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s1">&#39;rpc-reply&#39;</span><span class="p">][</span><span class="s1">&#39;rpc&#39;</span><span class="p">][</span><span class="s1">&#39;show&#39;</span><span class="p">][</span><span class="s1">&#39;message-vpn&#39;</span><span class="p">][</span><span class="s1">&#39;vpn&#39;</span><span class="p">]]</span></div>
+
+    <span class="k">def</span> <span class="nf">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">k</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__dict__</span><span class="p">[</span><span class="n">k</span><span class="p">]</span></div>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2016, Kegan Holtzhausen, Johan Lyheden.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../../',
+            VERSION:'1.0',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="../../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../../_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>
