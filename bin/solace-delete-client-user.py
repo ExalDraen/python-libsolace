@@ -43,7 +43,15 @@ def solace_delete_client_username(options):
         for username in usernames:
             # Disable / Shutdown User ( else we cant change profiles if it already exists )
             try:
-                # solace.manage("SolaceUser").get(username=username, vpn_name=vpnname)
+                try:
+                    user = \
+                    solace.manage("SolaceUser").get(client_username=username, vpn_name=vpnname)[0]['rpc-reply']['rpc'][
+                        'show']['client-username']['client-usernames']['client-username']
+                except KeyError, e:
+                    logging.error("No such user exists: %s in vpn %s" % (username, vpnname))
+                    raise
+
+                logging.info("User: %s" % user)
                 user_queue_list = solace.manage(UTILITIES_PLUGIN).get_user_queues(client_username=username,
                                                                                   vpn_name=vpnname)
                 if len(user_queue_list) > 0:
@@ -74,7 +82,7 @@ def solace_delete_client_username(options):
             except Exception, e:
                 logging.info(e.message)
                 logging.info("User %s does not exist - skipping" % username)
-                raise
+                pass
 
 
 if __name__ == "__main__":
