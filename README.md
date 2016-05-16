@@ -7,7 +7,7 @@ and aimed at managing multiple clusters in multiple environments.
 
 ## API Docs
 
-(https://unixunion.github.io)[https://unixunion.github.io]
+(API Docs)[https://unixunion.github.io]
 
 ### XML Generator
 
