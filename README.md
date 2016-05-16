@@ -5,6 +5,10 @@
 This is a set of python helpers for managing and provisioning Solace Messaging Appliances and the VMR. The design is to be flexible
 and aimed at managing multiple clusters in multiple environments.
 
+## API Docs
+
+(https://unixunion.github.io)[https://unixunion.github.io]
+
 ### XML Generator
 
 The core of this provisioning system is the SolaceXMLBuilder class which can generate XML through recursive instantiation of a dictionary like object. Example:

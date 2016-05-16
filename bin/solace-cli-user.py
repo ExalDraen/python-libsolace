@@ -53,17 +53,23 @@ def solace_provision_user(options=None):
         for environment in options.environment:
             solace = SolaceAPI(environment)
 
-            # ACLS / Users
-            cmd = SolaceXMLBuilder("Creating User %s" % options.username)
-            cmd.create.username.name = options.username
-            cmd.create.username.password = options.password
-            solace.rpc(str(cmd))
+            if options.remove:
+                cmd = SolaceXMLBuilder("Removing User %s" % options.username)
+                cmd.no.username.name = options.username
+                solace.rpc(str(cmd))
 
-            # Allow acl profile to publish
-            cmd = SolaceXMLBuilder("Setting Permissions to %s" % options.global_access_level)
-            cmd.username.name = options.username
-            cmd.username.global_access_level.access_level = options.global_access_level
-            solace.rpc(str(cmd))
+            else:
+                # ACLS / Users
+                cmd = SolaceXMLBuilder("Creating User %s" % options.username)
+                cmd.create.username.name = options.username
+                cmd.create.username.password = options.password
+                solace.rpc(str(cmd))
+
+                # Allow acl profile to publish
+                cmd = SolaceXMLBuilder("Setting Permissions to %s" % options.global_access_level)
+                cmd.username.name = options.username
+                cmd.username.global_access_level.access_level = options.global_access_level
+                solace.rpc(str(cmd))
     except:
         raise
 
@@ -90,6 +96,9 @@ if __name__ == "__main__":
 
     parser.add_option("-l", "--level", action="store", type="string", dest="global_access_level",
                       help="level, [read-only|read-write|admin]", default="read-only")
+
+    parser.add_option("-r", "--remove", action="store_true", dest="remove",
+                      help="remove the user from the appliance(s)", default=False);
 
     # Parse Opts
     (options, args) = parser.parse_args()

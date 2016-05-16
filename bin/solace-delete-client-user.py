@@ -12,6 +12,7 @@ from libsolace.Naming import name
 
 UTILITIES_PLUGIN = "Utilities"
 
+
 def solace_delete_client_username(options):
     """ Deletes users / profiles / acl's where neccesary.
 
@@ -43,7 +44,8 @@ def solace_delete_client_username(options):
             # Disable / Shutdown User ( else we cant change profiles if it already exists )
             try:
                 # solace.manage("SolaceUser").get(username=username, vpn_name=vpnname)
-                user_queue_list = solace.manage(UTILITIES_PLUGIN).get_user_queues(client_username=username, vpn_name=vpnname)
+                user_queue_list = solace.manage(UTILITIES_PLUGIN).get_user_queues(client_username=username,
+                                                                                  vpn_name=vpnname)
                 if len(user_queue_list) > 0:
                     logging.error(
                             "User %s owns queues, can not remove user without reassigning ownership. VPN name: %s. List of queues: %s - skipping" % (
@@ -61,7 +63,8 @@ def solace_delete_client_username(options):
                                 .reply.show.client_username.client_usernames.client_username.enabled):
                     logging.info("User %s is not disabled - disabling" % username)
                     # when calling shutdown, add the shutdown_on_apply = True to make it happen
-                    cmd = solace.manage("SolaceUser").shutdown(client_username=username, vpn_name=vpnname, shutdown_on_apply=True)
+                    cmd = solace.manage("SolaceUser").shutdown(client_username=username, vpn_name=vpnname,
+                                                               shutdown_on_apply=True)
                     solace.rpc(str(cmd))
                 else:
                     logging.info("User %s already disabled" % username)
@@ -75,12 +78,14 @@ def solace_delete_client_username(options):
 
 
 if __name__ == "__main__":
-    usage = """ Delete a Solace Client User within a VPN
-		Example:
+    usage = """
+    Delete a Solace Client User within a VPN
+
+    Example:
 		./solace-delete-client-user.py -e ci1,dev,si1,qa1,pt1 -v %s_domainevent -u %s_sitemq
 		./solace-delete-client-user.py -e ci1,dev,si1,qa1,pt1 -v %s_domainevent -u %s_sitemq,%s_foo
 
-"""
+    """
     parser = OptionParser(usage=usage)
     parser.add_option("-e", "--environment", action="store", type="string", dest="environment",
                       help="environment to apply changes to eg:[ qa1 | ci1 | si1 | prod | qa1,ci1,si1 ]")
