@@ -1,0 +1,77 @@
+---
+# the url you might want to serve the site config from if not using local files
+CMDB_URL: "http://someurl/site.xml"
+CMDB_FILE: "provision-example.yaml"
+CMDB_USER: ""
+CMDB_PASS: ""
+
+# the readonly user to use for test mode
+READ_ONLY_USER: readonly
+READ_ONLY_PASS: readonly
+
+# the naming standard to use, default is <env>_<name>
+NAMEHOOK: ZoinksNamingStandard
+
+# list of all plugins to load
+PLUGINS:
+  - libsolace.items.SolaceACLProfile
+  - libsolace.items.SolaceUser
+  - libsolace.items.SolaceUsers
+  - libsolace.items.SolaceVPN
+  - libsolace.items.SolaceQueue
+  - libsolace.plugins.NamingStandard
+  - libsolace.plugins.ZoinksNamingStandard
+  - libsolace.items.SolaceClientProfile
+  - libsolace.plugins.Utilities
+  - libsolace.plugins.InfluxDBClient
+  - libsolace.plugins.CMDBClient
+  - libsolace.plugins.YAMLClient
+  - libsolace.plugins.XMLAPI
+
+# the plugin name as registered in the registry we want to use for solace config
+SOLACE_CMDB_PLUGIN: YAMLClient
+
+# The plugin to use for Solace Queue management
+SOLACE_QUEUE_PLUGIN: SolaceQueue
+SOLACE_USER_PLUGIN: SolaceUser
+
+# mapping of environment to solace appliances
+SOLACE_CONF:
+  dev:
+    MGMT:
+      - http://solace1.mydomain.com/SEMP
+      - http://solace2.mydomain.com/SEMP
+    PASS: admin
+    USER: admin
+  single:
+    MGMT:
+      - http://solace1.mydomain.com/SEMP
+    USER: admin
+    PASS: admin
+  bad:
+    MGMT:
+      - http://foo
+    USER: admin
+    PASS: admin
+  backup_only:
+    MGMT:
+      - http://solace2.mydomain.com/SEMP
+      - http://solace2.mydomain.com/SEMP
+    USER: admin
+    PASS: admin
+  primary_only:
+    MGMT:
+      - http://solace1.mydomain.com/SEMP
+      - http://solace1.mydomain.com/SEMP
+    USER: admin
+    PASS: admin
+  bad_no_mgmt:
+    MGMT:
+    USER: admin
+    PASS: admin
+
+
+SOLACE_CLIENT_PROFILE_DEFAULTS:
+  max_clients: 1000
+
+UPDATE_MOCK_TESTS: False

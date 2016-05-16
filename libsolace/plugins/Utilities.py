@@ -77,8 +77,22 @@ class Utilities(Plugin):
 
         """
         result = []
-        response = self.api.manage(self.SOLACE_USER_PLUGIN).get(client_username=client_username, vpn_name=vpn_name,
-                                                                detail=True)[0]['rpc-reply']['rpc']['show']['client-username']['client-usernames']['client-username']['num-clients']
+
+        try:
+            data = self.api.manage(self.SOLACE_USER_PLUGIN).get(client_username=client_username, vpn_name=vpn_name,
+                                                                detail=True)
+            response = data[0]['rpc-reply']['rpc']['show']['client-username']['client-usernames']['client-username']['num-clients']
+
+        except KeyError, e:
+            logging.debug("Key does not exist, this normally means there was no user matching the filter")
+            logging.debug(data)
+            return False
+
+        except Exception, e:
+            logging.warn("Error decoding response keys in %s" % data)
+            logging.warn(e.message)
+            raise
+
         if int(response) > 0:
             logging.info("User %s is in-use, %s sessions open" % (client_username, response))
             return True

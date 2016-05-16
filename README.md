@@ -227,7 +227,7 @@ nosetests -d tests.unittests.test_solace_user:TestSolaceUser  --logging-level=IN
 nosetests -d tests.unittests.test_solace_user:TestSolaceUser.test_create_user  --logging-level=INFO --nologcapture -v
 
 ## All with Coverage
-nosetests --with-coverage --cover-package=libsolace
+LIBSOLACE_CONFIG=libsolace-tests.yaml nosetests --with-coverage --cover-package=libsolace
 
 # Docs
 
