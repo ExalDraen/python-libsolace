@@ -15,22 +15,30 @@ from optparse import OptionParser
 import sys
 import pprint
 
-
 SOLACE_VPN_PLUGIN = "SolaceVPN"
 
-def generateXML(vpn_name=None, queues=None):
+
+def delete_msgs_request(connection=None, queue=None, vpn_name=None):
+    connection.x = SolaceXMLBuilder("Delete messages in Queue: %s of VPN: %s" % (queue.strip(), vpn_name), version=connection.version)
+    connection.x.admin.message_spool.vpn_name = vpn_name
+    connection.x.admin.message_spool.delete_messages.queue_name = queue.strip()
+    return connection.x
+
+
+def validate_the_plan(connection=None, vpn_name=None, queues=None):
     """
+    :param connection: the connection instance
     :param vpn_name: string name of vpn
     :param queues: list of queues to manipulate
     :return: commands
     """
 
     # commandQueue is used to stack and validate solace commands
-    commands = SolaceCommandQueue()
+    commands = SolaceCommandQueue(version=connection.version)
 
     try:
         for queue in queues:
-            # Full Shutdown
+            # Delete Messages
             '''
 
             <rpc xmlns="http://www.solacesystems.com/semp/topic_routing/6_0">
@@ -45,16 +53,13 @@ def generateXML(vpn_name=None, queues=None):
             </rpc>
 
             '''
-            cmd = SolaceXMLBuilder("Delete messages in Queue: %s of VPN: %s" % (queue.strip(), vpn_name))
-            cmd.admin.message_spool.vpn_name = vpn_name
-            cmd.admin.message_spool.delete_messages.queue_name = queue.strip()
+            cmd = delete_msgs_request(connection=connection, queue=queue, vpn_name=vpn_name)
             commands.enqueue(cmd)
 
     except Exception, e:
         print("Error %s" % e)
+        raise
 
-    print("Returning the plan")
-    return commands
 
 if __name__ == '__main__':
     """ parse opts, read site.xml, start provisioning vpns. """
@@ -68,9 +73,9 @@ if __name__ == '__main__':
                       help="literal name of vpn, eg: pt1_domainevent")
     parser.add_option("-t", "--testmode", action="store_true", dest="testmode",
                       default=False, help="only test configuration and exit")
-    parser.add_option("-q" , "--queues", action="store", dest="queues",
+    parser.add_option("-q", "--queues", action="store", dest="queues",
                       default=[], help="comma separated list of queues")
-    parser.add_option("-r" , "--queueregex", action="store_true", dest="queue_filter",
+    parser.add_option("-r", "--queueregex", action="store_true", dest="queue_filter",
                       default=False, help="queue is a search pattern, so search for queues named like 'queue'")
 
     (options, args) = parser.parse_args()
@@ -99,12 +104,14 @@ if __name__ == '__main__':
     print("The following queues will be manipulated in %s environment! " % settings.env)
     pprint.pprint(queues)
 
-    commands = generateXML(vpn_name=options.vpn_name, queues=queues)
+    # validating the plan
+    validate_the_plan(connection=connection, vpn_name=options.vpn_name, queues=queues)
 
     s = raw_input('Do you want to continue? N/y? ')
 
     if s.lower() == 'y':
-        for cmd in commands.commands:
-            connection.rpc(str(cmd), primaryOnly=True)
+        for queue in queues:
+            x = delete_msgs_request(connection=connection, vpn_name=options.vpn_name, queue=queue)
+            connection.rpc(x, primaryOnly=True)
     else:
         print("chickening out...")
