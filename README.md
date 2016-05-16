@@ -216,13 +216,13 @@ see ./bin/solace-provision.py --help
 
 Define a "dev" environment in the config as in libsolace-tests.yaml.
 
-Single Plugin
+## Single Plugin
 nosetests -d tests.unittests.test_solace_user:TestSolaceUser  --logging-level=INFO --nologcapture -v 
 
-Single Test
+## Single Test
 nosetests -d tests.unittests.test_solace_user:TestSolaceUser.test_create_user  --logging-level=INFO --nologcapture -v
 
-All with Coverage
+## All with Coverage
 nosetests --with-coverage --cover-package=libsolace
 
 # Docs
