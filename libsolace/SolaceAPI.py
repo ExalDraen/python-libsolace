@@ -6,6 +6,7 @@ from libsolace.SolaceXMLBuilder import SolaceXMLBuilder
 from libsolace.SolaceCommandQueue import SolaceCommandQueue
 from libsolace import xml2dict
 from libsolace.plugin import PluginResponse
+from libsolace.Exceptions import LoginException
 
 try:
     from collections import OrderedDict
@@ -253,6 +254,9 @@ class SolaceAPI:
                     logging.error("Error decoding response from appliance")
                     logging.error("Response Codes: %s" % codes)
                     logging.error("Data Object: key: %s, data: %s " % (k, data))
+                    logging.error(codes.items()[0][1])
+                    if codes.items()[0][1] == 401:
+                        raise LoginException("Username / Password failure")
                     raise # (Exception("Appliance Communication Failure"))
             logging.debug("Returning Data from rest_call")
             return data, codes

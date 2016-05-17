@@ -4,6 +4,11 @@ __doc__ = """
 Various exception classes, nothing much to see here. move along...
 """
 
+
+class LoginException(Exception):
+    pass
+
+
 class MissingException(Exception):
     pass
 
@@ -18,6 +23,7 @@ class MissingClientUser(MissingException):
 
 class MissingClientProfile(MissingException):
     pass
+
 
 class MissingACLProfileException(MissingException):
     pass
