@@ -4,13 +4,14 @@ Example of using a JSON document to provision solace
 
 """
 
-import yaml
 import logging
+
+import yaml
+
 import libsolace
 from libsolace.plugin import Plugin
-from libsolace.Naming import name
 from libsolace.util import get_key_from_settings
-from libsolace.util import get_key_from_kwargs
+
 
 @libsolace.plugin_registry.register
 class YAMLClient(Plugin):
@@ -46,6 +47,7 @@ class YAMLClient(Plugin):
 
         owner_name = args[0]  # type: str
         vpns = self.data.get("VPNS").get(owner_name)
+
         return vpns
 
     def get_users_of_vpn(self, *args, **kwargs):
@@ -55,6 +57,16 @@ class YAMLClient(Plugin):
 
         vpn_name = args[0]  # type: str
         users = self.data.get("USERS").get(vpn_name)
+
+        # iterate over users copying environment overrides where applicable
+        if users is not None:
+            for user in users:
+                if user.has_key('environment'):
+                    e = user.get("environment").get(kwargs.get("environment"))
+                    if e is not None:
+                        for k, v in e.items():
+                            user[k] = v
+
         return users
 
     def get_queues_of_vpn(self, *args, **kwargs):
@@ -65,4 +77,15 @@ class YAMLClient(Plugin):
         vpn_name = args[0]  # type: str
 
         queues = self.data.get("QUEUES").get(vpn_name)
+
+        if queues is not None:
+            for queue in queues:
+                if queue.has_key('environment'):
+                    e = queue.get("environment").get(kwargs.get("environment"))
+                    if e is not None:
+                        for k, v in e.items():
+                            queue[k] = v
+
         return queues
+
+
