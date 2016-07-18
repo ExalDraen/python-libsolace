@@ -31,6 +31,9 @@ USERS:
     -
       username: au_testproductA
       password: somepassword
+      environment:
+          dev:
+            password: someOtherPassword
 
   au_testvpn2:
     -
