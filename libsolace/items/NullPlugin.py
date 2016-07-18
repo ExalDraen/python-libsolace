@@ -1,4 +1,4 @@
-from libpipeline import Plugin
+from libsolace import Plugin
 import libsolace
 
 @libsolace.plugin_registry.register
