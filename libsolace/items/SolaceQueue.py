@@ -158,13 +158,14 @@ class SolaceQueue(Plugin):
                     logging.info('setting queue_config to environment %s values' % e['name'])
                     return self.__apply_default_config__(e['queue_config'], self.defaults)
         except:
-            logging.warn("No environment overides for queue %s" % queue_name)
+            logging.warn("No environment overrides for queue %s" % queue_name)
             pass
         try:
             return self.__apply_default_config__(queue['queue_config'], self.defaults)
         except:
             logging.warning("No queue_config for queue: %s found, please check site-config" % queue_name)
             raise
+
 
     def __apply_default_config__(self, config, default):
         """ copys keys from default dict to config dict when not present """
@@ -175,10 +176,10 @@ class SolaceQueue(Plugin):
 
         for k, v in default.items():
             if k in config:
-                logging.info("Config key: %s to %s" % (k, v))
+                logging.info("Using environment config key: %s to %s" % (k, config[k]))
                 final_config[k] = config[k]
             else:
-                logging.info("Default config key: %s to %s" % (k, v))
+                logging.info("Using default config key: %s to %s" % (k, v))
                 final_config[k] = v
         return final_config
 

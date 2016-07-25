@@ -18,13 +18,16 @@ QUEUES:
   au_testvpn:
     -
       name: testqueue1
-      queue_config:
-        exclusive: "true"
-        queue_size: 4096
-        retries: 0
-        max_bind_count: 1000
-        owner: au_testproductA
-        consume: all
+      env:
+        -
+          name: dev
+          queue_config:
+            exclusive: "true"
+            queue_size: 4096
+            retries: 0
+            max_bind_count: 1000
+            owner: au_testproductA
+            consume: all
 
 USERS:
   au_testvpn:
