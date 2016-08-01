@@ -91,9 +91,7 @@ vice-versa as needed on keyNames.
 You might need libyaml-devel or equivilant for your OS.
 
 For debian derivitaves this is:
-libxslt1-dev 
-libxml2-dev
-python-dev
+apt-get -y install python-virtualenv git libxslt1-dev libxml2-dev python-dev libyaml-dev lib32z1-dev
 
 ```sh
 python setup.py install
