@@ -82,9 +82,10 @@ class YAMLClient(Plugin):
             for queue in queues:
                 if queue.has_key('environment'):
                     e = queue.get("environment").get(kwargs.get("environment"))
+                    logging.info("qoverride: %s" % e)
                     if e is not None:
                         for k, v in e.items():
-                            queue[k] = v
+                            queue['queue_config'][k] = v
 
         return queues
 
