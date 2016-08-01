@@ -20,11 +20,15 @@ QUEUES:
       name: testqueue1
       queue_config:
         exclusive: "true"
-        queue_size: 4096
+        queue_size: 10000
         retries: 0
         max_bind_count: 1000
         owner: au_testproductA
         consume: all
+      environment:
+        dev:
+          max_bind_count: 10
+          queue_size: 1024
 
 USERS:
   au_testvpn:
@@ -38,4 +42,4 @@ USERS:
   au_testvpn2:
     -
       username: au_testproductA
-      password: somepassword
+      password: somepassword%
