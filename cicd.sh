@@ -9,4 +9,5 @@ source ~/py27/bin/activate
 pip install --upgrade pip
 pip install nose
 pip install coverage
+pip install unittest2
 chmod 0644 ~/.python-eggs
