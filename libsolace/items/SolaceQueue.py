@@ -211,11 +211,12 @@ class SolaceQueue(Plugin):
         self.api.x.message_spool.vpn_name = vpn_name
         self.api.x.message_spool.create.queue.name = queue_name
         self.commands.enqueue(PluginResponse(str(self.api.x), **kwargs))
+        self.exists = True
         return PluginResponse(str(self.api.x), **kwargs)
 
     # perform the if_exists on the primary only
     @only_if_exists('get', 'rpc-reply.rpc.show.queue.queues.queue.info', primaryOnly=True)
-    @only_on_shutdown('queue')
+    # @only_on_shutdown('queue')
     @primary()
     def shutdown_egress(self, **kwargs):
         """Shutdown egress for a queue
@@ -260,7 +261,7 @@ class SolaceQueue(Plugin):
 
     # perform the if_exists on the primary only
     @only_if_exists('get', 'rpc-reply.rpc.show.queue.queues.queue.info', primaryOnly=True)
-    @only_on_shutdown('queue')
+    # @only_on_shutdown('queue')
     @primary()
     def shutdown_ingress(self, **kwargs):
         """Shutdown the ingress of a queue
@@ -306,7 +307,7 @@ class SolaceQueue(Plugin):
 
     # perform the if_exists on the primary only
     @only_if_exists('get', 'rpc-reply.rpc.show.queue.queues.queue.info', primaryOnly=True)
-    @only_on_shutdown('queue')
+    # @only_on_shutdown('queue')
     @primary()
     def exclusive(self, **kwargs):
         """Set queue exclusivity
@@ -351,7 +352,7 @@ class SolaceQueue(Plugin):
         return PluginResponse(str(self.api.x), **kwargs)
 
     @only_if_exists('get', 'rpc-reply.rpc.show.queue.queues.queue.info', primaryOnly=True)
-    @only_on_shutdown('queue')
+    # @only_on_shutdown('queue')
     @primary()
     def owner(self, **kwargs):
         """ Set the owner
@@ -428,7 +429,7 @@ class SolaceQueue(Plugin):
         return PluginResponse(str(self.api.x), **kwargs)
 
     @only_if_exists('get', 'rpc-reply.rpc.show.queue.queues.queue.info', primaryOnly=True, backupOnly=False)
-    @only_on_shutdown('queue')
+    # @only_on_shutdown('queue')
     @primary()
     @deprecation_warning("Please implement the use of the 'permission' method instead of relying on this")
     def consume(self, **kwargs):
@@ -469,7 +470,7 @@ class SolaceQueue(Plugin):
         return PluginResponse(str(self.api.x), **kwargs)
 
     @only_if_exists('get', 'rpc-reply.rpc.show.queue.queues.queue.info', primaryOnly=True, backupOnly=False)
-    @only_on_shutdown('queue')
+    # @only_on_shutdown('queue')
     @primary()
     def permission(self, **kwargs):
         """Sets permission on a queue

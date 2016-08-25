@@ -180,7 +180,7 @@ class SolaceUser(Plugin):
         else:
             return response
 
-    @only_on_shutdown('user')
+    #only_on_shutdown('user')
     @before("shutdown")
     def delete(self, **kwargs):
         """
@@ -337,7 +337,7 @@ class SolaceUser(Plugin):
                     "Not disabling User, commands could fail since shutdown_on_apply = %s" % shutdown_on_apply)
             return None
 
-    @only_on_shutdown('user')
+    #only_on_shutdown('user')
     def set_client_profile(self, **kwargs):
         """
         Set the ClientProfile
@@ -376,7 +376,7 @@ class SolaceUser(Plugin):
         self.commands.enqueue(PluginResponse(str(self.api.x), **kwargs))
         return PluginResponse(str(self.api.x), **kwargs)
 
-    @only_on_shutdown('user')
+    #only_on_shutdown('user')
     def set_acl_profile(self, **kwargs):
 
         """

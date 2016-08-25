@@ -208,7 +208,7 @@ class SolaceUsers(Plugin):
         self.commands.enqueue(PluginResponse(str(self.api.x), **kwargs))
         return PluginResponse(str(self.api.x), **kwargs)
 
-    @only_on_shutdown('user')
+    #@only_on_shutdown('user')
     def disable_user(self, **kwargs):
         """
         Disable the user ( suspending pub/sub )
@@ -241,7 +241,7 @@ class SolaceUsers(Plugin):
                 "Not disabling User, commands could fail since shutdown_on_apply = %s" % self.shutdown_on_apply)
             return None
 
-    @only_on_shutdown('user')
+    #@only_on_shutdown('user')
     def set_client_profile(self, **kwargs):
         """
         set client profile
@@ -269,7 +269,7 @@ class SolaceUsers(Plugin):
         self.commands.enqueue(PluginResponse(str(self.api.x), **kwargs))
         return PluginResponse(str(self.api.x), **kwargs)
 
-    @only_on_shutdown('user')
+    #@only_on_shutdown('user')
     def set_acl_profile(self, **kwargs):
         """
         set acl profile
