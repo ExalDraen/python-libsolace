@@ -7,7 +7,7 @@ and aimed at managing multiple clusters in multiple environments.
 
 ## API Docs
 
-(API Docs)[https://unixunion.github.io]
+[API Docs](https://unixunion.github.io)
 
 ### XML Generator
 
@@ -162,6 +162,7 @@ The YAML Client is the simplest way to spec out a environment. It is enabled by 
 the PLUGINS list in libsolace.yaml, and settings 'SOLACE_CMDB_PLUGIN: YAMLClient'
 
 ```yaml
+
 ---
 VPNS:
   MySolaceEcosystem:
