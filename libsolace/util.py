@@ -9,10 +9,7 @@ from distutils.version import StrictVersion
 import libsolace
 from libsolace.Exceptions import MissingProperty
 
-try:
-    from collections import OrderedDict
-except ImportError, e:
-    from ordereddict import OrderedDict
+from collections import OrderedDict
 
 import logging
 

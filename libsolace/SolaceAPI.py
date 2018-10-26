@@ -8,10 +8,7 @@ from libsolace import xml2dict
 from libsolace.plugin import PluginResponse
 from libsolace.Exceptions import LoginException
 
-try:
-    from collections import OrderedDict
-except:
-    from ordereddict import OrderedDict
+from collections import OrderedDict
 
 try:
     import simplejson

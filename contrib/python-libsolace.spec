@@ -19,7 +19,6 @@ BuildRequires:  python-setuptools
 Requires:       pyparsing
 Requires:       python-docopt
 Requires:       python-lxml
-Requires:       python-ordereddict
 Requires:       python-simplejson
 Requires:       PyYAML
 

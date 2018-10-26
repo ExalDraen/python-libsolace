@@ -1,9 +1,6 @@
 import logging
 
-try:
-    from collections import OrderedDict
-except ImportError, e:
-    from ordereddict import OrderedDict
+from collections import OrderedDict
 
 import re
 
