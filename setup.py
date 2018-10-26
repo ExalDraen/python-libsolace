@@ -50,7 +50,8 @@ setup(
     ],
     tests_require=[
         'unittest2==0.5.1',
-        'coverage==3.7.1'
+        'coverage==3.7.1',
+        'influxdb'
     ],
     install_requires=install_requires,
     scripts=[
