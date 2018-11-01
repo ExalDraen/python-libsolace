@@ -19,6 +19,21 @@ Changed
 
 -  Nothing
 
+`0.2.2`_ - 2018-11-01
+---------------------
+
+Added
+~~~~~
+
+-  Nothing
+
+Changed
+~~~~~~~
+
+-  If we do not have XSD files for a given SolOS version, now fall back to
+   When validating schema, fall back to latest Sol schema (7.1.1). Also, use
+   `6.2` schema for version `6.1` since we don't have access to the 6.1 schema.
+
 `0.2.1`_ - 2018-10-26
 ----------------------
 First repackaged version of https://github.com/unixunion/python-libsolace uploaded to PyPI
