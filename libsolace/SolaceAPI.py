@@ -205,7 +205,7 @@ class SolaceAPI:
             else:
                 logging.info("Both: %s, request: %s" % (appliances, request))
         else:
-            logging.warn("Only one appliance in config!!!")
+            logging.info("Only one appliance in configuration, running in non-HA mode")
             appliances = [self.primaryRouter]
 
         try:
