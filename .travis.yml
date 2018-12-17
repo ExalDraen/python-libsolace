@@ -5,17 +5,17 @@ install:
 script:
   - echo "Placeholder for tests"
 deploy:
-  # Test PyPI
-  - provider: pypi
-    distributions: sdist bdist_wheel
-    user: ExalDraen
-    password:
-      secure: "l7IJLxpDllZJ4vHS/FSE51GnN0FA/mjh/oE6cLUlUgfyHO99uZ1WWO39MwbSqmgUA2TF3vxNnIZHElOCoY2Y/JcNw9wlK1YdyPOxWk/lIE4pq4snMnzHPJbvwqIUj8kW4Vt611P2ezavYrb2ZgM6R8hohzObGa10htcXScPn3H6xorl+mDDPDU0DyAlPnGvsvO2X/fE6RiewsFKqfCGlJxRleU7EszMZBx7m8RX0mCNW+0qCajLPH8eT+vniv3JvjtrDOCMEF20ZbxPsqJFBwJVgbT7gN4ADqLpK1WYp1Pfg7R14Q4hrVP180JGBKcMhm6SwWvI2VqG1yrWV1dPI3vfRa6uMvtFt9R57ZKY2NDglUdrS84Wjwf0fvAxVtZ6iqNG0d6YIxyDVHCLM7wdYhZCFusczmvYGmgfOcDbuIXw85yPolFFZTiQkl3leTvtGm4eErI57ee0L8fMDKrkUNemKOi0M+xsOV22NoOkdNhJz6/RNPcn63XDKqKVctQToxgNHBZnSvnUa1n5uC/y4afgY4ienLvfnLvuBNVQhlt5o0lJpLLXKZVmeEqwGFjZ7Vef6elyB7aOM/lkc04+HtGooAC7Hjnlfrm6f435awHn8uJtD6i/qXS4Lv9d9g/+H02FdjtR5gKkmLBHRs6n2iUNWmLGIkX4YqW96UMV26pc="
-    server: https://test.pypi.org/legacy/
-    on:
-      tags: true
-      repo: ExalDraen/python-libsolace
-      condition: "$TRAVIS_TAG =~ ^[0-9]+[.][0-9]+[.][0-9]+(rc[0-9]+|[.]dev[0-9]+)?$"
+#  # Test PyPI
+#  - provider: pypi
+#    distributions: sdist bdist_wheel
+#    user: ExalDraen
+#    password:
+#      secure: "l7IJLxpDllZJ4vHS/FSE51GnN0FA/mjh/oE6cLUlUgfyHO99uZ1WWO39MwbSqmgUA2TF3vxNnIZHElOCoY2Y/JcNw9wlK1YdyPOxWk/lIE4pq4snMnzHPJbvwqIUj8kW4Vt611P2ezavYrb2ZgM6R8hohzObGa10htcXScPn3H6xorl+mDDPDU0DyAlPnGvsvO2X/fE6RiewsFKqfCGlJxRleU7EszMZBx7m8RX0mCNW+0qCajLPH8eT+vniv3JvjtrDOCMEF20ZbxPsqJFBwJVgbT7gN4ADqLpK1WYp1Pfg7R14Q4hrVP180JGBKcMhm6SwWvI2VqG1yrWV1dPI3vfRa6uMvtFt9R57ZKY2NDglUdrS84Wjwf0fvAxVtZ6iqNG0d6YIxyDVHCLM7wdYhZCFusczmvYGmgfOcDbuIXw85yPolFFZTiQkl3leTvtGm4eErI57ee0L8fMDKrkUNemKOi0M+xsOV22NoOkdNhJz6/RNPcn63XDKqKVctQToxgNHBZnSvnUa1n5uC/y4afgY4ienLvfnLvuBNVQhlt5o0lJpLLXKZVmeEqwGFjZ7Vef6elyB7aOM/lkc04+HtGooAC7Hjnlfrm6f435awHn8uJtD6i/qXS4Lv9d9g/+H02FdjtR5gKkmLBHRs6n2iUNWmLGIkX4YqW96UMV26pc="
+#    server: https://test.pypi.org/legacy/
+#    on:
+#      tags: true
+#      repo: ExalDraen/python-libsolace
+#      condition: "$TRAVIS_TAG =~ ^[0-9]+[.][0-9]+[.][0-9]+(rc[0-9]+|[.]dev[0-9]+)?$"
   # Live PyPI
   - provider: pypi
     distributions: sdist bdist_wheel
