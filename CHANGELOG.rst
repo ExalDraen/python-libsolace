@@ -61,6 +61,6 @@ Changed
 
 -  Nothing
 
-.. _Unreleased: https://github.com/ExalDraen/python-libsolace/compare/v0.2.3...master
+.. _Unreleased: https://github.com/ExalDraen/python-libsolace/compare/0.2.3...master
 .. _Keep a Changelog: http://keepachangelog.com/
 .. _Semantic Versioning: http://semver.org/
