@@ -1,0 +1,13 @@
+language: python
+python: 2.7
+deploy:
+  provider: pypi
+  distributions: sdist bdist_wheel
+  user: ExalDraen
+  password:
+    secure: aCPXEcco+qHiNNWs5mFzM82TFf1I2+2p4Ki09XxHyAkWZUoHDtGGpGSltdO23sjJOUTNVbFtBhe9UshIyiIjxdNcTkdVpFOs5pDy91GZp6y1rIoyzvVSULbvuElM18hnTy7ObbRwpgs4XOqLPBHwhCE8ffYkbqc5TKh9mRDu0BXpIgEAB2g9245m0TUzdALP6E+bGAT26hBZNmHZSHcysXWpue5Wr5sqDZCfC9Unt+u5/LCZA9i8K9wtiQpDRO8J+hlr4PmmDY6H7EM/Q4rMroA1/mBj4CibfegG0MnDBJ7ZLL9UzermxCNjhFkbqVgruJMwVdo7SIBz3qTsaIWWDqvx4pMNlPu/uCCQ0USgv3/m6WCOGDt9cZu63P4iWteqZA5khhDB77un2S+wJJRKOobQZ/Zscu62xr4EWe9nFR2tmDLujhJO8+Ro1yvvpXEXn9czJpCB2DuVOt/DLyTaOQs/PeSeGfEaC5huNza3Xdo5CcyTCYw2LZNHwZMDeUueQe8uzVPoh0ynEOUw7QYGjvmR8bIttGj9j5KGDyUsOUqLQoFhohyIRWdnpKuSOCLkPpKP1rjv+GPtOvvhJWdn/f3ncK/lUq7cZCWMm1dzD0Lj6pzXacAKa7TRIgPXKnIn8cOJOP60iDMO+3R/4j7cBOpR1dKSRQqSA/9BSfmg0PQ=
+  server: https://test.pypi.org/legacy/
+  on:
+    tags: true
+    repo: ExalDraen/python-libsolace
+    condition: "$TRAVIS_TAG =~ ^[0-9]+[.][0-9]+[.][0-9]+(rc[0-9]+|[.]dev[0-9]+)?$"

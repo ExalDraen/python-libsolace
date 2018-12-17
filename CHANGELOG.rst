@@ -19,13 +19,21 @@ Changed
 
 -  Nothing
 
-`0.2.2`_ - 2018-11-01
+`0.2.3` - 2018-12-15
 ---------------------
 
 Added
 ~~~~~
 
--  Nothing
+-  Added travis CI for releasing new versions to PyPI
+
+Changed
+~~~~~~~
+
+- Downgrade "only one appliance in config" log to `INFO` from `WARN`
+
+`0.2.2` - 2018-11-01
+---------------------
 
 Changed
 ~~~~~~~
@@ -34,7 +42,7 @@ Changed
    When validating schema, fall back to latest Sol schema (7.1.1). Also, use
    `6.2` schema for version `6.1` since we don't have access to the 6.1 schema.
 
-`0.2.1`_ - 2018-10-26
+`0.2.1` - 2018-10-26
 ----------------------
 First repackaged version of https://github.com/unixunion/python-libsolace uploaded to PyPI
 
@@ -53,5 +61,6 @@ Changed
 
 -  Nothing
 
+.. _Unreleased: https://github.com/ExalDraen/python-libsolace/compare/v0.2.3...master
 .. _Keep a Changelog: http://keepachangelog.com/
 .. _Semantic Versioning: http://semver.org/
