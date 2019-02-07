@@ -34,7 +34,7 @@ def name(*args, **kwargs):
 
     :rtype: str
     """
-    import libsolace.settingsloader as settings
+    from libsolace.settingsloader import settings
     try:
         return libsolace.plugin_registry(settings.NAMEHOOK)().solve(*args, **kwargs)
     except Exception, e:

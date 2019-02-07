@@ -46,7 +46,7 @@ class OpenTSDBClient(Plugin):
     .. doctest::
         :options: +SKIP
 
-            >>> import libsolace.settingsloader as settings
+            >>> from settingsloader import settings
             >>> import libsolace
             >>> metrics_class = libsolace.plugin_registry('OpenTSDBClient', settings=settings)
             >>> metrics = metrics_class(settings=settings)
@@ -77,7 +77,7 @@ class OpenTSDBClient(Plugin):
         .. doctest::
             :options: +SKIP
 
-            >>> import libsolace.settingsloader as settings
+            >>> from settingsloader import settings
             >>> import libsolace
             >>> metrics_class = libsolace.plugin_registry('OpenTSDBClient', settings=settings)
             >>> metrics = metrics_class(settings=settings)

@@ -14,7 +14,7 @@ Basics
 
 Example:
 
-    >>> import libsolace.settingsloader as settings
+    >>> from settingsloader import settings
     >>> from libsolace.SolaceAPI import SolaceAPI
     >>> client = SolaceAPI("dev")
     >>> list_requests = client.manage("NullPlugin", foo="bar", baz="jaz")

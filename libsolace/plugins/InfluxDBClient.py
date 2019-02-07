@@ -79,7 +79,7 @@ class InfluxDBClient(Plugin):
     .. doctest::
         :options: +SKIP
 
-        >>> import libsolace.settingsloader as settings
+        >>> from settingsloader import settings
         >>> import libsolace
         >>> metrics_class = libsolace.plugin_registry('InfluxDBClient', settings=settings)
         >>> metrics = metrics_class(settings=settings)
@@ -112,7 +112,7 @@ class InfluxDBClient(Plugin):
         .. doctest::
             :options: +SKIP
 
-            >>> import libsolace.settingsloader as settings
+            >>> from settingsloader import settings
             >>> import libsolace
             >>> metrics_class = libsolace.plugin_registry('InfluxDBClient', settings=settings)
             >>> metrics = metrics_class(settings=settings)

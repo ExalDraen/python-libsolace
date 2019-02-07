@@ -1,23 +1,4 @@
-import logging
-import os
-
-import yaml
-
-__author__ = 'johlyh'
-
-primary_config = 'libsolace.yaml',
-
-try:
-    primary_config = os.environ['LIBSOLACE_CONFIG']
-except Exception, e:
-    pass
-
-__yamlfiles__ = [
-    "%s" % primary_config,
-    '/etc/libsolace/libsolace.yaml',
-    '/opt/libsolace/libsolace.yaml'
-]
-__doc__ = """
+"""
 The settingsloader searches for a libsolace.yaml file in:
 
     - libsolace.yaml
@@ -30,16 +11,29 @@ The environment variable: :envvar:`LIBSOLACE_CONFIG` can also be used to specify
 
 Examples:
 
-    >>> import libsolace.settingsloader as settings
+    >>> from settingsloader import settings
     >>> settings.CMDB_URL
     'http://mydomain.com/path'
-
 """
+
+import logging
+import os
+
+import yaml
+
+__author__ = 'johlyh'
 
 logger = logging.getLogger(__name__)
 logger.addHandler(logging.NullHandler())
 
-yaml_loaded = False
+
+primary_config = os.environ.get('LIBSOLACE_CONFIG', 'libsolace.yaml')
+
+__yamlfiles__ = [
+    "%s" % primary_config,
+    '/etc/libsolace/libsolace.yaml',
+    '/opt/libsolace/libsolace.yaml'
+]
 
 # defaults which are set / could not be present
 defaults = {
@@ -51,40 +45,25 @@ defaults = {
     "SOLACE_QUEUE_PLUGIN": "SolaceQueue"
 }
 
-for yaml_file in __yamlfiles__:
-    if not os.path.exists(yaml_file):
-        continue
-
-    logger.info("Using yaml file %s" % yaml_file)
-    stream = open(yaml_file, 'r')
-    yaml_settings = yaml.load(stream)
-
-    # set the defaults
-    for default in defaults:
-        logger.info("Setting default %s:%s" % (default, defaults[default]))
-        globals()[default] = defaults[default]
-
-    # TODO FIXME
-    # get each plugins "default" variables and add to globals
-
-    # get the real values if any
-    for variable in yaml_settings.keys():
-        logger.info("Setting config %s:%s" % (variable, yaml_settings[variable]))
-        globals()[variable] = yaml_settings[variable]
-
-    yaml_loaded = True
-    logger.debug("Yaml loaded successful")
-
-    logger.info("Loading plugins...")
-    for p in globals()['PLUGINS']:
-        try:
-            __import__(p, globals())
-        except Exception, e:
-            logger.error("Failed to import plugin %s" % p)
-            raise
-    break
-
-if yaml_loaded is False:
+# Choose the first file we find on disk; if we don't find anything we can't carry on so bail
+existing = [f for f in __yamlfiles__ if os.path.exists(f)]
+if len(existing) == 0:
     msg = "Failed to find libpipeline.yaml in any of these locations: %s" % ",".join(__yamlfiles__)
-    logger.error(msg)
     raise Exception(msg)
+yaml_file = existing[0]
+
+# YAML file is assumed to contain a mapping (a dictionary)
+logger.info("Using yaml file %s", yaml_file)
+with open(yaml_file, 'r') as stream:
+    settings = yaml.load(stream)
+
+settings.update(defaults)
+logger.debug("Yaml file loaded successfully")
+
+logger.info("Loading plugins...")
+for p in settings['PLUGINS']:
+    try:
+        __import__(p, globals())
+    except Exception as e:
+        logger.exception("Failed to import plugin %s", p)
+        raise

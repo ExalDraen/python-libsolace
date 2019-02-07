@@ -51,7 +51,7 @@ class Plugin(object):
 
     Plugin Instantiation:
 
-    >>> import libsolace.settingsloader as settings
+    >>> from settingsloader import settings
     >>> from libsolace.SolaceAPI import SolaceAPI
     >>> api = SolaceAPI("dev")
     >>> my_plugin = api.manage("NullPlugin")
@@ -60,7 +60,7 @@ class Plugin(object):
 
     Direct Instantiation:
 
-    >>> import libsolace.settingsloader as settings
+    >>> from settingsloader import settings
     >>> import libsolace
     >>> my_clazz = libsolace.plugin_registry("NullPlugin", settings=settings)
     >>> my_instance = my_clazz(settings=settings)

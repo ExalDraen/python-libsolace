@@ -3,7 +3,7 @@ import traceback
 from collections import OrderedDict
 
 import libsolace
-import libsolace.settingsloader as settings
+from libsolace.settingsloader import settings
 from libsolace import xml2dict
 from libsolace.Exceptions import LoginException
 from libsolace.SolaceCommandQueue import SolaceCommandQueue
@@ -12,7 +12,7 @@ from libsolace.plugin import PluginResponse
 
 try:
     import simplejson
-except:
+except ImportError:
     from json import simplejson
 
 from libsolace.util import httpRequest, generateRequestHeaders, generateBasicAuthHeader
@@ -50,6 +50,10 @@ class SolaceAPI:
     :keyword testmode: Tells the api to connect using the READ_ONLY_USER as defined
         in the libsolace.yaml file.
     :type testmode: bool
+    :keyword setting_overrides: dictionary containing overrides for the settings in
+        `libsolace.yaml`. Any key configured in this parameter will take precedence
+        over keys specified in `libsolace.yaml`.
+    :type testmode: dict
     :rtype: SolaceAPI.SolaceAPI
     :returns: instance
 
@@ -93,23 +97,26 @@ class SolaceAPI:
 
         """
 
-    def __init__(self, environment, version=None, detect_status=True, testmode=False, **kwargs):
+    def __init__(self, environment, version=None, detect_status=True, testmode=False,
+                 setting_overrides=None, **kwargs):
         try:
-            logger.info("Solace Client SEMP version: %s" % version)
+            logger.info("Solace Client SEMP version: %s", version)
             self.version = version
+
+            self.settings = settings
+            self.settings.update(setting_overrides)
 
             logger.info("Connecting to appliances %s in %s" % (settings.SOLACE_CONF[environment]['MGMT'], environment))
             self.environment = environment
 
-            self.settings = settings
-            self.config = settings.SOLACE_CONF[environment]
+            self.config = self.settings.SOLACE_CONF[environment]
             logger.debug("Loaded Config: %s" % self.config)
 
             # testmode sets the user to the RO user
             self.testmode = testmode
             if self.testmode:
-                self.config['USER'] = settings.READ_ONLY_USER
-                self.config['PASS'] = settings.READ_ONLY_PASS
+                self.config['USER'] = self.settings.READ_ONLY_USER
+                self.config['PASS'] = self.settings.READ_ONLY_PASS
                 logger.info('READONLY mode')
 
             # for SSL / TLS

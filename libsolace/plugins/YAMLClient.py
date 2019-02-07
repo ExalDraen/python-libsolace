@@ -24,7 +24,7 @@ class YAMLClient(Plugin):
     def __init__(self, settings=None, **kwargs):
         """
         Example:
-        import libsolace.settingsloader as settings
+        from settingsloader import settings
         import libsolace
         clazz = libsolace.plugin_registry('YAMLClient', settings=settings)
         yaml_client = clazz(settings=settings)

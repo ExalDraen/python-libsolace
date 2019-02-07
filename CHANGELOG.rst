@@ -12,12 +12,14 @@ The format is based on `Keep a Changelog`_ and this project adheres to
 Added
 ~~~~~
 
--  Nothing
+-  Added `settings_override` parameter to `SolaceAPI` to allow for overriding of settings
+   from `libsolace.yaml`
 
 Changed
 ~~~~~~~
 
 -  Small PEP8 formatting refactoring
+-  Clean up the way settings are loaded from disk.
 -  Changed logging: we now no longer configure the root logger and default handler. Instead
    each module has its own logger that has a `NullHandler` attached. This allows
    library users to attach their own handlers and individually configure logging.
