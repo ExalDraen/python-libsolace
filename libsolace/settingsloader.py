@@ -61,9 +61,10 @@ settings.update(defaults)
 logger.debug("Yaml file loaded successfully")
 
 logger.info("Loading plugins...")
-for p in settings['PLUGINS']:
-    try:
-        __import__(p, globals())
-    except Exception as e:
-        logger.exception("Failed to import plugin %s", p)
-        raise
+if 'PLUGINS' in settings:
+    for p in settings['PLUGINS']:
+        try:
+            __import__(p, globals())
+        except Exception as e:
+            logger.exception("Failed to import plugin %s", p)
+            raise

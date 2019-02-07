@@ -53,7 +53,7 @@ class SolaceAPI:
     :keyword setting_overrides: dictionary containing overrides for the settings in
         `libsolace.yaml`. Any key configured in this parameter will take precedence
         over keys specified in `libsolace.yaml`.
-    :type testmode: dict
+    :type setting_overrides: dict
     :rtype: SolaceAPI.SolaceAPI
     :returns: instance
 
