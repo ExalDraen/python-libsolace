@@ -3,7 +3,7 @@ import logging
 import libsolace
 from libsolace.SolaceCommandQueue import SolaceCommandQueue
 from libsolace.plugin import Plugin
-from libsolace.util import get_key_from_kwargs, get_key_from_settings
+from libsolace.util import get_key_from_kwargs
 
 """
 General tools plugins
@@ -29,8 +29,8 @@ class Utilities(Plugin):
         self.api = get_key_from_kwargs('api', kwargs)
         self.commands = SolaceCommandQueue(version=self.api.version)
         self.settings = self.api.settings
-        self.SOLACE_QUEUE_PLUGIN = get_key_from_settings("SOLACE_QUEUE_PLUGIN", self.settings.__dict__)
-        self.SOLACE_USER_PLUGIN = get_key_from_settings("SOLACE_USER_PLUGIN", self.settings.__dict__)
+        self.SOLACE_QUEUE_PLUGIN = self.settings["SOLACE_QUEUE_PLUGIN"]
+        self.SOLACE_USER_PLUGIN = self.settings["SOLACE_USER_PLUGIN"]
 
     def get_user_queues(self, client_username, vpn_name):
         """

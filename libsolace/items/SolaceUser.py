@@ -72,7 +72,7 @@ class SolaceUser(Plugin):
         self.commands = SolaceCommandQueue(version=self.api.version)
 
         # settings section
-        self.SOLACE_QUEUE_PLUGIN = get_key_from_kwargs("SOLACE_QUEUE_PLUGIN", self.api.settings.__dict__)
+        self.SOLACE_QUEUE_PLUGIN = self.api.settings["SOLACE_QUEUE_PLUGIN"]
 
         if kwargs == {}:
             logger.debug("Query Mode")

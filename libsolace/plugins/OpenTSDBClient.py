@@ -13,7 +13,6 @@ except ImportError, e:
 
 import libsolace
 from libsolace.plugin import Plugin
-from libsolace.util import get_key_from_settings
 
 """
 Simple opentsdb plugin
@@ -46,7 +45,7 @@ class OpenTSDBClient(Plugin):
     .. doctest::
         :options: +SKIP
 
-            >>> from settingsloader import settings
+            >>> from libsolace.settingsloader import settings
             >>> import libsolace
             >>> metrics_class = libsolace.plugin_registry('OpenTSDBClient', settings=settings)
             >>> metrics = metrics_class(settings=settings)
@@ -56,11 +55,11 @@ class OpenTSDBClient(Plugin):
 
     def __init__(self, settings=None, **kwargs):
         logger.debug("Configuring with settings: %s" % settings)
-        self.settings = settings.__dict__  # type: dict
-        self.host = get_key_from_settings("TSDB_HOST", self.settings, default="defiant")
-        self.port = get_key_from_settings("TSDB_PORT", self.settings, default=4242)
-        self.qsize = get_key_from_settings("TSDB_QSIZE", self.settings, default=1000)
-        self.mps = get_key_from_settings("TSDB_MPS", self.settings, default=100)
+        self.settings = settings
+        self.host = settings.get("TSDB_HOST", "defiant")
+        self.port = settings.get("TSDB_PORT", 4242)
+        self.qsize = settings.get("TSDB_QSIZE", 1000)
+        self.mps = settings.get("TSDB_MPS", 100)
         self.host_tag = False
         self.check_host = True
 
@@ -77,7 +76,7 @@ class OpenTSDBClient(Plugin):
         .. doctest::
             :options: +SKIP
 
-            >>> from settingsloader import settings
+            >>> from libsolace.settingsloader import settings
             >>> import libsolace
             >>> metrics_class = libsolace.plugin_registry('OpenTSDBClient', settings=settings)
             >>> metrics = metrics_class(settings=settings)

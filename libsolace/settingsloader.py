@@ -11,8 +11,8 @@ The environment variable: :envvar:`LIBSOLACE_CONFIG` can also be used to specify
 
 Examples:
 
-    >>> from settingsloader import settings
-    >>> settings.CMDB_URL
+    >>> from libsolace.settingsloader import settings
+    >>> settings["CMDB_URL"]
     'http://mydomain.com/path'
 """
 

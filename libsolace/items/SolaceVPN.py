@@ -32,7 +32,7 @@ class SolaceVPN(Plugin):
 
     Query/Single Mode Example Direct Access:
 
-        >>> from settingsloader import settings
+        >>> from libsolace.settingsloader import settings
         >>> import libsolace
         >>> from libsolace.SolaceAPI import SolaceAPI
         >>> clazz = libsolace.plugin_registry("SolaceVPN", settings=settings)

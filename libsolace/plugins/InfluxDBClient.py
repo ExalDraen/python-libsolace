@@ -14,7 +14,6 @@ except ImportError, e:
 
 import libsolace
 from libsolace.plugin import Plugin
-from libsolace.util import get_key_from_settings
 
 __doc__ = """
 Simple influxdb client that can send metrics to influx.
@@ -79,7 +78,7 @@ class InfluxDBClient(Plugin):
     .. doctest::
         :options: +SKIP
 
-        >>> from settingsloader import settings
+        >>> from libsolace.settingsloader import settings
         >>> import libsolace
         >>> metrics_class = libsolace.plugin_registry('InfluxDBClient', settings=settings)
         >>> metrics = metrics_class(settings=settings)
@@ -89,12 +88,12 @@ class InfluxDBClient(Plugin):
 
     def __init__(self, settings=None, **kwargs):
         logger.debug("Configuring with settings: %s" % settings)
-        self.settings = settings.__dict__  # type: dict
-        self.influxdb_host = get_key_from_settings("INFLUXDB_HOST", self.settings, default="defiant")
-        self.influxdb_port = get_key_from_settings("INFLUXDB_PORT", self.settings, default=8086)
-        self.influxdb_user = get_key_from_settings("INFLUXDB_USER", self.settings, default="root")
-        self.influxdb_pass = get_key_from_settings("INFLUXDB_PASS", self.settings, default="root")
-        self.influxdb_db = get_key_from_settings("INFLUXDB_DB", self.settings, default="solace")
+        self.settings = settings  # type: dict
+        self.influxdb_host = settings.get("INFLUXDB_HOST", "defiant")
+        self.influxdb_port = settings.get("INFLUXDB_PORT", 8086)
+        self.influxdb_user = settings.get("INFLUXDB_USER", "root")
+        self.influxdb_pass = settings.get("INFLUXDB_PASS", "root")
+        self.influxdb_db = settings.get("INFLUXDB_DB", "solace")
 
         # connect
         self.client = InfluxDBClientConnector(self.influxdb_host,
@@ -112,7 +111,7 @@ class InfluxDBClient(Plugin):
         .. doctest::
             :options: +SKIP
 
-            >>> from settingsloader import settings
+            >>> from libsolace.settingsloader import settings
             >>> import libsolace
             >>> metrics_class = libsolace.plugin_registry('InfluxDBClient', settings=settings)
             >>> metrics = metrics_class(settings=settings)

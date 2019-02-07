@@ -14,7 +14,6 @@ import libsolace
 from libsolace.Naming import name
 from libsolace.plugin import Plugin
 from libsolace.util import get_key_from_kwargs
-from libsolace.util import get_key_from_settings
 
 logger = logging.getLogger(__name__)
 logger.addHandler(logging.NullHandler())
@@ -34,8 +33,8 @@ class CMDBClient(Plugin):
         :return:
         """
         logger.debug("Configuring with settings: %s" % settings)
-        self.settings = settings.__dict__  # type: dict
-        self.url = get_key_from_settings("CMDB_URL", self.settings)
+        self.settings = settings
+        self.url = settings["CMDB_URL"]
 
     def get_vpns_by_owner(self, *args, **kwargs):
         """

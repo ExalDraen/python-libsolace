@@ -36,7 +36,7 @@ def name(*args, **kwargs):
     """
     from libsolace.settingsloader import settings
     try:
-        return libsolace.plugin_registry(settings.NAMEHOOK)().solve(*args, **kwargs)
+        return libsolace.plugin_registry(settings["NAMEHOOK"])().solve(*args, **kwargs)
     except Exception, e:
         logger.error("Unable to solve name of object, reason: %s %s" % (e.__class__, e.message))
         raise

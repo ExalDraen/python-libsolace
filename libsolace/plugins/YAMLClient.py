@@ -1,6 +1,6 @@
 """
 
-Example of using a JSON document to provision solace
+Example of using a YAML document to provision solace
 
 """
 
@@ -10,7 +10,6 @@ import yaml
 
 import libsolace
 from libsolace.plugin import Plugin
-from libsolace.util import get_key_from_settings
 
 logger = logging.getLogger(__name__)
 logger.addHandler(logging.NullHandler())
@@ -24,7 +23,7 @@ class YAMLClient(Plugin):
     def __init__(self, settings=None, **kwargs):
         """
         Example:
-        from settingsloader import settings
+        from libsolace.settingsloader import settings
         import libsolace
         clazz = libsolace.plugin_registry('YAMLClient', settings=settings)
         yaml_client = clazz(settings=settings)
@@ -35,8 +34,8 @@ class YAMLClient(Plugin):
         :return:
         """
         logger.debug("Configuring with settings: %s" % settings)
-        self.settings = settings.__dict__  # type: dict
-        self.file = get_key_from_settings("CMDB_FILE", self.settings)
+        self.settings = settings  # type: dict
+        self.file = settings["CMDB_FILE"]
         stream = open(self.file, 'r')
         self.data = yaml.load(stream)
 

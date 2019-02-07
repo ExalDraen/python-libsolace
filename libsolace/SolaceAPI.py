@@ -86,7 +86,7 @@ class SolaceAPI:
         OrderedDict()
         >>> r = api.rpc(api.x, backupOnly=True)
         >>> # check the response was the "configured" backup
-        >>> r[0]['HOST'] == settings.SOLACE_CONF["dev"]['MGMT'][1]
+        >>> r[0]['HOST'] == settings["SOLACE_CONF"]["dev"]['MGMT'][1]
         True
 
         Get a instance of some plugin from the plugin manager
@@ -104,19 +104,22 @@ class SolaceAPI:
             self.version = version
 
             self.settings = settings
+            setting_overrides = [] if setting_overrides is None else setting_overrides
             self.settings.update(setting_overrides)
 
-            logger.info("Connecting to appliances %s in %s" % (settings.SOLACE_CONF[environment]['MGMT'], environment))
+            self.config = self.settings["SOLACE_CONF"][environment]
             self.environment = environment
 
-            self.config = self.settings.SOLACE_CONF[environment]
-            logger.debug("Loaded Config: %s" % self.config)
+            logger.info("Connecting to appliances %s in %s",
+                        self.config['MGMT'], environment)
+
+            logger.debug("Loaded Config: %s", self.config)
 
             # testmode sets the user to the RO user
             self.testmode = testmode
             if self.testmode:
-                self.config['USER'] = self.settings.READ_ONLY_USER
-                self.config['PASS'] = self.settings.READ_ONLY_PASS
+                self.config['USER'] = self.settings["READ_ONLY_USER"]
+                self.config['PASS'] = self.settings["READ_ONLY_PASS"]
                 logger.info('READONLY mode')
 
             # for SSL / TLS
@@ -144,9 +147,9 @@ class SolaceAPI:
                     raise Exception("Failed to detect backup router")
                 if self.primaryRouter == self.backupRouter:
                     # impossible to test, but possible to happen...
-                    raise Exception("Error, detected router %s to be both primary and backup" % self.primaryRouter)
-                logger.info("Detected primary Router: %s" % self.primaryRouter)
-                logger.info("Detected backup Router: %s" % self.backupRouter)
+                    raise Exception("Error, detected router %s to be both primary and backup", self.primaryRouter)
+                logger.info("Detected primary Router: %s", self.primaryRouter)
+                logger.info("Detected backup Router: %s", self.backupRouter)
 
             else:
                 logger.info("Not detecting statuses, using config")
@@ -172,9 +175,9 @@ class SolaceAPI:
                 result = self.rpc(str(self.xmlbuilder), **kwargs)
                 self.version = result[0]['rpc-reply']['@semp-version']
             else:
-                logger.info("Override SolOS-TR Version: %s" % version)
+                logger.info("Override SolOS-TR Version: %s", version)
                 self.version = version
-            logger.info("SolOS-TR Version: %s" % self.version)
+            logger.info("SolOS-TR Version: %s", self.version)
 
             # backwards compatibility
             # self.xmlbuilder = SolaceXMLBuilder(version=self.version)

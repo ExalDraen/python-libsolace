@@ -2,6 +2,7 @@ import base64
 import inspect
 import logging
 import re
+import ssl
 import xml.sax.handler
 from collections import OrderedDict
 from distutils.version import StrictVersion
@@ -229,7 +230,7 @@ def httpRequest(url, fields=None, headers=None, method='GET', timeout=3, protoco
                               headers=headers)
 
         ctx = None
-        if protocol == 'https' and not verify:
+        if protocol == 'https' and not verifySsl:
             ctx = ssl.create_default_context()
             ctx.check_hostname = False
             ctx.verify_mode = ssl.CERT_NONE
@@ -336,18 +337,6 @@ def get_key_from_kwargs(key, kwargs, default=None):
         return default
     else:
         raise (MissingProperty("%s is missing from kwargs" % key))
-
-
-def get_key_from_settings(key, kwargs, default=None):
-    """
-    Same as above, but different error message
-    """
-    if key in kwargs:
-        return kwargs.get(key)
-    elif default != None:
-        return default
-    else:
-        raise (MissingProperty("%s is missing from yaml config"))
 
 
 def get_plugin(plugin_name, solace_api, *args, **kwargs):

@@ -21,7 +21,7 @@ class SolaceClientProfile(Plugin):
 
     Example of direct instantiation and passing in a instance SolaceAPI
 
-        >>> from settingsloader import settings
+        >>> from libsolace.settingsloader import settings
         >>> import libsolace
         >>> from libsolace.SolaceAPI import SolaceAPI
         >>> clazz = libsolace.plugin_registry("SolaceClientProfile", settings=settings)
@@ -31,7 +31,7 @@ class SolaceClientProfile(Plugin):
 
     Example of Instantiation via the SolaceAPI manage method
 
-        >>> from settingsloader import settings
+        >>> from libsolace.settingsloader import settings
         >>> from libsolace.SolaceAPI import SolaceAPI
         >>> api = SolaceAPI("dev")
         >>> scp = api.manage("SolaceClientProfile")
@@ -51,7 +51,7 @@ class SolaceClientProfile(Plugin):
 
         Example:
 
-        >>> from settingsloader import settings
+        >>> from libsolace.settingsloader import settings
         >>> from libsolace.SolaceAPI import SolaceAPI
         >>> client = SolaceAPI("dev")
         >>> client.manage("SolaceClientProfile", name="myprofile", vpn_name="testvpn").commands.commands
@@ -104,7 +104,7 @@ class SolaceClientProfile(Plugin):
 
         Example:
 
-        >>> from settingsloader import settings
+        >>> from libsolace.settingsloader import settings
         >>> from libsolace.SolaceAPI import SolaceAPI
         >>> api = SolaceAPI("dev")
         >>> response = api.manage("SolaceClientProfile").get(name="default", vpn_name="default")
@@ -141,7 +141,7 @@ class SolaceClientProfile(Plugin):
 
         Example:
 
-        >>> from settingsloader import settings
+        >>> from libsolace.settingsloader import settings
         >>> from libsolace.SolaceAPI import SolaceAPI
         >>> api = SolaceAPI("dev")
         >>> plugin_response = api.manage("SolaceClientProfile").new_client_profile(name="default", vpn_name="default")
@@ -169,7 +169,7 @@ class SolaceClientProfile(Plugin):
 
         Example:
 
-        >>> from settingsloader import settings
+        >>> from libsolace.settingsloader import settings
         >>> from libsolace.SolaceAPI import SolaceAPI
         >>> api = SolaceAPI("dev")
         >>> plugin_response = api.manage("SolaceClientProfile").delete(name="default", vpn_name="default")
@@ -195,7 +195,7 @@ class SolaceClientProfile(Plugin):
 
         Example:
 
-        >>> from settingsloader import settings
+        >>> from libsolace.settingsloader import settings
         >>> from libsolace.SolaceAPI import SolaceAPI
         >>> api = SolaceAPI("dev")
         >>> plugin_response = api.manage("SolaceClientProfile").allow_consume(name="default", vpn_name="default")
@@ -224,7 +224,7 @@ class SolaceClientProfile(Plugin):
 
         Example:
 
-        >>> from settingsloader import settings
+        >>> from libsolace.settingsloader import settings
         >>> from libsolace.SolaceAPI import SolaceAPI
         >>> api = SolaceAPI("dev")
         >>> plugin_response = api.manage("SolaceClientProfile").allow_send(name="default", vpn_name="default")
@@ -253,7 +253,7 @@ class SolaceClientProfile(Plugin):
 
         Example:
 
-        >>> from settingsloader import settings
+        >>> from libsolace.settingsloader import settings
         >>> from libsolace.SolaceAPI import SolaceAPI
         >>> api = SolaceAPI("dev")
         >>> request = api.manage("SolaceClientProfile").allow_endpoint_create(name="default", vpn_name="default")
@@ -283,7 +283,7 @@ class SolaceClientProfile(Plugin):
 
         Example:
 
-        >>> from settingsloader import settings
+        >>> from libsolace.settingsloader import settings
         >>> from libsolace.SolaceAPI import SolaceAPI
         >>> api = SolaceAPI("dev")
         >>> request = api.manage("SolaceClientProfile").allow_transacted_sessions(name="default", vpn_name="default")
@@ -313,7 +313,7 @@ class SolaceClientProfile(Plugin):
 
         Example:
 
-        >>> from settingsloader import settings
+        >>> from libsolace.settingsloader import settings
         >>> from libsolace.SolaceAPI import SolaceAPI
         >>> api = SolaceAPI("dev")
         >>> request = api.manage("SolaceClientProfile").set_max_clients(name="default", vpn_name="default", max_clients=500)
@@ -346,7 +346,7 @@ class SolaceClientProfile(Plugin):
 
         Example:
 
-        >>> from settingsloader import settings
+        >>> from libsolace.settingsloader import settings
         >>> from libsolace.SolaceAPI import SolaceAPI
         >>> plugin = SolaceAPI("dev", version="soltr/7_1_1").manage("SolaceClientProfile")
         >>> request = plugin.allow_bridging(name="default", vpn_name="default")

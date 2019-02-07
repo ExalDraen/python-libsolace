@@ -14,11 +14,12 @@ logger.addHandler(logging.NullHandler())
 class XMLAPI(Plugin):
     """ LEGACY XML API handles reading the XML configuiration from URL or FILE.
 
-        cmdbapi = libsolace.plugin_registry(settings.SOLACE_CMDB_PLUGIN)
-        cmdbapi.configure(settings=settings)
-        vpns = cmdbapi.get_vpns_by_owner(options.product, environment=options.env)
-        users = cmdbapi.get_users_of_vpn(vpn['name'], environment=options.env)
-        queues = cmdbapi.get_queues_of_vpn(vpn['name'], environment=options.env)
+        >>> from libsolace.settingsloader import settings
+        >>> cmdbapi = libsolace.plugin_registry(settings["SOLACE_CMDB_PLUGIN"])
+        >>> cmdbapi.configure(settings=settings)
+        >>> vpns = cmdbapi.get_vpns_by_owner(options.product, environment=options.env)
+        >>> users = cmdbapi.get_users_of_vpn(vpn['name'], environment=options.env)
+        >>> queues = cmdbapi.get_queues_of_vpn(vpn['name'], environment=options.env)
 
     """
 
@@ -34,11 +35,11 @@ class XMLAPI(Plugin):
 
         logger.info(settings)
 
-        url = settings.CMDB_URL
-        username = settings.CMDB_USER
-        password = settings.CMDB_PASS
+        url = settings["CMDB_URL"]
+        username = settings["CMDB_USER"]
+        password = settings["CMDB_PASS"]
         timeout = 10
-        xml_file = settings.CMDB_FILE
+        xml_file = settings["CMDB_FILE"]
         use_etree = False
         use_xml2obj = True
         etree_case_insensitive = False
