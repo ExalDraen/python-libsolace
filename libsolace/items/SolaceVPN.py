@@ -1,10 +1,10 @@
 import logging
+
 import libsolace
-from libsolace.Decorators import only_if_not_exists, only_if_exists, primary, backup
-from libsolace.SolaceReply import SolaceReplyHandler
-from libsolace.plugin import Plugin, PluginResponse
+from libsolace.Decorators import only_if_not_exists, only_if_exists
 from libsolace.SolaceCommandQueue import SolaceCommandQueue
 from libsolace.SolaceXMLBuilder import SolaceXMLBuilder
+from libsolace.plugin import Plugin, PluginResponse
 from libsolace.util import get_key_from_kwargs
 
 logger = logging.getLogger(__name__)
@@ -93,7 +93,7 @@ class SolaceVPN(Plugin):
             # backwards compatibility for None options passed to still execute "add" code
             if self.options is None:
                 logger.warning(
-                        "No options passed, assuming you meant 'add', please update usage of this class to pass a OptionParser instance")
+                    "No options passed, assuming you meant 'add', please update usage of this class to pass a OptionParser instance")
                 # stack the commands
                 self.create_vpn(**kwargs)
                 self.clear_radius(**kwargs)
@@ -286,8 +286,8 @@ class SolaceVPN(Plugin):
 
         # Large Message Threshold
         self.api.x = SolaceXMLBuilder(
-                "VPN %s Settings large message threshold event to %s" % (vpn_name, large_message_threshold),
-                version=self.api.version)
+            "VPN %s Settings large message threshold event to %s" % (vpn_name, large_message_threshold),
+            version=self.api.version)
         self.api.x.message_vpn.vpn_name = vpn_name
         self.api.x.message_vpn.event.large_message_threshold.size = large_message_threshold
         self.commands.enqueue(self.api.x, **kwargs)

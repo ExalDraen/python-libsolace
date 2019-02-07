@@ -5,7 +5,6 @@ This file is just a documentation holder for various kwargs. No function other t
 e.g. @keyword shutdown_on_apply: :func:`shutdown_on_apply`
 """
 
-
 shutdown_on_apply = None
 """
 The shutdown_on_apply kwarg is typically passed in from the CLI for a particular provision task. It can be set to
@@ -17,7 +16,6 @@ either a boolean or a char.
 - 'u': shutdown only users while applying changes
 
 """
-
 
 version = None
 """
@@ -31,13 +29,11 @@ Example:
 
 """
 
-
 force = None
 """
 A general purpose `force` things boolean. Generally this is used by tests. When passed it bypasses many of the
 :class:`libsolace.Decorators` that require preconditions.
 """
-
 
 primaryOnly = None
 """

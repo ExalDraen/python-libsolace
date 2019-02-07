@@ -141,7 +141,7 @@ class Plugin(object):
         except:
             logger.warn("No plugin named: %s found, available plugins are: %s" % (args[0], self.plugins_dict))
             logger.warn(
-                    "Please check the plugin is listed in the yaml config and that you have @libsolace.plugin_registry.register in the class")
+                "Please check the plugin is listed in the yaml config and that you have @libsolace.plugin_registry.register in the class")
             raise
 
     def set_exists(self, state):
@@ -170,6 +170,7 @@ class PluginResponse(object):
     '<rpc semp-version="soltr/7_1_1"><show><memory/></show></rpc>'
 
     """
+
     def __init__(self, xml, **kwargs):
         self.xml = xml
         """ the XML """

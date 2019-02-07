@@ -1,11 +1,12 @@
 import logging
+
 import libsolace
-from libsolace.Decorators import only_on_shutdown, before, only_if_not_exists
-from libsolace.plugin import Plugin, PluginResponse
+from libsolace.Decorators import before, only_if_not_exists
+from libsolace.Exceptions import *
 from libsolace.SolaceCommandQueue import SolaceCommandQueue
 from libsolace.SolaceXMLBuilder import SolaceXMLBuilder
+from libsolace.plugin import Plugin, PluginResponse
 from libsolace.util import get_key_from_kwargs
-from libsolace.Exceptions import *
 
 logger = logging.getLogger(__name__)
 logger.addHandler(logging.NullHandler())
@@ -110,11 +111,12 @@ class SolaceUser(Plugin):
         # backwards compatibility for None options passed to still execute "add" code
         if self.options is None:
             logger.warning(
-                    "No options passed, assuming you meant 'add', please update usage of this class to pass a "
-                    "OptionParser instance")
+                "No options passed, assuming you meant 'add', please update usage of this class to pass a "
+                "OptionParser instance")
             try:
                 # Check if user already exists, if not then shutdown immediately after creating the user
-                self.get(**kwargs)[0]['rpc-reply']['rpc']['show']['client-username']['client-usernames']['client-username']
+                self.get(**kwargs)[0]['rpc-reply']['rpc']['show']['client-username']['client-usernames'][
+                    'client-username']
             except (AttributeError, KeyError, MissingClientUser):
                 logger.info("User %s doesn't exist, using shutdown_on_apply to True for user" % self.client_username)
                 kwargs['shutdown_on_apply'] = True
@@ -178,12 +180,13 @@ class SolaceUser(Plugin):
 
         if response[0]['rpc-reply']['rpc']['show']['client-username']['client-usernames'] == 'None':
             raise MissingClientUser("Primary: No such user %s" % client_username)
-        elif response[1] is not None and response[1]['rpc-reply']['rpc']['show']['client-username']['client-usernames'] == 'None':
+        elif response[1] is not None and response[1]['rpc-reply']['rpc']['show']['client-username'][
+            'client-usernames'] == 'None':
             raise MissingClientUser("Backup: No such user %s" % client_username)
         else:
             return response
 
-    #only_on_shutdown('user')
+    # only_on_shutdown('user')
     @before("shutdown")
     def delete(self, **kwargs):
         """
@@ -337,10 +340,10 @@ class SolaceUser(Plugin):
             return PluginResponse(str(self.api.x), **kwargs)
         else:
             logger.warning(
-                    "Not disabling User, commands could fail since shutdown_on_apply = %s" % shutdown_on_apply)
+                "Not disabling User, commands could fail since shutdown_on_apply = %s" % shutdown_on_apply)
             return None
 
-    #only_on_shutdown('user')
+    # only_on_shutdown('user')
     def set_client_profile(self, **kwargs):
         """
         Set the ClientProfile
@@ -379,7 +382,7 @@ class SolaceUser(Plugin):
         self.commands.enqueue(PluginResponse(str(self.api.x), **kwargs))
         return PluginResponse(str(self.api.x), **kwargs)
 
-    #only_on_shutdown('user')
+    # only_on_shutdown('user')
     def set_acl_profile(self, **kwargs):
 
         """
@@ -526,5 +529,3 @@ class SolaceUser(Plugin):
         self.api.x.client_username.no.shutdown
         self.commands.enqueue(PluginResponse(str(self.api.x), **kwargs))
         return PluginResponse(str(self.api.x), **kwargs)
-
-

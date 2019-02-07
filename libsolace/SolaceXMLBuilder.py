@@ -1,8 +1,6 @@
 import logging
-
-from collections import OrderedDict
-
 import re
+from collections import OrderedDict
 
 from libsolace.SolaceNode import SolaceNode
 from libsolace.util import d2x, get_calling_module

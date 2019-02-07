@@ -5,6 +5,7 @@ solacehelper is a class to construct solace commands and sets of commands.
 """
 
 import logging
+
 from libsolace.SolaceAPI import SolaceAPI
 
 try:
@@ -57,7 +58,7 @@ class SolaceProvision:
             self.environment_name = kwargs['environment']
             self.client_profile_name = kwargs['client_profile']
             self.users_dict = kwargs['users_dict']
-            logger.debug("USERS_DICT: %s" % self.users_dict )
+            logger.debug("USERS_DICT: %s" % self.users_dict)
             self.testmode = kwargs['testmode']
             self.create_queues = kwargs['create_queues']
             self.shutdown_on_apply = kwargs['shutdown_on_apply']
@@ -111,7 +112,9 @@ class SolaceProvision:
         logger.info("self.vpn_name: %s" % self.vpn_name)
 
         if not self._is_vpn_owner_user_present():
-            logger.debug("VPN owner user %s for VPN %s not present in CMDB, appending to the list of users to be created" % (self.vpn_name, self.vpn_name))
+            logger.debug(
+                "VPN owner user %s for VPN %s not present in CMDB, appending to the list of users to be created" % (
+                    self.vpn_name, self.vpn_name))
             vpn_owner_user = [
                 {
                     'username': self.vpn_name,

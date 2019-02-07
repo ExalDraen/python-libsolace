@@ -4,6 +4,7 @@ appliance cluster.
 """
 
 import logging
+
 import libsolace
 from libsolace.plugin import Plugin
 

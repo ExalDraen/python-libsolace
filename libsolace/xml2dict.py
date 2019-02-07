@@ -4,9 +4,10 @@
 from xml.parsers import expat
 from xml.sax.saxutils import XMLGenerator
 from xml.sax.xmlreader import AttributesImpl
-try: # pragma no cover
+
+try:  # pragma no cover
     from cStringIO import StringIO
-except ImportError: # pragma no cover
+except ImportError:  # pragma no cover
     try:
         from StringIO import StringIO
     except ImportError:
@@ -16,20 +17,22 @@ except ImportError: # pragma no cover
 # except ImportError: # pragma no cover
 OrderedDict = dict
 
-try: # pragma no cover
+try:  # pragma no cover
     _basestring = basestring
-except NameError: # pragma no cover
+except NameError:  # pragma no cover
     _basestring = str
-try: # pragma no cover
+try:  # pragma no cover
     _unicode = unicode
-except NameError: # pragma no cover
+except NameError:  # pragma no cover
     _unicode = str
 
 __author__ = 'Martin Blech'
 __version__ = '0.3'
 __license__ = 'MIT'
 
+
 class ParsingInterrupted(Exception): pass
+
 
 class _DictSAXHandler(object):
     def __init__(self,
@@ -58,8 +61,8 @@ class _DictSAXHandler(object):
         self.path.append((name, attrs or None))
         if len(self.path) > self.item_depth:
             self.stack.append((self.item, self.data))
-            attrs = OrderedDict((self.attr_prefix+key, value)
-                    for (key, value) in attrs.items())
+            attrs = OrderedDict((self.attr_prefix + key, value)
+                                for (key, value) in attrs.items())
             self.item = self.xml_attribs and attrs or None
             self.data = None
 
@@ -106,6 +109,7 @@ class _DictSAXHandler(object):
                 self.item[key] = [value, data]
         except KeyError:
             self.item[key] = data
+
 
 def parse(xml_input, *args, **kwargs):
     """Parse the given XML input and convert it into a dictionary.
@@ -178,10 +182,11 @@ def parse(xml_input, *args, **kwargs):
         parser.Parse(xml_input, True)
     return handler.item
 
+
 def _emit(key, value, content_handler,
-         attr_prefix='@',
-         cdata_key='#text',
-         root=True):
+          attr_prefix='@',
+          cdata_key='#text',
+          root=True):
     if not isinstance(value, (list, tuple)):
         value = [value]
     if root and len(value) > 1:
@@ -207,7 +212,7 @@ def _emit(key, value, content_handler,
         content_handler.startElement(key, AttributesImpl(attrs))
         for child_key, child_value in children:
             _emit(child_key, child_value, content_handler,
-                 attr_prefix, cdata_key, False)
+                  attr_prefix, cdata_key, False)
         if cdata is not None:
             content_handler.characters(cdata)
         content_handler.endElement(key)
@@ -225,27 +230,30 @@ def unparse(item, output=None, encoding='utf-8', **kwargs):
     content_handler.endDocument()
     if must_return:
         value = output.getvalue()
-        try: # pragma no cover
+        try:  # pragma no cover
             value = value.decode(encoding)
-        except AttributeError: # pragma no cover
+        except AttributeError:  # pragma no cover
             pass
         return value
 
-if __name__ == '__main__': # pragma: no cover
+
+if __name__ == '__main__':  # pragma: no cover
     import sys
     import marshal
 
     (item_depth,) = sys.argv[1:]
     item_depth = int(item_depth)
 
+
     def handle_item(path, item):
         marshal.dump((path, item), sys.stdout)
         return True
 
+
     try:
         root = parse(sys.stdin,
-                item_depth=item_depth,
-                item_callback=handle_item)
+                     item_depth=item_depth,
+                     item_callback=handle_item)
         if item_depth == 0:
             handle_item([], root)
     except KeyboardInterrupt:

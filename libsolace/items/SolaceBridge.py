@@ -2,9 +2,9 @@ import logging
 
 import libsolace
 from libsolace import Plugin
+from libsolace.SolaceAPI import SolaceAPI
 from libsolace.SolaceCommandQueue import SolaceCommandQueue
 from libsolace.SolaceXMLBuilder import SolaceXMLBuilder
-from libsolace.SolaceAPI import SolaceAPI
 from libsolace.items.SolaceQueue import SolaceQueue
 
 logger = logging.getLogger(__name__)
@@ -118,7 +118,7 @@ class SolaceBridge(Plugin):
 
     def _create_bridge_remote_vrouter(self, api, bridgeName, vpn, virtual_router, **kwargs):
         api.x = SolaceXMLBuilder("%s configure primary bridge: %s vrouter: %s on primary appliance" % (
-        api.primaryRouter, bridgeName, virtual_router), version=api.version)
+            api.primaryRouter, bridgeName, virtual_router), version=api.version)
         api.x.bridge.bridge_name = bridgeName
         api.x.bridge.vpn_name = vpn
         api.x.bridge.primary
@@ -128,7 +128,7 @@ class SolaceBridge(Plugin):
         api.cq.enqueueV2(str(api.x), primaryOnly=True)
 
         api.x = SolaceXMLBuilder("%s configure backup bridge: %s vrouter: %s on backup appliance" % (
-        api.backupRouter, bridgeName, virtual_router), version=api.version)
+            api.backupRouter, bridgeName, virtual_router), version=api.version)
         api.x.bridge.bridge_name = bridgeName
         api.x.bridge.vpn_name = vpn
         api.x.bridge.backup
@@ -140,7 +140,7 @@ class SolaceBridge(Plugin):
     def _create_bridge_remote_addr(self, api, bridgeName, vpn, backup_addr, phys_intf, **kwargs):
         api.x = SolaceXMLBuilder(
             "%s configure primary bridge: %s remote addr: %s phys_intf: %s on primary appliance" % (
-            api.primaryRouter, bridgeName, backup_addr, phys_intf), version=api.version)
+                api.primaryRouter, bridgeName, backup_addr, phys_intf), version=api.version)
         api.x.bridge.bridge_name = bridgeName
         api.x.bridge.vpn_name = vpn
         api.x.bridge.primary
@@ -152,7 +152,7 @@ class SolaceBridge(Plugin):
         api.cq.enqueueV2(str(api.x), primaryOnly=True)
 
         api.x = SolaceXMLBuilder("%s configure backup bridge: %s remote addr: %s phys_intf: %s on backup appliance" % (
-        api.backupRouter, bridgeName, backup_addr, phys_intf), version=api.version)
+            api.backupRouter, bridgeName, backup_addr, phys_intf), version=api.version)
         api.x.bridge.bridge_name = bridgeName
         api.x.bridge.vpn_name = vpn
         api.x.bridge.backup
@@ -165,7 +165,7 @@ class SolaceBridge(Plugin):
 
     def _bridge_username_addr(self, api, bridgeName, vpn, backup_addr, phys_intf, username, password, **kwargs):
         api.x = SolaceXMLBuilder("%s primary bridge: %s remote username: %s on primary appliance" % (
-        api.primaryRouter, bridgeName, username), version=api.version)
+            api.primaryRouter, bridgeName, username), version=api.version)
         api.x.bridge.bridge_name = bridgeName
         api.x.bridge.vpn_name = vpn
         api.x.bridge.primary
@@ -195,7 +195,7 @@ class SolaceBridge(Plugin):
 
     def _bridge_username_vrouter(self, api, bridgeName, vpn, vrouter, username, password, **kwargs):
         api.x = SolaceXMLBuilder("%s primary bridge: %s remote username: %s on primary appliance" % (
-        api.primaryRouter, bridgeName, username), version=api.version)
+            api.primaryRouter, bridgeName, username), version=api.version)
         api.x.bridge.bridge_name = bridgeName
         api.x.bridge.vpn_name = vpn
         api.x.bridge.primary
@@ -240,7 +240,7 @@ class SolaceBridge(Plugin):
 
     def _bridge_enable_remote_addr(self, api, bridgeName, vpn, backup_addr, phys_intf, **kwargs):
         api.x = SolaceXMLBuilder("%s enable primary bridge: %s remote addr: %s phys_intf: %s on primary appliance" % (
-        api.primaryRouter, bridgeName, backup_addr, phys_intf), version=api.version)
+            api.primaryRouter, bridgeName, backup_addr, phys_intf), version=api.version)
         api.x.bridge.bridge_name = bridgeName
         api.x.bridge.vpn_name = vpn
         api.x.bridge.primary
@@ -253,7 +253,7 @@ class SolaceBridge(Plugin):
         api.cq.enqueueV2(str(api.x), primaryOnly=True)
 
         api.x = SolaceXMLBuilder("%s enable backup bridge: %s remote addr: %s phys_intf: %s on backup appliance" % (
-        api.backupRouter, bridgeName, backup_addr, phys_intf), version=api.version)
+            api.backupRouter, bridgeName, backup_addr, phys_intf), version=api.version)
         api.x.bridge.bridge_name = bridgeName
         api.x.bridge.vpn_name = vpn
         api.x.bridge.backup
@@ -290,7 +290,7 @@ class SolaceBridge(Plugin):
 
     def _bridge_disable_remote_addr(self, api, bridgeName, vpn, backup_addr, phys_intf, **kwargs):
         api.x = SolaceXMLBuilder("%s disable primary bridge: %s remote addr: %s phys_intf: %s on primary appliance" % (
-        api.primaryRouter, bridgeName, backup_addr, phys_intf), version=api.version)
+            api.primaryRouter, bridgeName, backup_addr, phys_intf), version=api.version)
         api.x.bridge.bridge_name = bridgeName
         api.x.bridge.vpn_name = vpn
         api.x.bridge.primary
@@ -303,7 +303,7 @@ class SolaceBridge(Plugin):
         api.cq.enqueueV2(str(api.x), primaryOnly=True)
 
         api.x = SolaceXMLBuilder("%s disable backup bridge: %s remote addr: %s phys_intf: %s on backup appliance" % (
-        api.backupRouter, bridgeName, backup_addr, phys_intf), version=api.version)
+            api.backupRouter, bridgeName, backup_addr, phys_intf), version=api.version)
         api.x.bridge.bridge_name = bridgeName
         api.x.bridge.vpn_name = vpn
         api.x.bridge.backup
@@ -340,7 +340,7 @@ class SolaceBridge(Plugin):
 
     def _bridge_create_queue(self, api, queueName, vpnName, username, **kwargs):
         logger.info("%s:%s creating bridge queue: %s with owner username: %s" % (
-        api.primaryRouter, api.backupRouter, queueName, username))
+            api.primaryRouter, api.backupRouter, queueName, username))
         queue1 = {}
         queue1['queue_config'] = {}
         queue1['queue_config']["exclusive"] = "true"
@@ -359,7 +359,7 @@ class SolaceBridge(Plugin):
 
     def _bridge_set_remote_queue_addr(self, api, bridgeName, vpn, backup_addr, phys_intf, queueName, **kwargs):
         api.x = SolaceXMLBuilder("%s primary bridge: %s set remote queue: %s on primary appliance" % (
-        api.primaryRouter, bridgeName, queueName), version=api.version)
+            api.primaryRouter, bridgeName, queueName), version=api.version)
         api.x.bridge.bridge_name = bridgeName
         api.x.bridge.vpn_name = vpn
         api.x.bridge.primary
@@ -387,7 +387,7 @@ class SolaceBridge(Plugin):
 
     def _bridge_set_remote_queue_vrouter(self, api, bridgeName, vpn, vrouter, queueName, **kwargs):
         api.x = SolaceXMLBuilder("%s primary bridge: %s set remote queue: %s on primary appliance" % (
-        api.primaryRouter, bridgeName, queueName), version=api.version)
+            api.primaryRouter, bridgeName, queueName), version=api.version)
         api.x.bridge.bridge_name = bridgeName
         api.x.bridge.vpn_name = vpn
         api.x.bridge.primary

@@ -1,8 +1,10 @@
 import logging
-import libsolace
-from libsolace.util import httpRequest, generateRequestHeaders, generateBasicAuthHeader, xml2obj
-from libsolace.plugin import Plugin
+
 from lxml import etree as ET
+
+import libsolace
+from libsolace.plugin import Plugin
+from libsolace.util import httpRequest, generateRequestHeaders, xml2obj
 
 logger = logging.getLogger(__name__)
 logger.addHandler(logging.NullHandler())
@@ -26,7 +28,7 @@ class XMLAPI(Plugin):
         logger.info("LEGACY xml plugin is being used, please port to JSON API!")
         pass
 
-    #def __init__(self, url=None, username=None, password=None, timeout=10, xml_file=None, use_etree=False,
+    # def __init__(self, url=None, username=None, password=None, timeout=10, xml_file=None, use_etree=False,
     #             use_xml2obj=True, etree_case_insensitive=False, **kwargs):
     def configure(self, settings=None, **kwargs):
 
@@ -114,11 +116,12 @@ class XMLAPI(Plugin):
         :rtype: str
         """
         request_headers = generateRequestHeaders(
-            default_headers = {
-              'Content-type': 'application/json',
-              'Accept': 'application/json'
+            default_headers={
+                'Content-type': 'application/json',
+                'Accept': 'application/json'
             })
-        (data, response_headers, code) = httpRequest(url, method=method, headers=request_headers, fields=fields, timeout=self.timeout)
+        (data, response_headers, code) = httpRequest(url, method=method, headers=request_headers, fields=fields,
+                                                     timeout=self.timeout)
         return data
 
     def __get_et_root_object(self):
@@ -187,7 +190,7 @@ class XMLAPI(Plugin):
         for v in self.deploydata.solace.vpn:
             logger.debug("VPN: %s in solace" % v.name)
             if v.name == name:
-                logger.info("Getting queues for %s" % v.name )
+                logger.info("Getting queues for %s" % v.name)
                 vd = self.get_vpn(v.name)
                 return vd.queue
 
@@ -209,11 +212,11 @@ class XMLAPI(Plugin):
                     if m.name == vpn:
                         password = m.password
                         try:
-                            #logger.debug("Dumping messaging environments: %s" % pprint.pprint(m.__dict__))
+                            # logger.debug("Dumping messaging environments: %s" % pprint.pprint(m.__dict__))
                             for e in m.env:
-                                #logger.info("Env Searching %s" % e.name)
+                                # logger.info("Env Searching %s" % e.name)
                                 if e.name == environment:
-                                    #logger.info("Env Matched %s" % e.name)
+                                    # logger.info("Env Matched %s" % e.name)
                                     for myp in e.messaging_conf:
                                         logger.info('Setting password %s' % myp.password)
                                         password = myp.password
@@ -221,6 +224,7 @@ class XMLAPI(Plugin):
                             logger.warn("No Environment Password Overrides %s" % e)
                             pass
 
-                        logger.info('Product: %s using VPN: %s, adding user %s to users list' % (p.name, vpn, m.username))
+                        logger.info(
+                            'Product: %s using VPN: %s, adding user %s to users list' % (p.name, vpn, m.username))
                         users.append({'username': m.username, 'password': password})
         return users

@@ -1,5 +1,6 @@
-import libsolace
 import logging
+
+import libsolace
 
 __doc__ = """This method is responsible for handing off Naming work to the configured naming standard. The Plugin for the standard
 is specified in the NAMEHOOK property of the libsolace.yaml file.
@@ -21,6 +22,7 @@ example while DefaultNaming set as NAMEHOOK
 
 logger = logging.getLogger(__name__)
 logger.addHandler(logging.NullHandler())
+
 
 # plugin_name = "Naming"
 

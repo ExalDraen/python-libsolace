@@ -98,10 +98,10 @@ class InfluxDBClient(Plugin):
 
         # connect
         self.client = InfluxDBClientConnector(self.influxdb_host,
-                                     self.influxdb_port,
-                                     self.influxdb_user,
-                                     self.influxdb_pass,
-                                     self.influxdb_db)
+                                              self.influxdb_port,
+                                              self.influxdb_user,
+                                              self.influxdb_pass,
+                                              self.influxdb_db)
 
     def send(self, measurement, data, **tags):
         """

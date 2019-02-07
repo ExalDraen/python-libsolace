@@ -1,7 +1,7 @@
-import yaml
-import os
 import logging
-import sys
+import os
+
+import yaml
 
 __author__ = 'johlyh'
 
@@ -88,4 +88,3 @@ if yaml_loaded is False:
     msg = "Failed to find libpipeline.yaml in any of these locations: %s" % ",".join(__yamlfiles__)
     logger.error(msg)
     raise Exception(msg)
-

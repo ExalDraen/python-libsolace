@@ -1,14 +1,14 @@
 import logging
 import traceback
-import libsolace.settingsloader as settings
-import libsolace
-from libsolace.SolaceXMLBuilder import SolaceXMLBuilder
-from libsolace.SolaceCommandQueue import SolaceCommandQueue
-from libsolace import xml2dict
-from libsolace.plugin import PluginResponse
-from libsolace.Exceptions import LoginException
-
 from collections import OrderedDict
+
+import libsolace
+import libsolace.settingsloader as settings
+from libsolace import xml2dict
+from libsolace.Exceptions import LoginException
+from libsolace.SolaceCommandQueue import SolaceCommandQueue
+from libsolace.SolaceXMLBuilder import SolaceXMLBuilder
+from libsolace.plugin import PluginResponse
 
 try:
     import simplejson
@@ -182,7 +182,7 @@ class SolaceAPI:
 
     def __restcall(self, request, primaryOnly=False, backupOnly=False, **kwargs):
         logger.info("%s user requesting: %s kwargs:%s primaryOnly:%s backupOnly:%s"
-                     % (self.config['USER'], request, kwargs, primaryOnly, backupOnly))
+                    % (self.config['USER'], request, kwargs, primaryOnly, backupOnly))
         self.kwargs = kwargs
 
         # appliances in the query
@@ -218,11 +218,11 @@ class SolaceAPI:
                 logger.debug("Querying host: %s" % host)
                 url = host
                 request_headers = generateRequestHeaders(
-                        default_headers={
-                            'Content-type': 'text/xml',
-                            'Accept': 'text/xml'
-                        },
-                        auth_headers=generateBasicAuthHeader(self.config['USER'], self.config['PASS'])
+                    default_headers={
+                        'Content-type': 'text/xml',
+                        'Accept': 'text/xml'
+                    },
+                    auth_headers=generateBasicAuthHeader(self.config['USER'], self.config['PASS'])
                 )
                 logger.debug("request_headers: %s" % request_headers)
                 (response, response_headers, code) = httpRequest(url, method='POST', headers=request_headers,
@@ -241,10 +241,10 @@ class SolaceAPI:
                     if thisreply['rpc-reply'].has_key('execute-result'):
                         if thisreply['rpc-reply']['execute-result']['@code'] != 'ok':
                             logger.warn("Device: %s: %s %s" % (k, thisreply['rpc-reply']['execute-result']['@code'],
-                                                                "Request that failed: %s" % request))
+                                                               "Request that failed: %s" % request))
                             logger.warn("Device: %s: %s: %s" % (k, thisreply['rpc-reply']['execute-result']['@code'],
-                                                                 "Reply from appliance: %s" %
-                                                                 thisreply['rpc-reply']['execute-result']['@reason']))
+                                                                "Reply from appliance: %s" %
+                                                                thisreply['rpc-reply']['execute-result']['@reason']))
                         else:
                             logger.debug("Device: %s: %s" % (k, thisreply['rpc-reply']['execute-result']['@code']))
                         logger.debug("Device: %s: %s" % (k, thisreply))
@@ -257,7 +257,7 @@ class SolaceAPI:
                     logger.error(codes.items()[0][1])
                     if codes.items()[0][1] == 401:
                         raise LoginException("Username / Password failure")
-                    raise # (Exception("Appliance Communication Failure"))
+                    raise  # (Exception("Appliance Communication Failure"))
             logger.debug("Returning Data from rest_call")
             return data, codes
 
@@ -424,4 +424,3 @@ class SolaceAPI:
         plugin = libsolace.plugin_registry(plugin_name, **kwargs)
         logger.debug("Setting up the plugin instance with api and kwargs")
         return plugin(api=self, **kwargs)
-

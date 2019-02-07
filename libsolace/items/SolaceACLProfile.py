@@ -59,7 +59,7 @@ class SolaceACLProfile(Plugin):
 
         if kwargs.get('options', None) is None:
             logger.warning(
-                    "No options passed, assuming you meant 'add', please update usage of this class to pass a OptionParser instance")
+                "No options passed, assuming you meant 'add', please update usage of this class to pass a OptionParser instance")
             # queue up the commands
             self.new_acl(**kwargs)
             self.allow_publish(**kwargs)
@@ -185,5 +185,3 @@ class SolaceACLProfile(Plugin):
         self.api.x.acl_profile.client_connect.default_action.allow
         self.commands.enqueue(PluginResponse(str(self.api.x), **kwargs))
         return PluginResponse(str(self.api.x), **kwargs)
-
-

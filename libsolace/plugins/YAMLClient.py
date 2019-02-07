@@ -18,7 +18,6 @@ logger.addHandler(logging.NullHandler())
 
 @libsolace.plugin_registry.register
 class YAMLClient(Plugin):
-
     # the name used to call the plugin
     plugin_name = "YAMLClient"
 
@@ -91,5 +90,3 @@ class YAMLClient(Plugin):
                             queue['queue_config'][k] = v
 
         return queues
-
-

@@ -1,11 +1,11 @@
 import logging
+
 import libsolace
-from libsolace.SolaceReply import SolaceReplyHandler
-from libsolace.plugin import Plugin, PluginResponse
 from libsolace.SolaceCommandQueue import SolaceCommandQueue
 from libsolace.SolaceXMLBuilder import SolaceXMLBuilder
-from libsolace.util import version_equal_or_greater_than
+from libsolace.plugin import Plugin, PluginResponse
 from libsolace.util import get_key_from_kwargs
+from libsolace.util import version_equal_or_greater_than
 
 logger = logging.getLogger(__name__)
 logger.addHandler(logging.NullHandler())

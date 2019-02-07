@@ -9,11 +9,12 @@ All object names should be finalized by this plugin, so utilize Naming.name to t
 """
 
 import logging
+
 import libsolace
-from libsolace.plugin import Plugin
 from libsolace.Naming import name
-from libsolace.util import get_key_from_settings
+from libsolace.plugin import Plugin
 from libsolace.util import get_key_from_kwargs
+from libsolace.util import get_key_from_settings
 
 logger = logging.getLogger(__name__)
 logger.addHandler(logging.NullHandler())
@@ -21,7 +22,6 @@ logger.addHandler(logging.NullHandler())
 
 @libsolace.plugin_registry.register
 class CMDBClient(Plugin):
-
     # the name used to call the plugin
     plugin_name = "CMDBClient"
 

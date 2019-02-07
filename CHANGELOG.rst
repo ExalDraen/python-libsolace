@@ -17,7 +17,7 @@ Added
 Changed
 ~~~~~~~
 
--  Nothing
+-  Small PEP8 formatting refactoring
 -  Changed logging: we now no longer configure the root logger and default handler. Instead
    each module has its own logger that has a `NullHandler` attached. This allows
    library users to attach their own handlers and individually configure logging.

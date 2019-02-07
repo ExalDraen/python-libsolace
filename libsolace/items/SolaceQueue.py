@@ -1,7 +1,7 @@
 import logging
 
 import libsolace
-from libsolace.Decorators import only_on_shutdown, only_if_not_exists, only_if_exists, primary, deprecation_warning
+from libsolace.Decorators import only_if_not_exists, only_if_exists, primary, deprecation_warning
 from libsolace.SolaceCommandQueue import SolaceCommandQueue
 from libsolace.SolaceXMLBuilder import SolaceXMLBuilder
 from libsolace.plugin import Plugin, PluginResponse
@@ -76,7 +76,7 @@ class SolaceQueue(Plugin):
         # backwards compatibility for None options passed to still execute "add" code
         if self.options is None:
             logger.warning(
-                    "No options passed, assuming you meant 'add', please update usage of this class to pass a OptionParser instance")
+                "No options passed, assuming you meant 'add', please update usage of this class to pass a OptionParser instance")
 
             for queue in self.queues:
 
@@ -168,7 +168,6 @@ class SolaceQueue(Plugin):
         except:
             logger.warning("No queue_config for queue: %s found, please check site-config" % queue_name)
             raise
-
 
     def __apply_default_config__(self, config, default):
         """ copys keys from default dict to config dict when not present """

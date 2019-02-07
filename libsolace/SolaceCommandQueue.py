@@ -1,6 +1,7 @@
-import os
-from lxml import etree
 import logging
+import os
+
+from lxml import etree
 
 from libsolace.plugin import PluginResponse
 

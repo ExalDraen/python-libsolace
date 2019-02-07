@@ -1,12 +1,11 @@
-import sys
 import logging
+
 import libsolace
-from libsolace.plugin import Plugin, PluginResponse
+from libsolace.Exceptions import *
 from libsolace.SolaceCommandQueue import SolaceCommandQueue
 from libsolace.SolaceXMLBuilder import SolaceXMLBuilder
+from libsolace.plugin import Plugin, PluginResponse
 from libsolace.util import get_key_from_kwargs
-from libsolace.Exceptions import *
-from libsolace.Decorators import only_on_shutdown
 
 logger = logging.getLogger(__name__)
 logger.addHandler(logging.NullHandler())
@@ -211,7 +210,7 @@ class SolaceUsers(Plugin):
         self.commands.enqueue(PluginResponse(str(self.api.x), **kwargs))
         return PluginResponse(str(self.api.x), **kwargs)
 
-    #@only_on_shutdown('user')
+    # @only_on_shutdown('user')
     def disable_user(self, **kwargs):
         """
         Disable the user ( suspending pub/sub )
@@ -244,7 +243,7 @@ class SolaceUsers(Plugin):
                 "Not disabling User, commands could fail since shutdown_on_apply = %s" % self.shutdown_on_apply)
             return None
 
-    #@only_on_shutdown('user')
+    # @only_on_shutdown('user')
     def set_client_profile(self, **kwargs):
         """
         set client profile
@@ -272,7 +271,7 @@ class SolaceUsers(Plugin):
         self.commands.enqueue(PluginResponse(str(self.api.x), **kwargs))
         return PluginResponse(str(self.api.x), **kwargs)
 
-    #@only_on_shutdown('user')
+    # @only_on_shutdown('user')
     def set_acl_profile(self, **kwargs):
         """
         set acl profile
@@ -394,5 +393,3 @@ class SolaceUsers(Plugin):
         self.api.x.client_username.no.shutdown
         self.commands.enqueue(PluginResponse(str(self.api.x), **kwargs))
         return PluginResponse(str(self.api.x), **kwargs)
-
-

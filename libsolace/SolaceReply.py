@@ -1,7 +1,7 @@
 import logging
 import re
+
 import simplejson as json
-import re
 
 logger = logging.getLogger(__name__)
 logger.addHandler(logging.NullHandler())

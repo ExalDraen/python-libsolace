@@ -1,5 +1,6 @@
-from libsolace import Plugin
 import libsolace
+from libsolace import Plugin
+
 
 @libsolace.plugin_registry.register
 class NullPlugin(Plugin):

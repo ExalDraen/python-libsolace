@@ -1,17 +1,16 @@
-import re
-import xml.sax.handler
-import pkg_resources
 import base64
 import inspect
-from xml.dom.minidom import Document
+import logging
+import re
+import xml.sax.handler
+from collections import OrderedDict
 from distutils.version import StrictVersion
+from xml.dom.minidom import Document
+
+import pkg_resources
 
 import libsolace
 from libsolace.Exceptions import MissingProperty
-
-from collections import OrderedDict
-
-import logging
 
 logger = logging.getLogger(__name__)
 logger.addHandler(logging.NullHandler())
@@ -22,7 +21,6 @@ logger.addHandler(logging.NullHandler())
     from libsolace.util import *
 
 """
-
 
 try:
     import urllib3

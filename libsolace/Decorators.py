@@ -1,8 +1,7 @@
-import functools
 import logging
 from functools import wraps
 
-from libsolace.Exceptions import MissingException, MissingClientUser
+from libsolace.Exceptions import MissingException
 from libsolace.util import get_calling_module
 
 logger = logging.getLogger(__name__)
@@ -24,6 +23,7 @@ def deprecation_warning(warning_msg):
     :rtype: object
     :returns: the decorated object
     """
+
     def wrap(f):
         @wraps(f)
         def wrapped_f(*args, **kwargs):
@@ -136,8 +136,8 @@ def only_on_shutdown(entity, **kwargs):
                 return f(*args, **kwargs)
             module = get_calling_module()
             logger.info(
-                    "Package %s requires shutdown of this object, shutdown_on_apply is not set for this object type, bypassing %s for entity %s" % (
-                        module, f.__name__, entity))
+                "Package %s requires shutdown of this object, shutdown_on_apply is not set for this object type, "
+                "bypassing %s for entity %s" % (module, f.__name__, entity))
 
         return wrapped_f
 
@@ -164,7 +164,8 @@ def only_if_not_exists(entity, data_path, primaryOnly=False, backupOnly=False, *
 
     :param entity: the "getter" method to call by name
     :type entity: str
-    :param data_path: a dot name spaced string which will be used to descend into the response document to verify existence
+    :param data_path: a dot name spaced string which will be used to descend into the response document
+        to verify existence
     :type data_path: str
     :param primaryOnly: :data:`libsolace.Kwargs.primaryOnly`
     :type primaryOnly: bool
@@ -269,8 +270,8 @@ def only_if_not_exists(entity, data_path, primaryOnly=False, backupOnly=False, *
             else:
                 # if we reach here, the object exists
                 logger.info(
-                        "Package %s - %s, the requested object already exists, ignoring creation" % (
-                            module, f.__name__))
+                    "Package %s - %s, the requested object already exists, ignoring creation" % (
+                        module, f.__name__))
                 args[0].set_exists(exists)
 
         return wrapped_f
@@ -356,8 +357,8 @@ def only_if_exists(entity, data_path, primaryOnly=False, backupOnly=False, **kwa
             if exists:
                 module = get_calling_module()
                 logger.info(
-                        "Package %s - the requested object exists, calling method %s, check entity was: %s" % (
-                            module, f.__name__, entity))
+                    "Package %s - the requested object exists, calling method %s, check entity was: %s" % (
+                        module, f.__name__, entity))
                 args[0].set_exists(True)
                 return f(*args, **kwargs)
 
@@ -368,7 +369,8 @@ def only_if_exists(entity, data_path, primaryOnly=False, backupOnly=False, **kwa
 
 def primary():
     """
-    Sets the primaryOnly kwarg before calling the method. Use this to add a specific router to the appliances to call list.
+    Sets the primaryOnly kwarg before calling the method. Use this to add a specific router to the appliances
+    to call list.
     Note, this does not unset backupOnly kwarg, so you can actualy double target.
 
     :returns: method
@@ -389,7 +391,8 @@ def primary():
 
 def backup():
     """
-    Sets the backupOnly kwarg before calling the method. Use this to add a specific router to the appliances to call list.
+    Sets the backupOnly kwarg before calling the method. Use this to add a specific router to the appliances
+    to call list.
     Note, this does not unset primaryOnly kwarg, so you can actualy double target.
 
     :returns: method

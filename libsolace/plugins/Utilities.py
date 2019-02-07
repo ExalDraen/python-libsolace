@@ -1,9 +1,9 @@
 import logging
 
 import libsolace
+from libsolace.SolaceCommandQueue import SolaceCommandQueue
 from libsolace.plugin import Plugin
 from libsolace.util import get_key_from_kwargs, get_key_from_settings
-from libsolace.SolaceCommandQueue import SolaceCommandQueue
 
 """
 General tools plugins
@@ -51,7 +51,8 @@ class Utilities(Plugin):
         result = []
 
         response = self.api.manage(self.SOLACE_QUEUE_PLUGIN).get(queue_name='*', vpn_name=vpn_name,
-                                                                 detail=True)[0]['rpc-reply']['rpc']['show']['queue']['queues']['queue']
+                                                                 detail=True)[0]['rpc-reply']['rpc']['show']['queue'][
+            'queues']['queue']
 
         try:
             for h in response:
@@ -62,9 +63,9 @@ class Utilities(Plugin):
                     result.append(h['name'])
         except KeyError, e:
             raise Exception(
-                    "While getting list of queues from get_queue() the response did not contain the expected data. VPN:"
-                    " %s. Exception message: %s" % (
-                        vpn_name, str(e)))
+                "While getting list of queues from get_queue() the response did not contain the expected data. VPN:"
+                " %s. Exception message: %s" % (
+                    vpn_name, str(e)))
         else:
             return result
 
@@ -84,7 +85,8 @@ class Utilities(Plugin):
         try:
             data = self.api.manage(self.SOLACE_USER_PLUGIN).get(client_username=client_username, vpn_name=vpn_name,
                                                                 detail=True)
-            response = data[0]['rpc-reply']['rpc']['show']['client-username']['client-usernames']['client-username']['num-clients']
+            response = data[0]['rpc-reply']['rpc']['show']['client-username']['client-usernames']['client-username'][
+                'num-clients']
 
         except KeyError, e:
             logger.debug("Key does not exist, this normally means there was no user matching the filter")
@@ -117,7 +119,8 @@ class Utilities(Plugin):
         """
         result = []
         response = self.api.manage(self.SOLACE_USER_PLUGIN).get(client_username=client_username, vpn_name=vpn_name,
-                                                                detail=True)[0]['rpc-reply']['rpc']['show']['client-username']['client-usernames']['client-username']['num-clients']
+                                                                detail=True)[0]['rpc-reply']['rpc']['show'][
+            'client-username']['client-usernames']['client-username']['num-clients']
         if int(response) > 0:
             logger.info("User %s is in-use, %s sessions open" % (client_username, response))
             return True
