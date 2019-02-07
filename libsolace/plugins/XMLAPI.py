@@ -4,6 +4,9 @@ from libsolace.util import httpRequest, generateRequestHeaders, generateBasicAut
 from libsolace.plugin import Plugin
 from lxml import etree as ET
 
+logger = logging.getLogger(__name__)
+logger.addHandler(logging.NullHandler())
+
 
 @libsolace.plugin_registry.register
 class XMLAPI(Plugin):
@@ -20,14 +23,14 @@ class XMLAPI(Plugin):
     plugin_name = "XMLAPI"
 
     def __init__(self, *args, **kwargs):
-        logging.info("LEGACY xml plugin is being used, please port to JSON API!")
+        logger.info("LEGACY xml plugin is being used, please port to JSON API!")
         pass
 
     #def __init__(self, url=None, username=None, password=None, timeout=10, xml_file=None, use_etree=False,
     #             use_xml2obj=True, etree_case_insensitive=False, **kwargs):
     def configure(self, settings=None, **kwargs):
 
-        logging.info(settings)
+        logger.info(settings)
 
         url = settings.CMDB_URL
         username = settings.CMDB_USER
@@ -64,7 +67,7 @@ class XMLAPI(Plugin):
         self.etree_case_insensitive = etree_case_insensitive
 
         if xml_file:
-            logging.debug('Local file will be read, REST Calls disabled')
+            logger.debug('Local file will be read, REST Calls disabled')
             xml_file = open(xml_file, 'r')
             self.xml_file_data = xml_file.read()
         else:
@@ -89,7 +92,7 @@ class XMLAPI(Plugin):
         if self.xml_file_data:
             return self.__read_file()
         else:
-            logging.debug("route call: %s" % url)
+            logger.debug("route call: %s" % url)
             return self.__restcall(url, **kwargs)
 
     def __read_file(self, **kwargs):
@@ -154,7 +157,7 @@ class XMLAPI(Plugin):
         """
         self.populateDeployData()
         for v in self.deploydata.solace.vpn:
-            logging.debug("VPN: %s in solace" % v.name)
+            logger.debug("VPN: %s in solace" % v.name)
             if v.name == vpn:
                 return v
         raise BaseException('Unable to find solace configuration for vpn: %s' % vpn)
@@ -172,8 +175,8 @@ class XMLAPI(Plugin):
         self.populateDeployData()
         vpns = []
         for v in self.deploydata.solace.vpn:
-            logging.debug("VPN: %s in solace" % v.name)
-            logging.debug("document: %s" % v._attrs)
+            logger.debug("VPN: %s in solace" % v.name)
+            logger.debug("document: %s" % v._attrs)
             if v.owner == owner:
                 vpns.append(v._attrs)
         return vpns
@@ -182,9 +185,9 @@ class XMLAPI(Plugin):
         self.populateDeployData()
         queues = []
         for v in self.deploydata.solace.vpn:
-            logging.debug("VPN: %s in solace" % v.name)
+            logger.debug("VPN: %s in solace" % v.name)
             if v.name == name:
-                logging.info("Getting queues for %s" % v.name )
+                logger.info("Getting queues for %s" % v.name )
                 vd = self.get_vpn(v.name)
                 return vd.queue
 
@@ -197,27 +200,27 @@ class XMLAPI(Plugin):
         """
         self.populateDeployData()
         users = []
-        logging.warn('Scaning for Products using vpn: %s' % vpn)
+        logger.warn('Scaning for Products using vpn: %s' % vpn)
         for p in self.deploydata.product:
-            logging.debug('Scanning Product: %s for messaging declarations' % p.name)
+            logger.debug('Scanning Product: %s for messaging declarations' % p.name)
             if p.messaging:
                 for m in p.messaging:
                     #  <messaging name="my_%s_sitemq" user="%s_um" password="somepassword"></messaging>
                     if m.name == vpn:
                         password = m.password
                         try:
-                            #logging.debug("Dumping messaging environments: %s" % pprint.pprint(m.__dict__))
+                            #logger.debug("Dumping messaging environments: %s" % pprint.pprint(m.__dict__))
                             for e in m.env:
-                                #logging.info("Env Searching %s" % e.name)
+                                #logger.info("Env Searching %s" % e.name)
                                 if e.name == environment:
-                                    #logging.info("Env Matched %s" % e.name)
+                                    #logger.info("Env Matched %s" % e.name)
                                     for myp in e.messaging_conf:
-                                        logging.info('Setting password %s' % myp.password)
+                                        logger.info('Setting password %s' % myp.password)
                                         password = myp.password
                         except Exception, e:
-                            logging.warn("No Environment Password Overrides %s" % e)
+                            logger.warn("No Environment Password Overrides %s" % e)
                             pass
 
-                        logging.info('Product: %s using VPN: %s, adding user %s to users list' % (p.name, vpn, m.username))
+                        logger.info('Product: %s using VPN: %s, adding user %s to users list' % (p.name, vpn, m.username))
                         users.append({'username': m.username, 'password': password})
         return users

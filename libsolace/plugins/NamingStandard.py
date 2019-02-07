@@ -12,6 +12,9 @@ from libsolace.plugin import Plugin
 The default naming plugin
 """
 
+logger = logging.getLogger(__name__)
+logger.addHandler(logging.NullHandler())
+
 
 @libsolace.plugin_registry.register
 class NamingStandard(Plugin):
@@ -28,5 +31,5 @@ class NamingStandard(Plugin):
         try:
             return "%s_%s" % (args[1], args[0])
         except:
-            logging.error("Unable to resolve object name for: %s" % args)
+            logger.error("Unable to resolve object name for: %s" % args)
             raise

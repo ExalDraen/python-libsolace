@@ -10,6 +10,9 @@ from collections import OrderedDict
 
 from libsolace.util import get_calling_module
 
+logger = logging.getLogger(__name__)
+logger.addHandler(logging.NullHandler())
+
 
 class PluginClass(type):
     """This is a metaclass for construction only, see Plugin rather"""
@@ -71,7 +74,7 @@ class Plugin(object):
     exists = False
 
     def __init__(self, *args, **kwargs):
-        logging.debug("Plugin Init: %s, %s" % (args, kwargs))
+        logger.debug("Plugin Init: %s, %s" % (args, kwargs))
 
     def register(self, object_class, *args, **kwargs):
         """
@@ -88,13 +91,13 @@ class Plugin(object):
                 >>> ...
 
         """
-        logging.info("Registering Plugin id: %s from class: %s " % (object_class.plugin_name, object_class))
+        logger.info("Registering Plugin id: %s from class: %s " % (object_class.plugin_name, object_class))
         o = object_class
         self.plugins.append(o)
         self.plugins_dict[object_class.plugin_name] = o
 
         def _d(fn):
-            logging.info("CALL CALL CALL CALL CALL CALL")
+            logger.info("CALL CALL CALL CALL CALL CALL")
             return functools.update_wrapper(object_class(fn), fn)
 
         functools.update_wrapper(_d, object_class)
@@ -128,16 +131,16 @@ class Plugin(object):
         except:
             module_parent = "Unknown"
 
-        logging.debug(self.plugins_dict)
-        logging.info("Module %s->%s->%s" % (module_parent, module, args[0]))
+        logger.debug(self.plugins_dict)
+        logger.info("Module %s->%s->%s" % (module_parent, module, args[0]))
 
-        logging.debug("Plugin Request: args: %s, kwargs: %s" % (args, kwargs))
+        logger.debug("Plugin Request: args: %s, kwargs: %s" % (args, kwargs))
         try:
-            logging.debug("Class: %s" % self.plugins_dict[args[0]])
+            logger.debug("Class: %s" % self.plugins_dict[args[0]])
             return self.plugins_dict[args[0]]
         except:
-            logging.warn("No plugin named: %s found, available plugins are: %s" % (args[0], self.plugins_dict))
-            logging.warn(
+            logger.warn("No plugin named: %s found, available plugins are: %s" % (args[0], self.plugins_dict))
+            logger.warn(
                     "Please check the plugin is listed in the yaml config and that you have @libsolace.plugin_registry.register in the class")
             raise
 
@@ -152,7 +155,7 @@ class Plugin(object):
         :return:
         """
         module = get_calling_module(point=3)
-        logging.info("Calling module: %s, Setting Exists bit: %s" % (module, state))
+        logger.info("Calling module: %s, Setting Exists bit: %s" % (module, state))
         self.exists = state
 
 

@@ -18,6 +18,9 @@ Changed
 ~~~~~~~
 
 -  Nothing
+-  Changed logging: we now no longer configure the root logger and default handler. Instead
+   each module has its own logger that has a `NullHandler` attached. This allows
+   library users to attach their own handlers and individually configure logging.
 
 `0.2.3` - 2018-12-15
 ---------------------

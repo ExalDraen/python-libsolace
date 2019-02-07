@@ -12,6 +12,9 @@ import libsolace
 from libsolace.plugin import Plugin
 from libsolace.util import get_key_from_settings
 
+logger = logging.getLogger(__name__)
+logger.addHandler(logging.NullHandler())
+
 
 @libsolace.plugin_registry.register
 class YAMLClient(Plugin):
@@ -32,7 +35,7 @@ class YAMLClient(Plugin):
         :param kwargs:
         :return:
         """
-        logging.debug("Configuring with settings: %s" % settings)
+        logger.debug("Configuring with settings: %s" % settings)
         self.settings = settings.__dict__  # type: dict
         self.file = get_key_from_settings("CMDB_FILE", self.settings)
         stream = open(self.file, 'r')
@@ -82,7 +85,7 @@ class YAMLClient(Plugin):
             for queue in queues:
                 if queue.has_key('environment'):
                     e = queue.get("environment").get(kwargs.get("environment"))
-                    logging.info("qoverride: %s" % e)
+                    logger.info("qoverride: %s" % e)
                     if e is not None:
                         for k, v in e.items():
                             queue['queue_config'][k] = v

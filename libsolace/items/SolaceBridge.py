@@ -7,6 +7,9 @@ from libsolace.SolaceXMLBuilder import SolaceXMLBuilder
 from libsolace.SolaceAPI import SolaceAPI
 from libsolace.items.SolaceQueue import SolaceQueue
 
+logger = logging.getLogger(__name__)
+logger.addHandler(logging.NullHandler())
+
 
 @libsolace.plugin_registry.register
 class SolaceBridge(Plugin):
@@ -22,7 +25,7 @@ class SolaceBridge(Plugin):
         :type version: string
 
         """
-        logging.debug("options: %s" % options)
+        logger.debug("options: %s" % options)
         self.cq = SolaceCommandQueue(version=version)
 
         self.primaryCluster = SolaceAPI(options.primary, testmode=testmode, version=version)
@@ -41,13 +44,13 @@ class SolaceBridge(Plugin):
             except Exception, e:
                 bridgeName = vpn
 
-            logging.info("Creating Bridge: %s" % bridgeName)
+            logger.info("Creating Bridge: %s" % bridgeName)
 
             primaryBridgeName = "%s_%s" % ("primary", bridgeName)
             backupBridgeName = "%s_%s" % ("backup", bridgeName)
 
-            logging.info("Primary Bridge Name: %s" % primaryBridgeName)
-            logging.info("Backup Bridge Name: %s" % backupBridgeName)
+            logger.info("Primary Bridge Name: %s" % primaryBridgeName)
+            logger.info("Backup Bridge Name: %s" % backupBridgeName)
 
             # create bridge on primary cluster
             self._create_bridge(self.primaryCluster, primaryBridgeName, vpn,
@@ -336,7 +339,7 @@ class SolaceBridge(Plugin):
         api.cq.enqueueV2(str(api.x), backupOnly=True)
 
     def _bridge_create_queue(self, api, queueName, vpnName, username, **kwargs):
-        logging.info("%s:%s creating bridge queue: %s with owner username: %s" % (
+        logger.info("%s:%s creating bridge queue: %s with owner username: %s" % (
         api.primaryRouter, api.backupRouter, queueName, username))
         queue1 = {}
         queue1['queue_config'] = {}

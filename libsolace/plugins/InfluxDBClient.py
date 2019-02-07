@@ -34,6 +34,9 @@ Simple influxdb client that can send metrics to influx.
 
 """
 
+logger = logging.getLogger(__name__)
+logger.addHandler(logging.NullHandler())
+
 
 def get_time():
     """ consistent time formatting
@@ -85,7 +88,7 @@ class InfluxDBClient(Plugin):
     plugin_name = "InfluxDBClient"
 
     def __init__(self, settings=None, **kwargs):
-        logging.debug("Configuring with settings: %s" % settings)
+        logger.debug("Configuring with settings: %s" % settings)
         self.settings = settings.__dict__  # type: dict
         self.influxdb_host = get_key_from_settings("INFLUXDB_HOST", self.settings, default="defiant")
         self.influxdb_port = get_key_from_settings("INFLUXDB_PORT", self.settings, default=8086)
@@ -133,5 +136,5 @@ class InfluxDBClient(Plugin):
         try:
             self.client.write_points(json_body)
         except Exception, e:
-            logging.error(e.message)
-            logging.error("Unable to write to influxdb")
+            logger.error(e.message)
+            logger.error("Unable to write to influxdb")

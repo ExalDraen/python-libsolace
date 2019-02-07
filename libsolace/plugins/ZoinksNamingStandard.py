@@ -20,6 +20,9 @@ PLUGINS:
 NAMEHOOK: MyNamer
 """
 
+logger = logging.getLogger(__name__)
+logger.addHandler(logging.NullHandler())
+
 
 @libsolace.plugin_registry.register
 class ZoinksNamingStandard(Plugin):
@@ -34,9 +37,9 @@ class ZoinksNamingStandard(Plugin):
 
 
         """
-        logging.debug("Solving name for: %s" % str(args))
+        logger.debug("Solving name for: %s" % str(args))
         try:
             return args[0] % args[1]
         except TypeError, e:
-            logging.error("Unable to solve naming of object: %s" % args)
+            logger.error("Unable to solve naming of object: %s" % args)
             raise

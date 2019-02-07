@@ -15,6 +15,10 @@ from libsolace.Naming import name
 from libsolace.util import get_key_from_settings
 from libsolace.util import get_key_from_kwargs
 
+logger = logging.getLogger(__name__)
+logger.addHandler(logging.NullHandler())
+
+
 @libsolace.plugin_registry.register
 class CMDBClient(Plugin):
 
@@ -29,7 +33,7 @@ class CMDBClient(Plugin):
         :param kwargs:
         :return:
         """
-        logging.debug("Configuring with settings: %s" % settings)
+        logger.debug("Configuring with settings: %s" % settings)
         self.settings = settings.__dict__  # type: dict
         self.url = get_key_from_settings("CMDB_URL", self.settings)
 

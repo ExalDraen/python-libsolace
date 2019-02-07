@@ -3,6 +3,9 @@ import re
 import simplejson as json
 import re
 
+logger = logging.getLogger(__name__)
+logger.addHandler(logging.NullHandler())
+
 
 class SolaceReplyHandler(object):
     """
@@ -22,8 +25,8 @@ class SolaceReplyHandler(object):
 
     def __init__(self, document=None, version="soltr/6_0", primaryOnly=False, backupOnly=False, **kwargs):
 
-        logging.debug("kwargs: %s" % kwargs)
-        logging.debug(document)
+        logger.debug("kwargs: %s" % kwargs)
+        logger.debug(document)
 
         if primaryOnly and not backupOnly:
             self.reply = SolaceReply(document['rpc-reply']['rpc'])
@@ -35,7 +38,7 @@ class SolaceReplyHandler(object):
             try:
                 self.backup = SolaceReply(document.pop()['rpc-reply']['rpc'])
             except Exception, e:
-                logging.warn("Unable to process BACKUP response")
+                logger.warn("Unable to process BACKUP response")
                 pass
 
     def __repr__(self):
@@ -43,10 +46,10 @@ class SolaceReplyHandler(object):
         Replace u' with u" and ' with "
         """
         try:
-            logging.debug("Reply Dict: %s " % self.__dict__)
+            logger.debug("Reply Dict: %s " % self.__dict__)
             return str(json.loads(str(self.__dict__).replace("'", '"').replace('u"', '"').replace('None', '"None"')))
         except:
-            logging.warn("Unable to decode json %s" % str(self.__dict__))
+            logger.warn("Unable to decode json %s" % str(self.__dict__))
             raise
 
 
@@ -55,11 +58,11 @@ class SolaceReply(object):
 
     def __init__(self, document):
         for k in document:
-            logging.debug("%s: %s" % (k, document[k]))
+            logger.debug("%s: %s" % (k, document[k]))
             try:
                 self.__dict__[k] = SolaceReply(document[k])
             except:
-                logging.debug("Final value %s" % document[k])
+                logger.debug("Final value %s" % document[k])
                 if document[k] == None:
                     self.__dict__[k] = str(document[k])
                 else:
@@ -67,13 +70,13 @@ class SolaceReply(object):
 
     # cant have `-` in the key names, rewrite em.
     def __getattr__(self, name):
-        logging.debug("getattr: name: %s from %s " % (name, self.__dict__))
+        logger.debug("getattr: name: %s from %s " % (name, self.__dict__))
         name = re.sub("_", "-", name)
 
         try:
             return self.__dict__[name]
         except:
-            logging.error("Unable to retrieve key: %s" % name)
+            logger.error("Unable to retrieve key: %s" % name)
             raise
 
     def __str__(self):
@@ -88,7 +91,7 @@ class SolaceReply(object):
 
     def __setattr__(self, name, value):
         # name = re.sub("_", "-", name)
-        logging.debug("Setting key %s" % name)
+        logger.debug("Setting key %s" % name)
         if value == None:
             self.__dict__[name] = str(value)
         else:

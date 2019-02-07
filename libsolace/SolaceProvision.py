@@ -12,6 +12,9 @@ try:
 except ImportError:
     import json
 
+logger = logging.getLogger(__name__)
+logger.addHandler(logging.NullHandler())
+
 
 class SolaceProvision:
     """ Provision the CLIENT_PROFILE, VPN, ACL_PROFILE, QUEUES and USERS
@@ -54,7 +57,7 @@ class SolaceProvision:
             self.environment_name = kwargs['environment']
             self.client_profile_name = kwargs['client_profile']
             self.users_dict = kwargs['users_dict']
-            logging.debug("USERS_DICT: %s" % self.users_dict )
+            logger.debug("USERS_DICT: %s" % self.users_dict )
             self.testmode = kwargs['testmode']
             self.create_queues = kwargs['create_queues']
             self.shutdown_on_apply = kwargs['shutdown_on_apply']
@@ -62,14 +65,14 @@ class SolaceProvision:
             self.detect_status = kwargs['detect_status']
         except Exception, e:
             raise KeyError('missing kwarg %s' % e)
-        logging.info("vpn_dict: %s" % self.vpn_dict)
-        logging.info("vpn_name: %s" % self.vpn_name)
-        logging.info("Command line SolOS-TR version override: %s" % self.version)
+        logger.info("vpn_dict: %s" % self.vpn_dict)
+        logger.info("vpn_name: %s" % self.vpn_name)
+        logger.info("Command line SolOS-TR version override: %s" % self.version)
 
         self.queueMgr = None
 
         if self.testmode:
-            logging.info('TESTMODE ACTIVE')
+            logger.info('TESTMODE ACTIVE')
 
         # create a connection for RPC calls to the environment
         self.connection = SolaceAPI(self.environment_name, testmode=self.testmode, version=self.version,
@@ -79,10 +82,10 @@ class SolaceProvision:
         if self.version is None:
             self.version = self.connection.version
         else:
-            logging.warn("Overriding default semp version %s" % self.version)
+            logger.warn("Overriding default semp version %s" % self.version)
             self.version = self.version
 
-        logging.debug("VPN Data Node: %s" % json.dumps(str(self.vpn_dict), ensure_ascii=False))
+        logger.debug("VPN Data Node: %s" % json.dumps(str(self.vpn_dict), ensure_ascii=False))
 
         # prepare vpn commands
         self.vpn = self.connection.manage("SolaceVPN",
@@ -90,9 +93,9 @@ class SolaceProvision:
                                           owner_name=self.vpn_name,
                                           max_spool_usage=self.vpn_dict['vpn_config']['spool_size'])
 
-        logging.info("Create VPN %s" % self.vpn_name)
+        logger.info("Create VPN %s" % self.vpn_name)
         for cmd in self.vpn.commands.commands:
-            logging.debug(str(cmd))
+            logger.debug(str(cmd))
             if not self.testmode:
                 self.connection.rpc(str(cmd[0]), **cmd[1])
 
@@ -105,10 +108,10 @@ class SolaceProvision:
         self.acl_profile = self.connection.manage("SolaceACLProfile", name=self.vpn_name, vpn_name=self.vpn_name)
 
         # prepare the user that owns this vpn
-        logging.info("self.vpn_name: %s" % self.vpn_name)
+        logger.info("self.vpn_name: %s" % self.vpn_name)
 
         if not self._is_vpn_owner_user_present():
-            logging.debug("VPN owner user %s for VPN %s not present in CMDB, appending to the list of users to be created" % (self.vpn_name, self.vpn_name))
+            logger.debug("VPN owner user %s for VPN %s not present in CMDB, appending to the list of users to be created" % (self.vpn_name, self.vpn_name))
             vpn_owner_user = [
                 {
                     'username': self.vpn_name,
@@ -135,14 +138,14 @@ class SolaceProvision:
         #                             testmode = self.testmode,
         #                             shutdown_on_apply = self.shutdown_on_apply)]
         #
-        # logging.info("self.users: %s" % self.users)
+        # logger.info("self.users: %s" % self.users)
 
         # prepare the queues for the vpn ( if any )
         try:
-            logging.info("Queue datanodes %s" % self.queue_dict)
+            logger.info("Queue datanodes %s" % self.queue_dict)
             if self.queue_dict is not None:
                 try:
-                    logging.info("Stacking queue commands for VPN: %s" % self.vpn_name)
+                    logger.info("Stacking queue commands for VPN: %s" % self.vpn_name)
                     self.queueMgr = self.connection.manage("SolaceQueue",
                                                            vpn_name=self.vpn_name,
                                                            queues=self.queue_dict,
@@ -151,37 +154,37 @@ class SolaceProvision:
                     raise
                     # raise BaseException("Something bad has happened which was unforseen by developers: %s" % e)
             else:
-                logging.warning("No Queue dictionary was passed, disabling queue creation")
+                logger.warning("No Queue dictionary was passed, disabling queue creation")
                 self.create_queues = False
         except AttributeError:
-            logging.warning("No queue declaration for this vpn in site-config, skipping")
+            logger.warning("No queue declaration for this vpn in site-config, skipping")
             self.create_queues = False
             raise
 
-        logging.info("Create Client Profile")
+        logger.info("Create Client Profile")
         # Provision profile now already since we need to link to it.
         for cmd in self.client_profile.commands.commands:
-            logging.debug(str(cmd))
+            logger.debug(str(cmd))
             if not self.testmode:
                 self.connection.rpc(str(cmd[0]), **cmd[1])
 
-        logging.info("Create ACL Profile for vpn %s" % self.vpn_name)
+        logger.info("Create ACL Profile for vpn %s" % self.vpn_name)
         for cmd in self.acl_profile.commands.commands:
-            logging.debug(str(cmd))
+            logger.debug(str(cmd))
             if not self.testmode:
                 self.connection.rpc(str(cmd[0]), **cmd[1])
 
-        logging.info("Creating users for vpn %s" % self.vpn_name)
+        logger.info("Creating users for vpn %s" % self.vpn_name)
         for cmd in self.userMgr.commands.commands:
-            logging.debug(cmd)
+            logger.debug(cmd)
             if not self.testmode:
                 self.connection.rpc(str(cmd[0]), **cmd[1])
 
-        logging.info("Create Queues Bool?: %s in %s" % (self.create_queues, self.vpn_name))
+        logger.info("Create Queues Bool?: %s in %s" % (self.create_queues, self.vpn_name))
         if self.create_queues:
-            logging.info("Create Queues for vpn %s" % self.vpn_name)
+            logger.info("Create Queues for vpn %s" % self.vpn_name)
             for cmd in self.queueMgr.commands.commands:
-                logging.debug(cmd)
+                logger.debug(cmd)
                 if not self.testmode:
                     self.connection.rpc(str(cmd[0]), **cmd[1])
 
@@ -190,11 +193,11 @@ class SolaceProvision:
             # Check if there is environment overide for VPN
             for e in self.vpn_dict.env:
                 if e.name == self.environment_name:
-                    logging.info('setting vpn_config to %s values' % e.name)
+                    logger.info('setting vpn_config to %s values' % e.name)
                     self.vpn_dict.vpn_config = e.vpn_config
-                    logging.info("Spool Size: %s" % self.vpn_dict.vpn_config['spool_size'])
+                    logger.info("Spool Size: %s" % self.vpn_dict.vpn_config['spool_size'])
         except:
-            logging.warning("No environment overides for vpn: %s" % self.vpn_dict.name)
+            logger.warning("No environment overides for vpn: %s" % self.vpn_dict.name)
             pass
 
     def _is_vpn_owner_user_present(self):

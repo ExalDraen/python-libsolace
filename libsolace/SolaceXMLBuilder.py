@@ -7,6 +7,9 @@ import re
 from libsolace.SolaceNode import SolaceNode
 from libsolace.util import d2x, get_calling_module
 
+logger = logging.getLogger(__name__)
+logger.addHandler(logging.NullHandler())
+
 
 class SolaceXMLBuilder(object):
     """Builds Solace's SEMP XML Configuration Commands
@@ -47,7 +50,7 @@ class SolaceXMLBuilder(object):
             self.description = description
         self.version = version
         calling_module = get_calling_module()
-        logging.info("Called by module: %s - %s description: %s " % (calling_module, self.version, description))
+        logger.info("Called by module: %s - %s description: %s " % (calling_module, self.version, description))
 
     def __getattr__(self, name):
         name = re.sub("_", "-", name)
@@ -61,7 +64,7 @@ class SolaceXMLBuilder(object):
         myxml = d2x(eval(str(self.__dict__)))
         # I had to conjur up my own header cause solace doesnt like </rpc> to have attribs
         complete_xml = str('<rpc semp-version="%s">%s</rpc>' % (self.version, myxml.display(version=self.version)))
-        logging.debug("Returning XML: %s" % complete_xml)
+        logger.debug("Returning XML: %s" % complete_xml)
         return complete_xml
 
     def __call__(self, *args, **kwargs):

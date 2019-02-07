@@ -32,6 +32,9 @@ Simple opentsdb plugin
 
 """
 
+logger = logging.getLogger(__name__)
+logger.addHandler(logging.NullHandler())
+
 
 @libsolace.plugin_registry.register
 class OpenTSDBClient(Plugin):
@@ -52,7 +55,7 @@ class OpenTSDBClient(Plugin):
     plugin_name = "OpenTSDBClient"
 
     def __init__(self, settings=None, **kwargs):
-        logging.debug("Configuring with settings: %s" % settings)
+        logger.debug("Configuring with settings: %s" % settings)
         self.settings = settings.__dict__  # type: dict
         self.host = get_key_from_settings("TSDB_HOST", self.settings, default="defiant")
         self.port = get_key_from_settings("TSDB_PORT", self.settings, default=4242)
@@ -88,5 +91,5 @@ class OpenTSDBClient(Plugin):
         try:
             self.client.log(measurement, data, **tags)
         except Exception, ex:
-            logging.error(ex.message)
-            logging.error("Unable to send metrics")
+            logger.error(ex.message)
+            logger.error("Unable to send metrics")

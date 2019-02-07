@@ -19,6 +19,9 @@ example while DefaultNaming set as NAMEHOOK
 
 """
 
+logger = logging.getLogger(__name__)
+logger.addHandler(logging.NullHandler())
+
 # plugin_name = "Naming"
 
 
@@ -33,5 +36,5 @@ def name(*args, **kwargs):
     try:
         return libsolace.plugin_registry(settings.NAMEHOOK)().solve(*args, **kwargs)
     except Exception, e:
-        logging.error("Unable to solve name of object, reason: %s %s" % (e.__class__, e.message))
+        logger.error("Unable to solve name of object, reason: %s %s" % (e.__class__, e.message))
         raise

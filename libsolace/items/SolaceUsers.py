@@ -8,6 +8,9 @@ from libsolace.util import get_key_from_kwargs
 from libsolace.Exceptions import *
 from libsolace.Decorators import only_on_shutdown
 
+logger = logging.getLogger(__name__)
+logger.addHandler(logging.NullHandler())
+
 
 @libsolace.plugin_registry.register
 class SolaceUsers(Plugin):
@@ -43,13 +46,13 @@ class SolaceUsers(Plugin):
         self.api = get_key_from_kwargs("api", kwargs)
         kwargs.pop("api")
 
-        logging.info("SolaceUsers: kwargs: %s " % kwargs)
+        logger.info("SolaceUsers: kwargs: %s " % kwargs)
 
         if kwargs == {}:
-            logging.info("No kwargs, factory mode")
+            logger.info("No kwargs, factory mode")
             return
         else:
-            logging.info("kwargs: %s" % kwargs)
+            logger.info("kwargs: %s" % kwargs)
             self.commands = SolaceCommandQueue(version=self.api.version)
             self.options = None  # not implemented
             self.users = get_key_from_kwargs("users", kwargs)
@@ -60,7 +63,7 @@ class SolaceUsers(Plugin):
             self.testmode = get_key_from_kwargs("testmode", kwargs)
             self.shutdown_on_apply = get_key_from_kwargs("shutdown_on_apply", kwargs)
 
-            logging.info("""UsersCommands: %s, Environment: %s, Users: %s, vpn_name: %s,
+            logger.info("""UsersCommands: %s, Environment: %s, Users: %s, vpn_name: %s,
                 acl_profile: %s, client_profile: %s, testmode: %s, shutdown_on_apply: %s""" % (self.commands,
                                                                                                self.api.environment,
                                                                                                self.users,
@@ -71,16 +74,16 @@ class SolaceUsers(Plugin):
                                                                                                self.shutdown_on_apply))
 
             if self.testmode:
-                logging.info('TESTMODE ACTIVE')
+                logger.info('TESTMODE ACTIVE')
                 try:
                     self._tests(**kwargs)
                 except Exception, e:
-                    logging.error("Tests Failed %s" % e)
+                    logger.error("Tests Failed %s" % e)
                     raise BaseException("Tests Failed")
 
             # backwards compatibility for None options passed to still execute "add" code
             if self.options == None:
-                logging.warning(
+                logger.warning(
                     "No options passed, assuming you meant 'add', please update usage of this class to pass a OptionParser instance")
                 for user in self.users:
                     user_kwargs = dict(kwargs)
@@ -90,7 +93,7 @@ class SolaceUsers(Plugin):
                         # Check if user already exists, if not then shutdown immediately after creating the user
                         self.get(**user_kwargs).reply.show.client_username.client_usernames.client_username
                     except (AttributeError, KeyError, MissingClientUser):
-                        logging.info(
+                        logger.info(
                             "User %s doesn't exist, using shutdown_on_apply to True for user" % user_kwargs['username'])
                         user_kwargs['shutdown_on_apply'] = True
                     self.create_user(**user_kwargs)
@@ -110,7 +113,7 @@ class SolaceUsers(Plugin):
         """
         Call the tests before create is attempted, checks for profiles in this case
         """
-        logging.info('Pre-Provision Tests')
+        logger.info('Pre-Provision Tests')
         self.check_client_profile_exists(**kwargs)
         self.check_acl_profile_exists(**kwargs)
 
@@ -126,7 +129,7 @@ class SolaceUsers(Plugin):
         self.api.x.show.client_username.detail
 
         response = self.api.rpc(str(self.api.x), **kwargs)
-        logging.info(response)
+        logger.info(response)
         if response.reply.show.client_username.client_usernames == 'None':
             raise MissingClientUser("No such user %s" % username)
         else:
@@ -153,14 +156,14 @@ class SolaceUsers(Plugin):
 
         client_profile = get_key_from_kwargs('client_profile', kwargs)
 
-        logging.info('Checking if client_profile is present on devices')
+        logger.info('Checking if client_profile is present on devices')
         self.api.x = SolaceXMLBuilder("Checking client_profile %s is present on device" % client_profile,
                                       version=self.api.version)
         self.api.x.show.client_profile.name = client_profile
         response = self.api.rpc(str(self.api.x), allowfail=False)
         for v in response:
             if v['rpc-reply']['execute-result']['@code'] == 'fail':
-                logging.warning('client_profile: %s missing from appliance' % client_profile)
+                logger.warning('client_profile: %s missing from appliance' % client_profile)
                 raise BaseException("no such client_profile %s" % client_profile)
                 return False
         return True
@@ -175,14 +178,14 @@ class SolaceUsers(Plugin):
         """
         acl_profile = get_key_from_kwargs('acl_profile', kwargs)
 
-        logging.info('Checking if acl_profile is present on devices')
+        logger.info('Checking if acl_profile is present on devices')
         self.api.x = SolaceXMLBuilder("Checking acl_profile %s is present on device" % acl_profile,
                                       version=self.api.version)
         self.api.x.show.acl_profile.name = kwargs.get('acl_profile')
         response = self.api.rpc(str(self.api.x), allowfail=False)
         for v in response:
             if v['rpc-reply']['execute-result']['@code'] == 'fail':
-                logging.warning('acl_profile: %s missing from appliance' % acl_profile)
+                logger.warning('acl_profile: %s missing from appliance' % acl_profile)
                 raise BaseException("no such acl_profile")
                 return False
         return True
@@ -237,7 +240,7 @@ class SolaceUsers(Plugin):
             self.commands.enqueue(PluginResponse(str(self.api.x), **kwargs))
             return PluginResponse(str(self.api.x), **kwargs)
         else:
-            logging.warning(
+            logger.warning(
                 "Not disabling User, commands could fail since shutdown_on_apply = %s" % self.shutdown_on_apply)
             return None
 

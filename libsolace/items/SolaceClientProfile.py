@@ -7,6 +7,9 @@ from libsolace.SolaceXMLBuilder import SolaceXMLBuilder
 from libsolace.util import version_equal_or_greater_than
 from libsolace.util import get_key_from_kwargs
 
+logger = logging.getLogger(__name__)
+logger.addHandler(logging.NullHandler())
+
 
 @libsolace.plugin_registry.register
 class SolaceClientProfile(Plugin):
@@ -79,7 +82,7 @@ class SolaceClientProfile(Plugin):
             return
 
         if not "name" in kwargs:
-            logging.info("No name kwarg, assuming query mode")
+            logger.info("No name kwarg, assuming query mode")
             return
 
         self.name = get_key_from_kwargs('name', kwargs)
@@ -88,7 +91,7 @@ class SolaceClientProfile(Plugin):
         self.max_clients = get_key_from_kwargs('max_clients', kwargs, default=self.defaults.get("max_clients"))
 
         if kwargs.get('options', None) is None:
-            logging.warning(
+            logger.warning(
                 "No options passed, assuming you meant 'add', please update usage of this class to pass a OptionParser instance")
             self.new_client_profile(**kwargs)
             self.allow_consume(**kwargs)

@@ -7,6 +7,9 @@ from libsolace.SolaceCommandQueue import SolaceCommandQueue
 from libsolace.SolaceXMLBuilder import SolaceXMLBuilder
 from libsolace.util import get_key_from_kwargs
 
+logger = logging.getLogger(__name__)
+logger.addHandler(logging.NullHandler())
+
 
 @libsolace.plugin_registry.register
 class SolaceVPN(Plugin):
@@ -67,29 +70,29 @@ class SolaceVPN(Plugin):
         self.commands = SolaceCommandQueue(version=self.api.version)
 
         if not "vpn_name" in kwargs:
-            logging.info("No vpn_name kwarg, assuming query mode")
+            logger.info("No vpn_name kwarg, assuming query mode")
         else:
             self.vpn_name = get_key_from_kwargs("vpn_name", kwargs)
             self.owner_username = get_key_from_kwargs("owner_username", kwargs, default=self.vpn_name)
             self.acl_profile = get_key_from_kwargs("acl_profile", kwargs, default=self.vpn_name)
             self.options = None
 
-            logging.debug("Creating vpn in env: %s vpn: %s, kwargs: %s" % (self.api.environment, self.vpn_name, kwargs))
+            logger.debug("Creating vpn in env: %s vpn: %s, kwargs: %s" % (self.api.environment, self.vpn_name, kwargs))
 
             # set defaults
             for k, v in self.default_settings.items():
-                logging.info("Setting Key: %s to %s" % (k, v))
+                logger.info("Setting Key: %s to %s" % (k, v))
                 setattr(self, k, v)
 
             # use kwargs to tune defaults
             for k, v in self.default_settings.items():
                 if k in kwargs:
-                    logging.info("Overriding Key: %s to %s" % (k, kwargs[k]))
+                    logger.info("Overriding Key: %s to %s" % (k, kwargs[k]))
                     setattr(self, k, kwargs[k])
 
             # backwards compatibility for None options passed to still execute "add" code
             if self.options is None:
-                logging.warning(
+                logger.warning(
                         "No options passed, assuming you meant 'add', please update usage of this class to pass a OptionParser instance")
                 # stack the commands
                 self.create_vpn(**kwargs)
@@ -97,7 +100,7 @@ class SolaceVPN(Plugin):
                 self.set_internal_auth(**kwargs)
                 self.set_spool_size(**kwargs)
                 self.set_large_message_threshold(**kwargs)
-                self.set_logging_tag(**kwargs)
+                self.set_logger_tag(**kwargs)
                 self.enable_vpn(**kwargs)
 
     @only_if_not_exists("get", 'rpc-reply.rpc.show.message-vpn.vpn')
@@ -150,7 +153,7 @@ class SolaceVPN(Plugin):
 
         vpn_name = get_key_from_kwargs("vpn_name", kwargs)
         detail = get_key_from_kwargs("detail", kwargs, default=False)
-        logging.info("Getting VPN: %s" % vpn_name)
+        logger.info("Getting VPN: %s" % vpn_name)
 
         self.api.x = SolaceXMLBuilder("Getting VPN %s" % vpn_name, version=self.api.version)
         self.api.x.show.message_vpn.vpn_name = vpn_name
@@ -250,7 +253,7 @@ class SolaceVPN(Plugin):
         vpn_name = get_key_from_kwargs("vpn_name", kwargs)
         max_spool_usage = get_key_from_kwargs("max_spool_usage", kwargs, self.default_settings['max_spool_usage'])
 
-        logging.debug("Setting spool size to %s" % max_spool_usage)
+        logger.debug("Setting spool size to %s" % max_spool_usage)
         # Set the Spool Size
         self.api.x = SolaceXMLBuilder("VPN %s Set spool size to %s" % (vpn_name, max_spool_usage),
                                       version=self.api.version)
@@ -291,11 +294,11 @@ class SolaceVPN(Plugin):
         return (str(self.api.x), kwargs)
 
     @only_if_exists("get", 'rpc-reply.rpc.show.message-vpn.vpn')
-    def set_logging_tag(self, **kwargs):
-        """Sets the VPN logging tag, default = vpn_name
+    def set_logger_tag(self, **kwargs):
+        """Sets the VPN logger tag, default = vpn_name
 
         :param vpn_name: The name of the VPN
-        :param tag: string to use in logging tag
+        :param tag: string to use in logger tag
         :type vpn_name: str
         :type tag: str
         :return: tuple SEMP request and kwargs
@@ -303,7 +306,7 @@ class SolaceVPN(Plugin):
         Example:
 
             >>> api = SolaceAPI("dev")
-            >>> request_tuple = api.manage("SolaceVPN").set_logging_tag(vpn_name="my_vpn", tag="my_vpn_string")
+            >>> request_tuple = api.manage("SolaceVPN").set_logger_tag(vpn_name="my_vpn", tag="my_vpn_string")
             >>> response = api.rpc(request_tuple)
 
         """
@@ -311,8 +314,8 @@ class SolaceVPN(Plugin):
         vpn_name = get_key_from_kwargs("vpn_name", kwargs)
         tag = get_key_from_kwargs("tag", kwargs, default=vpn_name)
 
-        # Logging Tag for this VPN
-        self.api.x = SolaceXMLBuilder("VPN %s Setting logging tag to %s" % (vpn_name, vpn_name),
+        # logger Tag for this VPN
+        self.api.x = SolaceXMLBuilder("VPN %s Setting logger tag to %s" % (vpn_name, vpn_name),
                                       version=self.api.version)
         self.api.x.message_vpn.vpn_name = vpn_name
         self.api.x.message_vpn.event.log_tag.tag_string = tag
@@ -368,7 +371,7 @@ class SolaceVPN(Plugin):
         response = self.api.rpc(PluginResponse(str(self.api.x), **kwargs))
 
         # response = SolaceReplyHandler(self.api.rpc(str(self.api.x), primaryOnly=True))
-        # logging.info(response)
+        # logger.info(response)
 
         return [vpn['name'] for vpn in response[0]['rpc-reply']['rpc']['show']['message-vpn']['vpn']]
 

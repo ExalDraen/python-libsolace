@@ -14,7 +14,7 @@ from collections import OrderedDict
 import logging
 
 logger = logging.getLogger(__name__)
-
+logger.addHandler(logging.NullHandler())
 
 """
 
@@ -182,11 +182,11 @@ class d2x:
         # return self.root.toprettyxml(indent="  ")
         try:
             complete_xml = str('\n<rpc semp-version="%s">\n%s</rpc>' % (version, self.root.toprettyxml(indent="  ")))
-            logging.debug(complete_xml)
+            logger.debug(complete_xml)
             return self.root.toxml()
             # return self.root.toprettyxml(indent="  ")
         except AttributeError, e:
-            logging.error("the root leaf node was not found, maybe you registered two roots!")
+            logger.error("the root leaf node was not found, maybe you registered two roots!")
             raise
 
 
@@ -213,14 +213,14 @@ def httpRequest(url, fields=None, headers=None, method='GET', timeout=3, protoco
         if method == 'GET':
             request = http.request_encode_url(method, url, fields=fields, headers=headers, timeout=timeout)
         elif method == 'POST':
-            logging.debug("method: %s, url: %s, headers: %s, fields: %s" % (method, url, headers, fields))
+            logger.debug("method: %s, url: %s, headers: %s, fields: %s" % (method, url, headers, fields))
             request = http.urlopen(method, url, headers=headers, body=fields)
         code = request.status
-        logging.debug("response code: %s" % code)
+        logger.debug("response code: %s" % code)
         headers = request.getheaders()
-        logging.debug("response headers: %s" % headers)
+        logger.debug("response headers: %s" % headers)
         data = request.data
-        logging.debug("response data: %s" % data)
+        logger.debug("response data: %s" % data)
     elif URLLIB2:
         logger.debug('Using urllib2')
         if not method in ['GET', 'POST']:
@@ -362,7 +362,7 @@ def get_plugin(plugin_name, solace_api, *args, **kwargs):
     :return:
     """
     plugin = libsolace.plugin_registry(plugin_name, **kwargs)
-    logging.info(args)
+    logger.info(args)
     return plugin(api=solace_api, *args, **kwargs)
 
 

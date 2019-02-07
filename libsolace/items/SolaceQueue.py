@@ -7,6 +7,9 @@ from libsolace.SolaceXMLBuilder import SolaceXMLBuilder
 from libsolace.plugin import Plugin, PluginResponse
 from libsolace.util import get_key_from_kwargs
 
+logger = logging.getLogger(__name__)
+logger.addHandler(logging.NullHandler())
+
 
 @libsolace.plugin_registry.register
 class SolaceQueue(Plugin):
@@ -58,21 +61,21 @@ class SolaceQueue(Plugin):
         kwargs.pop("api")
 
         if kwargs == {}:
-            logging.info("Query Mode")
+            logger.info("Query Mode")
             return
 
-        logging.info("Provision mode: %s" % kwargs)
+        logger.info("Provision mode: %s" % kwargs)
         self.vpn_name = get_key_from_kwargs("vpn_name", kwargs, default="default")
         self.testmode = get_key_from_kwargs("testmode", kwargs, default=False)
         self.queues = get_key_from_kwargs("queues", kwargs, default={})
         self.shutdown_on_apply = get_key_from_kwargs("shutdown_on_apply", kwargs, default=False)
         self.defaults = get_key_from_kwargs('defaults', kwargs, default=self.defaults)
         self.options = None
-        logging.info("Queues: %s" % self.queues)
+        logger.info("Queues: %s" % self.queues)
 
         # backwards compatibility for None options passed to still execute "add" code
         if self.options is None:
-            logging.warning(
+            logger.warning(
                     "No options passed, assuming you meant 'add', please update usage of this class to pass a OptionParser instance")
 
             for queue in self.queues:
@@ -152,34 +155,34 @@ class SolaceQueue(Plugin):
         queue_name = get_key_from_kwargs("name", queue)
 
         try:
-            logging.debug("Checking env overrides for queue %s" % queue['env'])
+            logger.debug("Checking env overrides for queue %s" % queue['env'])
             for e in queue['env']:
                 if e['name'] == self.api.environment:
-                    logging.info('setting queue_config to environment %s values' % e['name'])
+                    logger.info('setting queue_config to environment %s values' % e['name'])
                     return self.__apply_default_config__(e['queue_config'], self.defaults)
         except:
-            logging.warn("No environment overrides for queue %s" % queue_name)
+            logger.warn("No environment overrides for queue %s" % queue_name)
             pass
         try:
             return self.__apply_default_config__(queue['queue_config'], self.defaults)
         except:
-            logging.warning("No queue_config for queue: %s found, please check site-config" % queue_name)
+            logger.warning("No queue_config for queue: %s found, please check site-config" % queue_name)
             raise
 
 
     def __apply_default_config__(self, config, default):
         """ copys keys from default dict to config dict when not present """
 
-        logging.info("Applying default config after config")
+        logger.info("Applying default config after config")
 
         final_config = {}
 
         for k, v in default.items():
             if k in config:
-                logging.info("Using environment config key: %s to %s" % (k, config[k]))
+                logger.info("Using environment config key: %s to %s" % (k, config[k]))
                 final_config[k] = config[k]
             else:
-                logging.info("Using default config key: %s to %s" % (k, v))
+                logger.info("Using default config key: %s to %s" % (k, v))
                 final_config[k] = v
         return final_config
 
@@ -257,7 +260,7 @@ class SolaceQueue(Plugin):
             self.commands.enqueue(PluginResponse(str(self.api.x), **kwargs))
             return PluginResponse(str(self.api.x), **kwargs)
         else:
-            logging.warning("Not disabling Queue, commands could fail since shutdown_on_apply = %s" % shutdown_on_apply)
+            logger.warning("Not disabling Queue, commands could fail since shutdown_on_apply = %s" % shutdown_on_apply)
 
     # perform the if_exists on the primary only
     @only_if_exists('get', 'rpc-reply.rpc.show.queue.queues.queue.info', primaryOnly=True)
@@ -303,7 +306,7 @@ class SolaceQueue(Plugin):
             self.commands.enqueue(PluginResponse(str(self.api.x), **kwargs))
             return PluginResponse(str(self.api.x), **kwargs)
         else:
-            logging.warning("Not disabling Queue, commands could fail since shutdown_on_apply = %s" % shutdown_on_apply)
+            logger.warning("Not disabling Queue, commands could fail since shutdown_on_apply = %s" % shutdown_on_apply)
 
     # perform the if_exists on the primary only
     @only_if_exists('get', 'rpc-reply.rpc.show.queue.queues.queue.info', primaryOnly=True)
@@ -384,7 +387,7 @@ class SolaceQueue(Plugin):
 
         if owner == "%lsVPN":
             owner = vpn_name
-            logging.info("Owner being set  to VPN itself: %s" % owner)
+            logger.info("Owner being set  to VPN itself: %s" % owner)
 
         # Queue Owner
         self.api.x = SolaceXMLBuilder("Set Queue %s owner to %s" % (queue_name, vpn_name), version=self.api.version)

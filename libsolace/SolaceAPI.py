@@ -17,6 +17,9 @@ except:
 
 from libsolace.util import httpRequest, generateRequestHeaders, generateBasicAuthHeader
 
+logger = logging.getLogger(__name__)
+logger.addHandler(logging.NullHandler())
+
 
 class SolaceAPI:
     """
@@ -92,22 +95,22 @@ class SolaceAPI:
 
     def __init__(self, environment, version=None, detect_status=True, testmode=False, **kwargs):
         try:
-            logging.info("Solace Client SEMP version: %s" % version)
+            logger.info("Solace Client SEMP version: %s" % version)
             self.version = version
 
-            logging.info("Connecting to appliances %s in %s" % (settings.SOLACE_CONF[environment]['MGMT'], environment))
+            logger.info("Connecting to appliances %s in %s" % (settings.SOLACE_CONF[environment]['MGMT'], environment))
             self.environment = environment
 
             self.settings = settings
             self.config = settings.SOLACE_CONF[environment]
-            logging.debug("Loaded Config: %s" % self.config)
+            logger.debug("Loaded Config: %s" % self.config)
 
             # testmode sets the user to the RO user
             self.testmode = testmode
             if self.testmode:
                 self.config['USER'] = settings.READ_ONLY_USER
                 self.config['PASS'] = settings.READ_ONLY_PASS
-                logging.info('READONLY mode')
+                logger.info('READONLY mode')
 
             # for SSL / TLS
             if 'VERIFY_SSL' not in self.config:
@@ -117,7 +120,7 @@ class SolaceAPI:
             # 1st node is primary and second is backup
             self.detect_status = detect_status
             if self.detect_status:
-                logging.info("Detecting primary and backup node states")
+                logger.info("Detecting primary and backup node states")
                 self.status = self.get_message_spool(**kwargs)
                 self.primaryRouter = None
                 self.backupRouter = None
@@ -135,20 +138,20 @@ class SolaceAPI:
                 if self.primaryRouter == self.backupRouter:
                     # impossible to test, but possible to happen...
                     raise Exception("Error, detected router %s to be both primary and backup" % self.primaryRouter)
-                logging.info("Detected primary Router: %s" % self.primaryRouter)
-                logging.info("Detected backup Router: %s" % self.backupRouter)
+                logger.info("Detected primary Router: %s" % self.primaryRouter)
+                logger.info("Detected backup Router: %s" % self.backupRouter)
 
             else:
-                logging.info("Not detecting statuses, using config")
+                logger.info("Not detecting statuses, using config")
                 try:
                     self.primaryRouter = self.config['MGMT'][0]
                 except Exception, e:
-                    logging.error("No routers")
+                    logger.error("No routers")
                     raise
                 try:
                     self.backupRouter = self.config['MGMT'][1]
                 except IndexError, e:
-                    logging.warn("No second router in config")
+                    logger.warn("No second router in config")
                     kwargs["primaryOnly"] = True
                     kwargs["backupOnly"] = False
                     pass
@@ -156,15 +159,15 @@ class SolaceAPI:
             # if the version is NOT specified, query appliance versions
             # assumes that backup and primary are SAME firmware version.s
             if version == None:
-                logging.debug("Detecting Version")
+                logger.debug("Detecting Version")
                 self.xmlbuilder = SolaceXMLBuilder("Detecting SolOS-TR Version", version="soltr/5_0")
                 self.xmlbuilder.show.version
                 result = self.rpc(str(self.xmlbuilder), **kwargs)
                 self.version = result[0]['rpc-reply']['@semp-version']
             else:
-                logging.info("Override SolOS-TR Version: %s" % version)
+                logger.info("Override SolOS-TR Version: %s" % version)
                 self.version = version
-            logging.info("SolOS-TR Version: %s" % self.version)
+            logger.info("SolOS-TR Version: %s" % self.version)
 
             # backwards compatibility
             # self.xmlbuilder = SolaceXMLBuilder(version=self.version)
@@ -174,11 +177,11 @@ class SolaceAPI:
             self.cq = SolaceCommandQueue(version=self.version)
 
         except Exception, e:
-            logging.warn("Solace Error %s" % e)
+            logger.warn("Solace Error %s" % e)
             raise
 
     def __restcall(self, request, primaryOnly=False, backupOnly=False, **kwargs):
-        logging.info("%s user requesting: %s kwargs:%s primaryOnly:%s backupOnly:%s"
+        logger.info("%s user requesting: %s kwargs:%s primaryOnly:%s backupOnly:%s"
                      % (self.config['USER'], request, kwargs, primaryOnly, backupOnly))
         self.kwargs = kwargs
 
@@ -195,24 +198,24 @@ class SolaceAPI:
         if len(appliances) > 1:
             if primaryOnly and backupOnly:
                 appliances = [self.primaryRouter, self.backupRouter]
-                logging.info("Forced Both: %s, request: %s" % (appliances, request))
+                logger.info("Forced Both: %s, request: %s" % (appliances, request))
             elif primaryOnly and not backupOnly:
                 appliances = [self.primaryRouter]
-                logging.info("Primary: %s, request: %s" % (appliances, request))
+                logger.info("Primary: %s, request: %s" % (appliances, request))
             elif backupOnly and not primaryOnly:
                 appliances = [self.backupRouter]
-                logging.info("Backup: %s, request: %s" % (appliances, request))
+                logger.info("Backup: %s, request: %s" % (appliances, request))
             else:
-                logging.info("Both: %s, request: %s" % (appliances, request))
+                logger.info("Both: %s, request: %s" % (appliances, request))
         else:
-            logging.info("Only one appliance in configuration, running in non-HA mode")
+            logger.info("Only one appliance in configuration, running in non-HA mode")
             appliances = [self.primaryRouter]
 
         try:
             data = OrderedDict()
             codes = OrderedDict()
             for host in appliances:
-                logging.debug("Querying host: %s" % host)
+                logger.debug("Querying host: %s" % host)
                 url = host
                 request_headers = generateRequestHeaders(
                         default_headers={
@@ -221,15 +224,15 @@ class SolaceAPI:
                         },
                         auth_headers=generateBasicAuthHeader(self.config['USER'], self.config['PASS'])
                 )
-                logging.debug("request_headers: %s" % request_headers)
+                logger.debug("request_headers: %s" % request_headers)
                 (response, response_headers, code) = httpRequest(url, method='POST', headers=request_headers,
                                                                  fields=request, timeout=5000,
                                                                  verifySsl=self.config['VERIFY_SSL'])
-                logging.debug("response: %s" % response)
+                logger.debug("response: %s" % response)
                 data[host] = response
-                logging.debug("code: %s" % code)
+                logger.debug("code: %s" % code)
                 codes[host] = code
-            logging.debug(data)
+            logger.debug(data)
 
             for k in data:
                 thisreply = None
@@ -237,30 +240,30 @@ class SolaceAPI:
                     thisreply = xml2dict.parse(data[k])
                     if thisreply['rpc-reply'].has_key('execute-result'):
                         if thisreply['rpc-reply']['execute-result']['@code'] != 'ok':
-                            logging.warn("Device: %s: %s %s" % (k, thisreply['rpc-reply']['execute-result']['@code'],
+                            logger.warn("Device: %s: %s %s" % (k, thisreply['rpc-reply']['execute-result']['@code'],
                                                                 "Request that failed: %s" % request))
-                            logging.warn("Device: %s: %s: %s" % (k, thisreply['rpc-reply']['execute-result']['@code'],
+                            logger.warn("Device: %s: %s: %s" % (k, thisreply['rpc-reply']['execute-result']['@code'],
                                                                  "Reply from appliance: %s" %
                                                                  thisreply['rpc-reply']['execute-result']['@reason']))
                         else:
-                            logging.debug("Device: %s: %s" % (k, thisreply['rpc-reply']['execute-result']['@code']))
-                        logging.debug("Device: %s: %s" % (k, thisreply))
+                            logger.debug("Device: %s: %s" % (k, thisreply['rpc-reply']['execute-result']['@code']))
+                        logger.debug("Device: %s: %s" % (k, thisreply))
                     else:
-                        logging.debug("no execute-result in response. Device: %s" % k)
+                        logger.debug("no execute-result in response. Device: %s" % k)
                 except Exception, e:
-                    logging.error("Error decoding response from appliance")
-                    logging.error("Response Codes: %s" % codes)
-                    logging.error("Data Object: key: %s, data: %s " % (k, data))
-                    logging.error(codes.items()[0][1])
+                    logger.error("Error decoding response from appliance")
+                    logger.error("Response Codes: %s" % codes)
+                    logger.error("Data Object: key: %s, data: %s " % (k, data))
+                    logger.error(codes.items()[0][1])
                     if codes.items()[0][1] == 401:
                         raise LoginException("Username / Password failure")
                     raise # (Exception("Appliance Communication Failure"))
-            logging.debug("Returning Data from rest_call")
+            logger.debug("Returning Data from rest_call")
             return data, codes
 
         except Exception, e:
             traceback.print_exc()
-            logging.warn("Solace Error %s" % e)
+            logger.warn("Solace Error %s" % e)
             raise
 
     def get_redundancy(self):
@@ -335,14 +338,14 @@ class SolaceAPI:
 
         """
 
-        logging.debug(type(xml))
+        logger.debug(type(xml))
 
         if type(xml) == type(None):
-            logging.warn("Ignoring empty request")
+            logger.warn("Ignoring empty request")
             return
 
         elif isinstance(xml, PluginResponse):
-            logging.info("Plugin Response")
+            logger.info("Plugin Response")
             kwargs = xml.kwargs
             xml = xml.xml
 
@@ -357,15 +360,15 @@ class SolaceAPI:
             xml = str(xml)
 
         else:
-            logging.warn("I dont recognize this type of rpc: %s type: %s" % (xml, type(xml)))
+            logger.warn("I dont recognize this type of rpc: %s type: %s" % (xml, type(xml)))
             raise Exception("Not a valid RPC argument")
 
         responses = None
         mywargs = kwargs
-        logging.debug("Kwargs: %s" % mywargs)
-        logging.info("Request SEMP: %s" % xml)
-        logging.debug("primaryOnly: %s" % primaryOnly)
-        logging.debug("backupOnly: %s" % backupOnly)
+        logger.debug("Kwargs: %s" % mywargs)
+        logger.info("Request SEMP: %s" % xml)
+        logger.debug("primaryOnly: %s" % primaryOnly)
+        logger.debug("backupOnly: %s" % backupOnly)
 
         if "primaryOnly" in mywargs:
             primaryOnly = mywargs.pop("primaryOnly")
@@ -380,16 +383,16 @@ class SolaceAPI:
                 return responses
             for k in responses:
                 response = xml2dict.parse(responses[k])
-                logging.debug("Response: %s" % response)
+                logger.debug("Response: %s" % response)
                 response['HOST'] = k
                 if not allowfail:
                     if 'parse-error' in response['rpc-reply']:
                         raise Exception(str(response))
                     elif 'permission-error' in response['rpc-reply']:
                         if self.testmode:
-                            logging.debug('tolerable permission error in test mode')
+                            logger.debug('tolerable permission error in test mode')
                         else:
-                            logging.critical("Error occured, request was: %s" % xml)
+                            logger.critical("Error occured, request was: %s" % xml)
                             raise Exception(str(response))
                     else:
                         data.append(response)
@@ -399,7 +402,7 @@ class SolaceAPI:
                 data.append(None)
             return data
         except:
-            logging.error("responses: %s" % responses)
+            logger.error("responses: %s" % responses)
             raise
 
     def manage(self, plugin_name, **kwargs):
@@ -419,6 +422,6 @@ class SolaceAPI:
         """
 
         plugin = libsolace.plugin_registry(plugin_name, **kwargs)
-        logging.debug("Setting up the plugin instance with api and kwargs")
+        logger.debug("Setting up the plugin instance with api and kwargs")
         return plugin(api=self, **kwargs)
 

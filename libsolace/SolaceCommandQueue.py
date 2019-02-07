@@ -4,6 +4,9 @@ import logging
 
 from libsolace.plugin import PluginResponse
 
+logger = logging.getLogger(__name__)
+logger.addHandler(logging.NullHandler())
+
 
 class SolaceCommandQueue:
     """ Solace Command Queue Class
@@ -26,11 +29,11 @@ class SolaceCommandQueue:
         """
         Initializes the queue as a list
         """
-        logging.debug("Init with soltr version: %s" % version)
+        logger.debug("Init with soltr version: %s" % version)
         try:
             schema_file = open(self.schema_files[version])
         except KeyError:
-            logging.info("SolOS version '%s' unknown, falling back to latest known schema", version)
+            logger.info("SolOS version '%s' unknown, falling back to latest known schema", version)
             schema_file = open(self.schema_files["soltr/7_1_1"])
         schema_root = etree.XML(schema_file.read())
         schema = etree.XMLSchema(schema_root)
@@ -51,16 +54,16 @@ class SolaceCommandQueue:
             kwargs = command.kwargs
             command = command.xml
 
-        logging.info("command %s" % str(command))
-        logging.debug("kwargs: %s" % kwargs)
+        logger.info("command %s" % str(command))
+        logger.debug("kwargs: %s" % kwargs)
 
         try:
             root = etree.fromstring(str(command), self.parser)
-            logging.debug('XML Validated')
+            logger.debug('XML Validated')
             self.commands.append((command, kwargs))
         except:
-            logging.error('XML failed to validate, the XML was: %s' % str(command))
-            logging.error(command)
+            logger.error('XML failed to validate, the XML was: %s' % str(command))
+            logger.error(command)
             raise
 
     def enqueueV2(self, command, **kwargs):
@@ -73,14 +76,14 @@ class SolaceCommandQueue:
         :return: None
         """
 
-        logging.debug("command %s" % str(command))
-        logging.debug("kwargs: %s" % kwargs)
+        logger.debug("command %s" % str(command))
+        logger.debug("kwargs: %s" % kwargs)
 
         try:
             root = etree.fromstring(str(command), self.parser)
-            logging.debug('XML Validated')
+            logger.debug('XML Validated')
             self.commands.append((command, kwargs))
         except:
-            logging.error('XML failed to validate, the XML was:')
-            logging.error(command)
+            logger.error('XML failed to validate, the XML was:')
+            logger.error(command)
             raise

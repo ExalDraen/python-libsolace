@@ -7,6 +7,9 @@ from libsolace.SolaceXMLBuilder import SolaceXMLBuilder
 from libsolace.plugin import PluginResponse
 from libsolace.util import get_key_from_kwargs
 
+logger = logging.getLogger(__name__)
+logger.addHandler(logging.NullHandler())
+
 
 @libsolace.plugin_registry.register
 class SolaceACLProfile(Plugin):
@@ -55,7 +58,7 @@ class SolaceACLProfile(Plugin):
         self.vpn_name = get_key_from_kwargs('vpn_name', kwargs)
 
         if kwargs.get('options', None) is None:
-            logging.warning(
+            logger.warning(
                     "No options passed, assuming you meant 'add', please update usage of this class to pass a OptionParser instance")
             # queue up the commands
             self.new_acl(**kwargs)
