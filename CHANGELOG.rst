@@ -12,6 +12,19 @@ The format is based on `Keep a Changelog`_ and this project adheres to
 Added
 ~~~~~
 
+-  Nothing
+
+Changed
+~~~~~~~
+
+-  Nothing
+
+`0.3.0`_
+-------------
+
+Added
+~~~~~
+
 -  Added `settings_override` parameter to `SolaceAPI` to allow for overriding of settings
    from `libsolace.yaml`
 
@@ -67,5 +80,6 @@ Changed
 -  Nothing
 
 .. _Unreleased: https://github.com/ExalDraen/python-libsolace/compare/0.2.3...master
+.. _0.3.0: https://github.com/ExalDraen/python-libsolace/compare/0.2.3...0.3.0
 .. _Keep a Changelog: http://keepachangelog.com/
 .. _Semantic Versioning: http://semver.org/

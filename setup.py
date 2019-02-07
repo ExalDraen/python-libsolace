@@ -21,7 +21,7 @@ with open(readme) as f:
 
 setup(
     name='libsolace',
-    version='0.2.3',
+    version='0.3.0',
     description='Solace Provisioning Helper using the Solace SEMP XML API',
     long_description=long_description,
     long_description_content_type='text/markdown',
@@ -39,6 +39,7 @@ setup(
         'Development Status :: 3 - Alpha',
         'Intended Audience :: Developers',
         'License :: OSI Approved :: MIT License',
+        'Operating System :: POSIX',
         'Programming Language :: Python :: 2.7',
     ],
     python_requires='>=2.7,<=3.0',

@@ -1,5 +1,5 @@
 # libSolace
-[[![Build Status](https://travis-ci.org/ExalDraen/python-libsolace.svg?branch=master)](https://travis-ci.org/ExalDraen/python-libsolace)
+[![Build Status](https://travis-ci.org/ExalDraen/python-libsolace.svg?branch=master)](https://travis-ci.org/ExalDraen/python-libsolace)
 <!-- markdown-toc start - Don't edit this section. Run M-x markdown-toc-refresh-toc -->
 **Table of Contents**
 
